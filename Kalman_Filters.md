@@ -1,6 +1,6 @@
 # Kalman Filtreleri
 
-## 1. Giriş: Tahminin Gücü
+## 1. Giriş:
 * **Kalman Filtresi Nedir ve Neden Önemlidir?**
 Kalman filtresi, dolaylı ve belirsiz ölçümlerden bir sistemin durumunu tahmin etmek için kullanılan optimal bir tahmin algoritmasıdır. Gürültülü ve eksik verilerle başa çıkma yeteneği, onu doğrudan ölçümün imkansız veya güvenilmez olduğu çeşitli alanlarda vazgeçilmez kılar. Kalman filtresinin gücü, bir dinamik sistemin matematiksel bir modelini ve bu sistem üzerindeki ölçümleri kullanarak zaman içindeki davranışına dair bilgi sağlamasında yatar.
 
