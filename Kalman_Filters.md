@@ -1,4 +1,4 @@
-# Kalman Filtreleri: Basitten İleri Düzeye Kapsamlı Bir İnceleme
+# Kalman Filtreleri
 
 ## 1. Giriş: Tahminin Gücü
 * **Kalman Filtresi Nedir ve Neden Önemlidir?**
