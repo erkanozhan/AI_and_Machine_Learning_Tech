@@ -134,6 +134,13 @@ Standart Kalman filtresi, durum geçiş ve ölçüm denklemlerinin durumun doğr
 * **Doğrusallaştırma: Doğrusal Olmayan Fonksiyonları Yaklaştırma.**
 Genişletilmiş Kalman Filtresi (EKF), doğrusal olmayan sistemleri ele almak için Kalman filtresini genişletir. Bunu, doğrusal olmayan durum geçiş (`f`) ve ölçüm (`h`) fonksiyonlarını, özellikle birinci dereceden yaklaşım olan Taylor serisi açılımını kullanarak mevcut tahminin etrafında doğrusallaştırarak yapar. Bu doğrusallaştırma, doğrusal olmayan fonksiyonların durum ve gürültüye göre Jakobiyen matrislerinin hesaplanmasını içerir. Durum geçiş fonksiyonunun kısmi türevlerinin matrisi olan durum Jakobiyeni (`F_k`) ve ölçüm fonksiyonunun kısmi türevlerinin matrisi olan ölçüm Jakobiyeni (`H_k`). `F_k`, tahmini durum `x̂_{k-1|k-1}` noktasında `f` fonksiyonunun Jakobiyeni iken, `H_k` tahmini durum `x̂_{k|k-1}` noktasında `h` fonksiyonunun Jakobiyenidir.
 
+**Not:** Jakobiyen Matrisi (Jacobian Matrix), matematikte çok değişkenli, vektör değerli bir fonksiyonun kısmi türevlerinin bir matris içinde düzenlenmiş halidir.
+Daha basit bir ifadeyle:
+Bir fonksiyonun türevi, o fonksiyonun girdisindeki küçük bir değişikliğin çıktısında ne kadar değişikliğe neden olduğunu gösterir (eğim gibi düşünebilirsiniz).
+Tek değişkenli fonksiyonlar için bu türev tek bir sayıdır.
+Ancak, girdi olarak birden fazla sayı (bir vektör) alan ve çıktı olarak da birden fazla sayı (başka bir vektör) veren bir fonksiyonunuz varsa, çıktının her bir bileşeninin girdinin her bir bileşenine göre nasıl değiştiğini bilmeniz gerekir.
+İşte Jakobiyen matrisi, bu olası tüm "değişim oranlarını" (kısmi türevleri) düzenli bir şekilde bir araya getiren matristir.
+
 * **EKF Algoritması: Doğrusal Olmayan Modeller İçin Kalman Filtresini Uyarlama.**
 Tahmin adımı, doğrusal olmayan durum geçiş fonksiyonunu doğrudan kullanır:
 
@@ -211,3 +218,5 @@ Ayarlama genellikle `Q` ve `R`'yi ayarlama ve filtrenin performansını gözleml
 | Hesaplama Maliyeti            | Düşük                    | Orta                                | Orta                          |
 
 Sonuç olarak, Kalman filtresi, gürültülü ve belirsiz verilerden dinamik sistemlerin durumunu tahmin etmek için güçlü ve çok yönlü bir araçtır. Temel ilkeleri, doğrusal olmayan sistemleri ele almak için uzantıları ve tasarım hususlarının anlaşılması, çeşitli mühendislik ve bilimsel disiplinlerdeki uygulamaları için hayati öneme sahiptir.
+
+** Örnek **
