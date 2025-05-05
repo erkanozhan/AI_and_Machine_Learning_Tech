@@ -28,7 +28,7 @@ $EU(A) = \sum P(O_i | A) \times U(O_i)$
 burada A eylemi, $O_i$ eylemin yol açabileceği olası sonuçlardan biri, $P(O_i | A)$ A eylemi gerçekleştiğinde $O_i$ sonucunun ortaya çıkma olasılığı ve $U(O_i)$ $O_i$ sonucunun bireye sağladığı fayda değeridir. Karar kriteri ise:
 
 
-$A^* = \operatorname{argmax}_A EU(A)$
+$A^* = {argmax}_A EU(A)$
 
 
 yani beklenen faydası en büyük olan eylem (A*) seçilir. Teori şu varsayımlara dayanır: Tamlık (karar verici her iki sonucu da karşılaştırabilir), Geçişlilik (A > B ve B > C ise, A > C olur), Süreklilik (B, A ve C arasında uygun olasılıklarla elde edilebilecek bir karışım olarak ifade edilebilir) ve Bağımsızlık (A > B ise, her iki sonucu aynı C sonucu ile karıştırdığımızda, A’ya dayalı karışım B’ye dayalıdan üstün kalır).
