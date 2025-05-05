@@ -219,4 +219,136 @@ Ayarlama genellikle `Q` ve `R`'yi ayarlama ve filtrenin performansını gözleml
 
 Sonuç olarak, Kalman filtresi, gürültülü ve belirsiz verilerden dinamik sistemlerin durumunu tahmin etmek için güçlü ve çok yönlü bir araçtır. Temel ilkeleri, doğrusal olmayan sistemleri ele almak için uzantıları ve tasarım hususlarının anlaşılması, çeşitli mühendislik ve bilimsel disiplinlerdeki uygulamaları için hayati öneme sahiptir.
 
-** Örnek **
+## Örnek
+# Kalman Filtresi: Kuşu En İyi Şekilde Takip Etme
+
+Merhaba çocuklar! Bugün gökyüzünde hızla uçan bir kuşu takip edeceğiz. Bu takip, bir plan yapıp sonra da gördüklerimizi kullanarak planımızı düzeltme oyununa benziyor. Bu oyunda bize yardım edecek süper akıllı bir araç var: **Kalman Filtresi**!
+
+**Kalman Filtresi Nedir? Dedenizin Teleskopu Gibi Düşünün!**
+
+Dedenizin eski bir teleskopu var diyelim. Bazen biraz titrek gösteriyor (yani gördüğünüzde küçük hatalar olabiliyor). Ama dedeniz kuşların nasıl uçtuğunu çok iyi biliyor (yani kuşların hareketine dair harika bir **Planı** var).
+
+Kalman filtresi, hem o biraz titrek teleskopun **gördüğünü** hem de dedenizin kuş hakkındaki **bilgisini (Planını)** alıp birleştirerek, kuşun tam olarak nerede olduğunu en doğru şekilde söyleyen şeydir. İkisini birleştirince hata daha az olur!
+
+**Neden Plan ve Gördüklerimizi Birleştirmeliyiz?**
+
+*   **Planımız Bazen Yanlış Olabilir:** Kuş aniden hızlı uçmayı bırakıp yavaşlayabilir veya yön değiştirebilir. Dedemizin planı tam tutmayabilir.
+*   **Gördüklerimiz Yanlış Olabilir:** Teleskopumuz sallanıyor olabilir, hava çok açık olmayabilir. Gördüğümüz yer kuşun tam yeri olmayabilir.
+
+Kalman filtresi, "Acaba planım mı daha doğru? Yoksa teleskopun gösterdiği mi?" diye düşünür. Hangisi daha güvenilir görünüyorsa, o bilgiye biraz daha çok inanır ve ikisini karıştırıp en iyi tahmini yapar!
+
+---
+
+**Oyunumuz: Hızlı Uçan Kuşu Yakalamak!**
+
+Diyelim ki bir kuş tam önünüzden (yani **0 metre** noktasından) havalandı. Ve bu kuşun saniyede **20 metre** hızla (bir metre bir adım gibi düşünün, saniyede 20 adım!) dümdüz uçtuğunu tahmin ediyorsunuz. Bu sizin ilk **Planınız**.
+
+**Hedefimiz:** 5 saniye sonra kuşun nerede olduğunu tahmin etmek!
+
+**Adım 1: Kuşun Durumunu Tanımla (Nerede? Ne Kadar Hızlı?)**
+
+Kuşun o anki durumunu iki sayı ile anlatalım:
+*   **Konumu (p):** Şu an nerede?
+*   **Hızı (v):** Ne kadar hızlı gidiyor?
+
+Bu iki sayıyı bir kutuya koyalım, adı **Durum Kutusu** (`x`) olsun. Zaman geçtikçe bu kutudaki sayılar değişecek!
+
+$$
+x_k = \begin{bmatrix} \text{Konum}_k \\ \text{Hız}_k \end{bmatrix}
+$$
+
+**Adım 2: Planımızı Matematikle Yaz (Kuş Nasıl Hareket Ediyor?)**
+
+Kuşun nasıl hareket ettiğini (planımızı) matematiksel olarak yazabiliriz. Eğer kuş saniyede 20 metre gidiyorsa, 1 saniye sonra (Δt = 1) nerede olur?
+*   Yeni Konum = Eski Konum + Hız * 1 saniye
+*   Yeni Hız = Eski Hız (çünkü planımızda hızın değişmediğini varsaydık)
+
+Bunu Durum Kutusu ile şöyle gösterebiliriz (`k-1` önceki an, `k` şimdiki an):
+
+$$
+x_k = \begin{bmatrix} 1 & 1 \\ 0 & 1 \end{bmatrix} x_{k-1} + w_k
+$$
+
+*   İlk kısımdaki büyük kutu (matris), Planımıza göre hareketini anlatır.
+*   `x_{k-1}`, önceki Durum Kutusu.
+*   `w_k`, küçük bir hata payı. Bu Planımızın bazen tam tutmayabileceğini gösterir (kuş biraz sapabilir). Bu hataya **Süreç Gürültüsü** deriz. Bu gürültünün ne kadar olabileceğini **Q** adında başka bir kutu (matris) anlatır.
+
+**Adım 3: Gördüklerimizi Matematikle Yaz (Teleskop Ne Görüyor?)**
+
+Teleskop sadece kuşun nerede olduğunu söylüyor (konumunu). Bunu da matematiksel olarak yazabiliriz:
+
+$$
+z_k = \begin{bmatrix} 1 & 0 \end{bmatrix} x_k + v_k
+$$
+
+*   `z_k`, teleskopun bize söylediği sayı (gördüğümüz konum).
+*   Büyük kutu (matris), Durum Kutusu'ndan sadece Konum bilgisini aldığımızı söyler. Buna **Ölçüm Matrisi (H)** denir.
+*   `v_k`, teleskopun görme hatası. Buna **Ölçüm Gürültüsü** deriz. Bu gürültünün ne kadar olabileceğini **R** adında tek sayı içeren başka bir kutu (matris) anlatır.
+
+**Başlangıç Noktası (Oyun Başlarken):**
+
+Oyuna başlarken (k=0 anında) tahminlerimizi ve ne kadar az bildiğimizi belirleriz:
+*   İlk En İyi Tahminimiz (`x̂₀`): Kuş 0 metrede ve 20 m/s hızla gidiyor diye tahmin ettik.
+    $$
+    x̂_0 = \begin{bmatrix} 0 \\ 20 \end{bmatrix}
+    $$
+*   İlk Ne Kadar Az Biliyoruz (`P₀`): Başlangıçta konumunu biliyorduk ama hızı hakkında biraz daha az emindik. Bu "ne kadar az biliyoruz"u **Belirsizlik Kutusu (P)** anlatır. Başlangıçta `P₀` şöyle diyelim:
+    $$
+    P_0 = \begin{bmatrix} \text{Konum Belirsizliği} & \text{Birlikte Belirsizlik} \\ \text{Birlikte Belirsizlik} & \text{Hız Belirsizliği} \end{bmatrix}
+    $$
+    (Bu sayıları biz belirleriz, ne kadar az bildiğimize bağlı. Mesela $P_0 = \begin{bmatrix} 1 & 0 \\ 0 & 10 \end{bmatrix}$ gibi.)
+
+**Kalman Filtresinin Oyunu Başlıyor! (Her Saniye Tekrarlanır)**
+
+Her saniye (k = 1, sonra k = 2, sonra k = 3 ... 5'e kadar) şu iki büyük adımı yaparız:
+
+**Büyük Adım 1: Tahmin Et (Geleceği Planla!)**
+
+Önceki saniye için bulduğumuz en iyi tahmini (Durum Kutusu `x̂_{k-1|k-1}`) ve Belirsizlik Kutusu'nu (`P_{k-1|k-1}`) alırız. Planımızı kullanarak kuşun şimdiki saniyede nerede *olması gerektiğini* tahmin ederiz.
+
+*   **Tahmini Durum Kutusu (`x̂_{k|k-1}`):** Önceki en iyi tahminimizi alır, Planımızdaki hareket kuralını uygularız.
+
+    $$
+    x̂_{k|k-1} = \Phi_k x̂_{k-1|k-1}
+    $$
+    (Bu formül bize yeni tahmini konum ve hızı verir, sadece Planımıza bakarak. $\Phi_k$ Planın matematiksel kutusudur.)
+
+*   **Tahmini Belirsizlik Kutusu (`P_{k|k-1}`):** Zaman geçtiği için ve Planımız mükemmel olmadığı için tahminimize olan güvenimiz biraz azalır. Bu, Belirsizlik Kutusu'nun biraz büyümesi demektir.
+
+    $$
+    P_{k|k-1} = \Phi_k P_{k-1|k-1} \Phi_kᵀ + Q_k
+    $$
+    (Bu formül bize yeni tahmini belirsizliğimizi verir, Planımızdaki hata payı olan $Q_k$ kutusunu da ekleyerek.)
+
+**Büyük Adım 2: Düzelt (Gördüklerini Kullan ve Tahminini İyileştir!)**
+
+Şimdi teleskopumuza bakarız ve kuşun nerede olduğunu **gerçekten** görürüz (`z_k`). Tahminimizi bu yeni bilgiyle düzeltiriz.
+
+*   **Kalman'ın Karıştırma Oranı (`K_k`):** Plan Tahminimiz ile Gördüğümüz arasındaki farkı ne kadar ciddiye alacağımıza karar veririz. Buna **Kalman Kazancı** denir. Bu, Plan Tahminimizin Belirsizliği (`P_{k|k-1}`) ve Gördüğümüzün Hatası (`R_k`) arasındaki dengeye bağlıdır.
+
+    $$
+    K_k = P_{k|k-1} H_kᵀ (H_k P_{k|k-1} H_kᵀ + R_k)⁻¹
+    $$
+    (Bu formül, Plan Tahminimize mi yoksa Gördüğümüze mi daha çok güvenmemiz gerektiğini söyleyen bir sayı kutusu verir. $H_k$ Ölçüm Matrisidir, $R_k$ Gördüğümüzdeki hata payı kutusudur.)
+
+*   **En İyi Durum Kutusu (`x̂_{k|k}`):** Plan Tahminimizi alırız ve Gördüğümüz ile Plan Tahminimiz arasındaki farkı (buna "yenilik" denir) Karıştırma Oranı kadar ekleyerek düzeltiriz.
+
+    $$
+    x̂_{k|k} = x̂_{k|k-1} + K_k (z_k – H_k x̂_{k|k-1})
+    $$
+    (Bu formül, hem Planımızı hem de Gördüğümüzü karıştırarak o saniye için kuşun nerede olduğuna dair en iyi tahmini verir.)
+
+*   **En İyi Belirsizlik Kutusu (`P_{k|k}`):** Yeni bir bilgi (Gördüğümüz) kullandığımız için, kuşun nerede olduğunu artık daha iyi biliyoruz. Bu, Belirsizlik Kutusu'nun küçülmesi demektir.
+
+    $$
+    P_{k|k} = (I – K_k H_k) P_{k|k-1}
+    $$
+    ($I$ sihirli bir "hiçbir şeyi değiştirmeyen" matristir. Bu formül, Gördüğümüzü kullandıktan sonra kalan belirsizliğimizi verir.)
+
+**5 Saniye Sonra Ne Olur?**
+
+Bu tahmin ve düzeltme adımlarını 5 kez tekrarlarız (her saniye bir kez). Her adımda, bir önceki adımın **En İyi Durum Kutusu** ve **En İyi Belirsizlik Kutusu** bir sonraki adımın başlangıcı olur.
+
+5. saniye sonunda, Kalman filtresinin en son bulduğu **En İyi Durum Kutusu** (`x̂_{5|5}`) bizim 5 saniye sonra kuşun nerede olduğuna dair en güvenilir tahminimize sahip olacaktır. Bu tahmin, sadece kuşun nasıl hareket ettiğine dair Planımızı değil, aynı zamanda 5 saniye boyunca teleskopla yapılan tüm gürültülü Gözlemleri de akıllıca birleştirerek bulunmuştur.
+
+Kalman filtresi sayesinde, teleskopumuz biraz titrek olsa bile, kuşun yerini harika bir şekilde tahmin edebiliriz! İşte Kalman filtresinin matematik sihri bu!
