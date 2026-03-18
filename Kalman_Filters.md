@@ -351,4 +351,80 @@ Bu tahmin ve düzeltme adımlarını 5 kez tekrarlarız (her saniye bir kez). He
 
 5. saniye sonunda, Kalman filtresinin en son bulduğu **En İyi Durum Kutusu** (`x̂_{5|5}`) bizim 5 saniye sonra kuşun nerede olduğuna dair en güvenilir tahminimize sahip olacaktır. Bu tahmin, sadece kuşun nasıl hareket ettiğine dair Planımızı değil, aynı zamanda 5 saniye boyunca teleskopla yapılan tüm gürültülü Gözlemleri de akıllıca birleştirerek bulunmuştur.
 
-Kalman filtresi sayesinde, teleskopumuz biraz titrek olsa bile, kuşun yerini harika bir şekilde tahmin edebiliriz! İşte Kalman filtresinin matematik sihri bu!
+Kalman filtresi sayesinde, teleskopumuz biraz titrek olsa bile, kuşun yerini harika bir şekilde tahmin edebiliriz!
+
+### NOTLAR:
+Sensör verilerini okumak ve bu veriler üzerinden anlamlı çıkarımlar yapmak mühendisliğin temel meselelerinden biridir. Ancak gerçek dünyada hiçbir sensör kusursuz çalışmaz. Okuduğumuz her değere fiziksel çevreden, elektronik bileşenlerden veya veri iletiminden kaynaklanan bir miktar hata karışır. Biz bu hataya "gürültü" (noise) diyoruz.
+
+Gürültü kelimesinin İngilizcesi olan *noise*, köken olarak Latince *nausea* (deniz tutması, rahatsızlık) kelimesine dayanır. Tıpkı deniz tutmasının insanın dengesini ve yönelimini bozması gibi, sensör gürültüsü de sistemimizin gerçeği algılama dengesini bozar. Doğal dil işleme (Natural Language Processing - NLP) modellerinde dolandırıcı SMS'leri ayıklarken metnin içine gizlenmiş anlamsız karakterleri ve yazım hatalarını nasıl aşılması gereken bir "gürültü" olarak ele alıyorsak, fiziksel sensörlerden gelen voltaj dalgalanmalarını da benzer bir yaklaşımla filtrelememiz gerekir.
+
+İşte Kalman Filtresi (Kalman Filter), bu gürültülü ölçümlerin içinden en doğru gerçeği çekip çıkarmamızı sağlayan matematiksel bir algoritmadır. Adını Macar asıllı Amerikalı matematikçi Rudolf E. Kálmán'dan alır.
+
+### Temel Mantık: Tahmin ve Güncelleme
+
+Süreci zihninizde somutlaştırmak için arabayla uzun bir yola çıktığınızı ve cep telefonunuzun GPS'ini (Global Positioning System - Küresel Konumlama Sistemi) kullandığınızı düşünün.
+
+GPS uydulardan aldığı sinyallerle konumunuzu haritada gösterir. Ancak GPS'in 5-10 metrelik bir hata payı, yani gürültüsü vardır. Aracınızla uzun ve karanlık bir tünele girdiğinizi varsayın. Tünele girdiğiniz an GPS sinyali kesilir. Buna rağmen haritadaki araç simgesi ilerlemeye devam eder. Peki telefon sinyal almadığı halde nerede olduğunuzu nasıl bilir?
+
+Telefon, tünele girmeden önceki son hızınızı ve yönünüzü biliyordur. Bu bilgileri kullanarak tünel içindeki konumunuzu **Tahmin (Predict)** eder. Ancak zaman geçtikçe bu tahminin hata payı artar; tünel içinde yavaşlamış veya şerit değiştirmiş olabilirsiniz. Tünelden çıktığınız anda GPS sinyali tekrar gelir. Yeni bir **Ölçüm (Measurement)** alınır. Sistem, yaptığı tahmini bu yeni ölçümle karşılaştırarak gerçek konumunuzu **Günceller (Update)**.
+
+Kalman filtresi tam olarak bu iki adımlı döngüyle çalışır:
+
+```graphviz
+digraph G {
+    rankdir=LR;
+    node [shape=box, style=rounded, fontname="Helvetica", margin=0.3, color="#2c3e50", penwidth=2];
+    edge [color="#34495e", penwidth=1.5, fontname="Helvetica", fontsize=10];
+    
+    Predict [label="Tahmin (Predict)\nFiziksel modele dayanarak\nbir sonraki durumu hesapla"];
+    Update [label="Güncelleme (Update)\nSensörden gelen ölçüm ile\ntahmini düzelt"];
+    
+    Predict -> Update [label=" Öngörü \n (Belirsizlik artar)"];
+    Update -> Predict [label=" Düzeltilmiş Durum \n (Belirsizlik azalır)"];
+}
+```
+
+Mekansal-zamansal (Spatio-Temporal) verilerle çalışırken, örneğin sismik hareketlerin zaman içindeki yayılımını veya hareketli bir hedefin rotasını izlerken, sistemin durumunu sürekli takip etmeliyiz. Sistem durumuna İngilizcede *State* denir. Latince *status* (durma, pozisyon, vaziyet) kökünden gelir. Sistemin o anki hızını, konumunu ve ivmesini bu durum değişkenleri ile ifade ederiz.
+
+### Matematiksel Gösterim ve Matrisler
+
+Gençler, işin içine kod ve hesaplama girdiğinde bu döngüyü matrislerle ve olasılık dağılımlarıyla ifade etmemiz gerekir. Bir nesnenin durumunu asla %100 kesinlikle bilemeyiz, elimizde her zaman bir belirsizlik vardır. Bu belirsizliği Kovaryans (Covariance) matrisi ile tanımlarız. Kovaryans, değişkenlerin birlikte ne kadar değiştiklerini gösterir.
+
+Durum vektörümüzü $x$, belirsizliğimizi (kovaryans matrisini) ise $P$ olarak tanımlayalım. Sistem zaman adımlarıyla (k, k+1, k+2...) ilerler.
+
+**1. Tahmin (Predict) Adımı Denklemeleri:**
+
+Bu aşamada geçmişteki bilgimizi kullanarak bir adım sonrasını öngörüyoruz.
+
+$$x_{k} = A x_{k-1} + B u_{k-1}$$
+$$P_{k} = A P_{k-1} A^T + Q$$
+
+* **A (State Transition Matrix - Durum Geçiş Matrisi):** Önceki durumun yeni duruma nasıl evrileceğini tanımlar (örneğin hızın konuma etkisi).
+* **B (Control Input Matrix - Kontrol Giriş Matrisi):** Dışarıdan sisteme verilen komutların (örneğin frene basmak) durumu nasıl etkilediğini gösterir ($u$ kontrol vektörüdür).
+* **Q (Process Noise Covariance - Süreç Gürültüsü Kovaryansı):** Matematiksel modelimizin kusurlarından kaynaklanan belirsizliktir.
+
+Fark ettiyseniz tahmin adımında sensörden hiç veri almadık, sadece sistemin kendi dinamiğini işlettik.
+
+**2. Güncelleme (Update) Adımı Denklemeleri:**
+
+Şimdi sensörden okuduğumuz taze veriyi ($z_k$) denkleme dahil etme zamanı. Ancak ölçüme ne kadar güveneceğiz? Tahminimize mi daha çok güvenmeliyiz, yoksa sensöre mi? İşte bu dengeyi **Kalman Kazancı (Kalman Gain)**, yani $K$ belirler.
+
+Önce Kalman Kazancını hesaplarız:
+$$K = P_{k} H^T (H P_{k} H^T + R)^{-1}$$
+
+* **H (Measurement Matrix - Ölçüm Matrisi):** Durum vektörümüzü sensör formatına dönüştürür.
+* **R (Measurement Noise Covariance - Ölçüm Gürültüsü Kovaryansı):** Sensörümüzün teknik hata payıdır (örneğin sıcaklık sensörünün $\pm 0.5^\circ$C hata vermesi).
+
+Ardından yeni ölçümü kullanarak durum vektörümüzü güncelleriz:
+$$x_{k} = x_{k} + K (z_{k} - H x_{k})$$
+
+Bu denklemdeki $(z_{k} - H x_{k})$ kısmı çok kritiktir; buna *Yenilik (Innovation)* denir. Beklediğimiz ölçüm ile gerçekte sensörden okunan değer arasındaki farktır. Kalman kazancı ($K$) büyükse ölçüme güveniriz, küçükse kendi modelimizin tahminine güveniriz.
+
+Son olarak, bu yeni bilgi ışığında sistemin belirsizliğini (kovaryansını) daraltır, yani güncelleriz:
+$$P_{k} = (I - K H) P_{k}$$
+
+Buradaki $I$ Birim Matristir (Identity Matrix). Yeni ölçüm sayesinde sistem hakkındaki bilgimiz arttığı için belirsizlik matrisimiz ($P$) küçülür.
+
+Algoritma çalıştığı sürece bu döngü sonsuza kadar tekrar eder. Tahmin et, ölçüm al, hatayı hesapla, kendini düzelt. 
+
+Teori ve formüller bu şekilde çalışıyor. Bu algoritmaların pratikte nasıl işlediğini görmek için basit bir Python kodu üzerinden 1 boyutlu (örneğin sadece düz bir hatta ilerleyen araç) bir Kalman Filtresi simülasyonu yazmamı ister misiniz?
