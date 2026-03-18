@@ -64,45 +64,34 @@ Süreci zihnimizde somutlaştırmak için karmaşık bir şehirde A noktasından
 
 Bu yapının zaman içindeki akışını genellikle İngilizcede kafes anlamına gelen *Trellis* diyagramları ile çizeriz.
 
-```graphviz
-digraph ViterbiTrellis {
-    rankdir=LR;
-    node [shape=circle, style=filled, fillcolor="#ecf0f1", fontname="Helvetica", color="#2c3e50", penwidth=2];
-    edge [color="#bdc3c7", penwidth=1, fontname="Helvetica", fontsize=10];
-    
-    subgraph cluster_t1 {
-        label="t=1\n(1. Kelime)";
-        color=white;
-        S1_1 [label="Durum A"];
-        S2_1 [label="Durum B"];
-    }
+```mermaid
+graph LR
+    subgraph t1 ["t=1 (1. Kelime)"]
+        S1_1(("Durum A"))
+        S2_1(("Durum B"))
+    end
 
-    subgraph cluster_t2 {
-        label="t=2\n(2. Kelime)";
-        color=white;
-        S1_2 [label="Durum A"];
-        S2_2 [label="Durum B"];
-    }
+    subgraph t2 ["t=2 (2. Kelime)"]
+        S1_2(("Durum A"))
+        S2_2(("Durum B"))
+    end
 
-    subgraph cluster_t3 {
-        label="t=3\n(3. Kelime)";
-        color=white;
-        S1_3 [label="Durum A", fillcolor="#f1c40f"];
-        S2_3 [label="Durum B"];
-    }
+    subgraph t3 ["t=3 (3. Kelime)"]
+        S1_3(("Durum A"))
+        S2_3(("Durum B"))
+    end
     
-    // Zayıf yollar (gri ve ince)
-    S1_1 -> S2_2 [label="Düşük"];
-    S2_1 -> S1_2 [label="Düşük"];
-    S2_2 -> S2_3 [label="Düşük"];
+    S1_1 -. "Düşük" .-> S2_2
+    S2_1 -. "Düşük" .-> S1_2
+    S2_2 -. "Düşük" .-> S2_3
     
-    // Viterbi Yolu (koyu ve kalın)
-    edge [color="#e74c3c", penwidth=2.5];
-    S1_1 -> S1_2 [label="En Yüksek P"];
-    S1_2 -> S1_3 [label="En Yüksek P"];
-    S2_1 -> S2_2 [label="Maks"];
-    S1_2 -> S2_3 [label="Maks"];
-}
+    S1_1 == "En Yüksek P" ==> S1_2
+    S1_2 == "En Yüksek P" ==> S1_3
+    S2_1 == "Maks" ==> S2_2
+    S1_2 == "Maks" ==> S2_3
+    
+    style S1_3 fill:#f1c40f,stroke:#2c3e50,stroke-width:2px
+    classDef default fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px;
 ```
 
 İşin hesaplama kısmına geçtiğimizde, gençler, bu kurye mantığını matrislere dökeriz. Zamanı $t$ ile, bulunduğumuz saklı durumu ise $k$ ile ifade edelim. Her $t$ anında ve her $k$ durumu için, o noktaya kadar gelen en olası yolun olasılık değerini hesaplar ve bu değeri $V_{t,k}$ değişkeninde tutarız.
@@ -126,38 +115,38 @@ Zaman çizelgesinin en sonuna, yani analiz ettiğimiz verinin son anına ($T$) u
 İşte bu geriye doğru takip işlemi bittiğinde, elimizdeki karmaşık gözlem dizisini üreten en mantıklı, matematiksel olarak kanıtlanmış o saklı durumlar dizisini baştan sona elde etmiş oluruz. Doğal dil işleme algoritmalarından gen dizilimlerinin analizine kadar birçok alanda karşımıza çıkan gürültülü ve belirsiz veriler, bu yöntemle anlamlı yapılara dönüştürülür.
 
 
-Saklı Markov Modelleri (Hidden Markov Models - HMM) üzerine konuşurken, arka planda işleyen zaman serilerini ve durum geçişlerini iyi anlamamız gerekir. [cite_start]Bir sistemi incelerken, bu sistemin içinde bulunabileceği bir dizi durumu (state) göz önüne alırız ve bunu $S = \{s_1, s_2, ... s_{|S|}\}$ şeklinde ifade ederiz[cite: 2]. İngilizcedeki *state* (durum) kelimesi Latince *status* kökünden gelir ve sistemin o anki pozisyonunu veya halini belirtir. [cite_start]Bu durumları zaman içinde ardışık bir dizi olarak gözlemleyebiliriz[cite: 3]. [cite_start]Gözlemlerimizin kümesini $\vec{z} \in S^T$ olarak tanımlıyoruz[cite: 3].
+Saklı Markov Modelleri (Hidden Markov Models - HMM) üzerine konuşurken, arka planda işleyen zaman serilerini ve durum geçişlerini iyi anlamamız gerekir. Bir sistemi incelerken, bu sistemin içinde bulunabileceği bir dizi durumu (state) göz önüne alırız ve bunu $S = \{s_1, s_2, ... s_{|S|}\}$ şeklinde ifade ederiz. İngilizcedeki *state* (durum) kelimesi Latince *status* kökünden gelir ve sistemin o anki pozisyonunu veya halini belirtir. Bu durumları zaman içinde ardışık bir dizi olarak gözlemleyebiliriz. Gözlemlerimizin kümesini $\vec{z} \in S^T$ olarak tanımlıyoruz.
 
-Örneğin, dışarıdaki hava durumunu modelliyor olalım. [cite_start]Havanın alabileceği durumlar kümemiz $S = \{sun, cloud, rain\}$ olsun[cite: 4]. Burada toplam durum sayımız $|S| [cite_start]= 3$'tür[cite: 4]. [cite_start]Birkaç günlük bir periyotta havayı gözlemlediğimizi düşünün[cite: 4]. [cite_start]Beş günlük ($T=5$) bir gözlem dizimiz şu şekilde olabilir: $\{z_1 = s_{sun}, z_2 = s_{cloud}, z_3 = s_{cloud}, z_4 = s_{rain}, z_5 = s_{cloud}\}$[cite: 5].
+Örneğin, dışarıdaki hava durumunu modelliyor olalım. Havanın alabileceği durumlar kümemiz $S = \{sun, cloud, rain\}$ olsun. Burada toplam durum sayımız |S| = 3'tür. Birkaç günlük bir periyotta havayı gözlemlediğimizi düşünün. Beş günlük ($T=5$) bir gözlem dizimiz şu şekilde olabilir: $\{z_1 = s_{sun}, z_2 = s_{cloud}, z_3 = s_{cloud}, z_4 = s_{rain}, z_5 = s_{cloud}\}$.
 
-[cite_start]Hava örneğimizdeki bu gözlemlenen haller, aslında zaman içinde işleyen rastgele bir sürecin çıktısını temsil eder[cite: 7]. [cite_start]Normal şartlar altında, dışarıdan başka hiçbir varsayım eklemediğimizde, $t$ zamanındaki hava durumu ($s_j$), $1$'den $t-1$'e kadar olan tüm geçmiş durumların bir fonksiyonu olabilir[cite: 8]. [cite_start]Hatta modellemediğimiz pek çok değişken de bu süreci etkileyebilir[cite: 8]. Eğer bugünkü havanın durumunu tahmin etmek için dünyanın varoluşundan bugüne kadarki tüm hava olaylarını hesaba katmak zorunda kalsaydık, hiçbir sistem bu hesabı yapamazdı.
+Hava örneğimizdeki bu gözlemlenen haller, aslında zaman içinde işleyen rastgele bir sürecin çıktısını temsil eder. Normal şartlar altında, dışarıdan başka hiçbir varsayım eklemediğimizde, $t$ zamanındaki hava durumu ($s_j$), $1$'den $t-1$'e kadar olan tüm geçmiş durumların bir fonksiyonu olabilir. Hatta modellemediğimiz pek çok değişken de bu süreci etkileyebilir. Eğer bugünkü havanın durumunu tahmin etmek için dünyanın varoluşundan bugüne kadarki tüm hava olaylarını hesaba katmak zorunda kalsaydık, hiçbir sistem bu hesabı yapamazdı.
 
-[cite_start]Gençler, zaman serileri hakkında izlenebilir ve hesaplanabilir şekilde akıl yürütmemize izin veren iki temel Markov varsayımı kullanırız[cite: 9].
+Gençler, zaman serileri hakkında izlenebilir ve hesaplanabilir şekilde akıl yürütmemize izin veren iki temel Markov varsayımı kullanırız.
 
-[cite_start]Birincisi, Sınırlı Görüş Varsayımıdır (Limited Horizon Assumption)[cite: 10]. [cite_start]Bu kural bize, $t$ zamanında belirli bir durumda olma olasılığımızın sadece $t-1$ zamanındaki duruma bağlı olduğunu söyler[cite: 11]. [cite_start]Bu varsayımın altında yatan temel mantık oldukça sadedir: $t$ zamanındaki durum, sistemin gelecek durumunu tahmin etmek için geçmişin yeterli bir özeti ile temsil edilmesidir[cite: 12]. Geçmişe dair tüm veri yükünü sırtımızda taşımayız. Matematiksel olarak bunu şu şekilde yazarız: 
+Birincisi, Sınırlı Görüş Varsayımıdır (Limited Horizon Assumption). Bu kural bize, $t$ zamanında belirli bir durumda olma olasılığımızın sadece $t-1$ zamanındaki duruma bağlı olduğunu söyler. Bu varsayımın altında yatan temel mantık oldukça sadedir: $t$ zamanındaki durum, sistemin gelecek durumunu tahmin etmek için geçmişin yeterli bir özeti ile temsil edilmesidir. Geçmişe dair tüm veri yükünü sırtımızda taşımayız. Matematiksel olarak bunu şu şekilde yazarız: 
 
-[cite_start]
-$$P(z_t | z_{t-1}, z_{t-2}, ..., z_1) = P(z_t | z_{t-1})$$
-[cite: 13]
+$$
+P(z_t | z_{t-1}, z_{t-2}, ..., z_1) = P(z_t | z_{t-1})
+$$
 
-[cite_start]İkincisi ise Durağan Süreç Varsayımıdır (The Stationary Process Assumption)[cite: 15]. Durağan kelimesi, Latince *stationarius* (sabit, değişmez) kökünden gelir. [cite_start]Bu varsayım, bir sonraki duruma geçerken mevcut durumun sağladığı koşullu dağılımın zaman içinde değişmediğini ifade eder[cite: 16]. Yani "güneşli bir günden sonra yağmur yağma ihtimali", bugün hesaplasak da on gün sonra hesaplasak da sistemimizde aynı kabul edilir. Formülize edersek: 
+İkincisi ise Durağan Süreç Varsayımıdır (The Stationary Process Assumption). Durağan kelimesi, Latince *stationarius* (sabit, değişmez) kökünden gelir. Bu varsayım, bir sonraki duruma geçerken mevcut durumun sağladığı koşullu dağılımın zaman içinde değişmediğini ifade eder. Yani "güneşli bir günden sonra yağmur yağma ihtimali", bugün hesaplasak da on gün sonra hesaplasak da sistemimizde aynı kabul edilir. Formülize edersek: 
 
-[cite_start]
-$$P(z_t | z_{t-1}) = P(z_2 | z_1); t \in 2...T$$
-[cite: 17]
+$$
+P(z_t | z_{t-1}) = P(z_2 | z_1); t \in 2...T
+$$
 
-[cite_start]Sistemi başlatmak için bir ilk durum ve ilk gözlem tanımlamamız gerekir, bunu $z_0 \equiv s_0$ olarak varsayıyoruz[cite: 18]. [cite_start]Buradaki $s_0$, $0$ zamanında sistemdeki durumlar üzerindeki başlangıç olasılık dağılımını temsil eder[cite: 18]. [cite_start]Bu notasyonel kolaylık, sistemin ilk gerçek durumu olan $z_1$'i $P(z_1 | z_0)$ olarak görme olasılığına ilişkin inancımızı kodlamamızı sağlar[cite: 19]. [cite_start]Böylece dizilimi baştan sona $P(z_t|z_{t-1},...,z_1) = P(z_t|z_{t-1},...,z_1, z_0)$ şeklinde ifade edebiliriz[cite: 20].
+Sistemi başlatmak için bir ilk durum ve ilk gözlem tanımlamamız gerekir, bunu $z_0 \equiv s_0$ olarak varsayıyoruz. Buradaki $s_0$, $0$ zamanında sistemdeki durumlar üzerindeki başlangıç olasılık dağılımını temsil eder. Bu notasyonel kolaylık, sistemin ilk gerçek durumu olan $z_1$'i $P(z_1 | z_0)$ olarak görme olasılığına ilişkin inancımızı kodlamamızı sağlar. Böylece dizilimi baştan sona $P(z_t|z_{t-1},...,z_1) = P(z_t|z_{t-1},...,z_1, z_0)$ şeklinde ifade edebiliriz.
 
-Şimdi bu olasılıkları sistemli bir şekilde yapılandırmamız gerekiyor. Bunun için Geçiş Matrisi (Transition Matrix) kullanırız ve bunu $A$ ile gösteririz. [cite_start]Boyutları $\mathbb{R}^{(|S|+1) \times (|S|+1)}$ şeklindedir[cite: 22]. $+1$ eklememizin sebebi, sisteme dahil ettiğimiz başlangıç durumu olan $s_0$'dır. [cite_start]Matrisin içindeki her bir $A_{ij}$ değeri, sistemin herhangi bir $t$ zamanında $i$ durumundan $j$ durumuna geçiş olasılığıdır[cite: 22].
+Şimdi bu olasılıkları sistemli bir şekilde yapılandırmamız gerekiyor. Bunun için Geçiş Matrisi (Transition Matrix) kullanırız ve bunu $A$ ile gösteririz. Boyutları $\mathbb{R}^{(|S|+1) \times (|S|+1)}$ şeklindedir. $+1$ eklememizin sebebi, sisteme dahil ettiğimiz başlangıç durumu olan $s_0$'dır. Matrisin içindeki her bir $A_{ij}$ değeri, sistemin herhangi bir $t$ zamanında $i$ durumundan $j$ durumuna geçiş olasılığıdır.
 
-[cite_start]Güneş, bulut ve yağmur içeren modelimiz için geçiş matrisimizi sayısal değerlerle kuralım[cite: 23].
+Güneş, bulut ve yağmur içeren modelimiz için geçiş matrisimizi sayısal değerlerle kuralım.
 
-[cite_start]İlk durumumuz olan $s_0$'dan havanın diğer üç durumuna (güneş, bulut, yağmur) geçiş için eşit (uniform) bir olasılık dağılımı gösterdiğini varsayıyoruz[cite: 47]. [cite_start]Bu olasılıklar $0.33$, $0.33$ ve $0.33$ şeklindedir[cite: 28, 29, 30].
+İlk durumumuz olan $s_0$'dan havanın diğer üç durumuna (güneş, bulut, yağmur) geçiş için eşit (uniform) bir olasılık dağılımı gösterdiğini varsayıyoruz. Bu olasılıklar $0.33$, $0.33$ ve $0.33$ şeklindedir.
 
 Sonrasında sistemin kendi içindeki geçişlerine bakalım:
-* [cite_start]Güneşli ($s_{sun}$) bir günden sonra tekrar güneşli olma olasılığı $0.8$, bulutlu ($s_{cloud}$) olma olasılığı $0.1$, yağmurlu ($s_{rain}$) olma olasılığı ise $0.1$'dir[cite: 34, 35, 36].
-* [cite_start]Bulutlu ($s_{cloud}$) bir günden sonra güneşli olma ihtimali $0.2$, tekrar bulutlu olma ihtimali $0.6$, yağmurlu olma ihtimali ise $0.2$'dir[cite: 38, 39, 40].
-* [cite_start]Yağmurlu ($s_{rain}$) bir günden sonra havanın açıp güneşli olma ihtimali $0.1$, bulutlu olma ihtimali $0.2$ ve yağmurlu kalma ihtimali $0.7$'dir[cite: 43, 44, 45].
+* Güneşli ($s_{sun}$) bir günden sonra tekrar güneşli olma olasılığı $0.8$, bulutlu ($s_{cloud}$) olma olasılığı $0.1$, yağmurlu ($s_{rain}$) olma olasılığı ise $0.1$'dir.
+* Bulutlu ($s_{cloud}$) bir günden sonra güneşli olma ihtimali $0.2$, tekrar bulutlu olma ihtimali $0.6$, yağmurlu olma ihtimali ise $0.2$'dir.
+* Yağmurlu ($s_{rain}$) bir günden sonra havanın açıp güneşli olma ihtimali $0.1$, bulutlu olma ihtimali $0.2$ ve yağmurlu kalma ihtimali $0.7$'dir.
 
 Bu sistemi bir diyagram üzerinde inceleyelim:
 
@@ -190,6 +179,6 @@ graph LR
     style Rain fill:#3498db,stroke:#2c3e50,stroke-width:2px
 ```
 
-[cite_start]Oluşturduğumuz matriste ve diyagramda dikkat ederseniz, havanın kendi kendisiyle ilişkili (self-correlated) olduğu sezgisini temsil eden sayılar vardır[cite: 46]. [cite_start]Güneşliyse güneşli kalma eğilimindedir, bulutluysa bulutlu kalır[cite: 46]. [cite_start]Bu örüntü, birçok Markov modelinde yaygındır ve geçiş matrisinde güçlü bir köşegen (diyagonal) yapı olarak gözlemlenebilir[cite: 46]. Olayların birbiri ardına dizilişindeki bu eğilimler, veri analizi süreçlerinin ve algoritma tasarımlarının temel taşıdır.
+Oluşturduğumuz matriste ve diyagramda dikkat ederseniz, havanın kendi kendisiyle ilişkili (self-correlated) olduğu sezgisini temsil eden sayılar vardır. Güneşliyse güneşli kalma eğilimindedir, bulutluysa bulutlu kalır. Bu örüntü, birçok Markov modelinde yaygındır ve geçiş matrisinde güçlü bir köşegen (diyagonal) yapı olarak gözlemlenebilir. Olayların birbiri ardına dizilişindeki bu eğilimler, veri analizi süreçlerinin ve algoritma tasarımlarının temel taşıdır.
 
 Bu durum geçişlerinin matematiksel modellemesi ile ilgili sormak veya hesaplamak istediğiniz başka bir adım var mı?
