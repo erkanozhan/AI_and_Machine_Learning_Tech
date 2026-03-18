@@ -12,28 +12,28 @@ Bu mantıksal sürecin matematiğe dökülmüş haline **Saklı Markov Modeli** 
 
 Aşağıdaki şemada bu yapının zaman içindeki ilerleyişini görebilirsiniz:
 
-```graphviz
-digraph HMM {
-    rankdir=LR;
-    node [shape=circle, style=filled, fillcolor="#ecf0f1", fontname="Helvetica", color="#2c3e50", penwidth=2];
-    edge [color="#34495e", penwidth=1.5, fontname="Helvetica", fontsize=10];
+```mermaid
+graph LR
+    H1(("Saklı Durum<br>(Zaman: t)"))
+    H2(("Saklı Durum<br>(Zaman: t+1)"))
+    H3(("Saklı Durum<br>(Zaman: t+2)"))
     
-    H1 [label="Saklı Durum\n(Zaman: t)"];
-    H2 [label="Saklı Durum\n(Zaman: t+1)"];
-    H3 [label="Saklı Durum\n(Zaman: t+2)"];
+    O1["Gözlem<br>(Zaman: t)"]
+    O2["Gözlem<br>(Zaman: t+1)"]
+    O3["Gözlem<br>(Zaman: t+2)"]
     
-    node [shape=box, fillcolor="#d5dbdb"];
-    O1 [label="Gözlem\n(Zaman: t)"];
-    O2 [label="Gözlem\n(Zaman: t+1)"];
-    O3 [label="Gözlem\n(Zaman: t+2)"];
+    H1 -- "Geçiş<br>Olasılığı (A)" --> H2
+    H2 -- "Geçiş<br>Olasılığı (A)" --> H3
     
-    H1 -> H2 [label=" Geçiş\nOlasılığı (A)"];
-    H2 -> H3 [label=" Geçiş\nOlasılığı (A)"];
+    H1 -- "Yayım<br>Olasılığı (B)" --> O1
+    H2 -- "Yayım<br>Olasılığı (B)" --> O2
+    H3 -- "Yayım<br>Olasılığı (B)" --> O3
     
-    H1 -> O1 [label=" Yayım\nOlasılığı (B)"];
-    H2 -> O2 [label=" Yayım\nOlasılığı (B)"];
-    H3 -> O3 [label=" Yayım\nOlasılığı (B)"];
-}
+    classDef hiddenState fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px;
+    classDef observation fill:#d5dbdb,stroke:#2c3e50,stroke-width:2px;
+    
+    class H1,H2,H3 hiddenState;
+    class O1,O2,O3 observation;
 ```
 
 Bir sistemin arka plandaki bu ağ yapısını bilgisayarlara anlatmak ve hesaplanabilir hale getirmek için matrisleri kullanırız. Bir HMM temel olarak üç ana parametre ile tanımlanır ve genellikle $\lambda = (A, B, \pi)$ şeklinde gösterilir.
