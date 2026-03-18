@@ -1,5 +1,6 @@
 # Saklı Markov Modelleri (Hidden Markov Models - HMM)
 
+## 1. Giriş: Saklı Durumlar ve Gözlemler
 Gençler, sistemlerin veya süreçlerin anlık durumlarını her zaman doğrudan ölçemeyiz. Bazen asıl ilgilendiğimiz yapı, doğrudan gözlemleyebildiğimiz verilerin arkasına gizlenmiştir. Doğal dil işleme (Natural Language Processing - NLP) çalışmalarında, örneğin bir SMS metninin içindeki kelimelerin dizilimine bakarak o mesajın dolandırıcılık amacı taşıyıp taşımadığını anladığımız süreci düşünün. Mesajın kendisi gözlemlediğimiz veridir, mesajı yazanın asıl niyeti ise saklı durumdur.
 
 Bir arkadaşınızın uzaktaki bir şehirde yaşadığını varsayın. Arkadaşınızla sadece mesajlaşıyorsunuz ve size o gün ne yaptığını söylüyor: Ya kitap okuyor, ya yürüyüşe çıkıyor ya da evde temizlik yapıyor. Siz ise o şehrin hava durumunu merak ediyorsunuz. Hava durumunu doğrudan göremiyorsunuz, bu sizin için **Saklı Durum** (Hidden State). Durum kelimesinin İngilizcesi olan *state*, Latince *status* (durma, pozisyon, vaziyet) kökünden gelir. Sistemin içinde bulunduğu vaziyeti ifade eder.
@@ -36,6 +37,7 @@ graph LR
     class O1,O2,O3 observation;
 ```
 
+## 2. Sistemin Matematiksel Parametreleri
 Bir sistemin arka plandaki bu ağ yapısını bilgisayarlara anlatmak ve hesaplanabilir hale getirmek için matrisleri kullanırız. Bir HMM temel olarak üç ana parametre ile tanımlanır ve genellikle $\lambda = (A, B, \pi)$ şeklinde gösterilir.
 
 **1. A Matrisi (Geçiş Olasılıkları - Transition Probabilities):** Sistemin bir saklı durumdan diğerine geçme ihtimallerini barındırır. "Bugün güneşliyse yarın da güneşli olma ihtimali nedir?" veya mekansal-zamansal (spatio-temporal) bir veride "Sistem $S_1$ durumundan $S_2$ durumuna hangi olasılıkla geçer?" sorularının matematiksel karşılığıdır.
@@ -44,12 +46,14 @@ Bir sistemin arka plandaki bu ağ yapısını bilgisayarlara anlatmak ve hesapla
 
 **3. $\pi$ Vektörü (Başlangıç Olasılıkları - Initial Probabilities):** Süreci gözlemlemeye başladığımız o ilk anda ($t=1$), sistemin hangi saklı durumda olduğuna dair elimizdeki başlangıç olasılık dağılımıdır.
 
+## 3. HMM ile Çözülebilen Temel Problemler
 Bu modeli kurduğumuzda, veri madenciliği süreçlerinde genellikle karşımıza çıkan üç temel problemi çözebiliriz:
 
 * **Değerlendirme (Evaluation):** Elimizde bir model ($\lambda$) ve peş peşe dizilmiş bir gözlem dizisi var. Kurduğumuz bu modelin, elimizdeki bu gözlem dizisini üretme olasılığı nedir? Bu problemi çözmek için İleri (Forward) algoritmasını kullanırız.
 * **Şifre Çözme (Decoding):** Elimizde yine gözlemler var ve biz bu gözlemleri üreten en olası *saklı durum dizisini* bulmak istiyoruz. Bir cümlede arka arkaya dizilmiş kelimelerin isim mi, fiil mi, sıfat mı (Part-of-Speech Tagging) olduğunu sırasıyla bulmak tam olarak bu problemdir. Burada devreye Viterbi Algoritması girer ve tüm olasılık ağacını hesaplamak yerine en güçlü yolu bulur.
 * **Öğrenme (Learning):** Elimizde sadece saf gözlemler var. Sistemi en iyi tanımlayacak olan $A$, $B$ ve $\pi$ parametrelerini, yani modelin kendisini bu veriden öğrenmek istiyoruz. Bu durumda Baum-Welch algoritması gibi yöntemlerle parametrelerimizi optimize ederiz.
 
+## 4. Şifre Çözme: Viterbi Algoritması ve Dinamik Programlama
 Bu algoritmalar içinden özellikle saklı durumların şifresini çözmemizi sağlayan Viterbi algoritmasının nasıl çalıştığına bakalım. 
 
 Saklı Markov Modellerinde (Hidden Markov Model - HMM) arka planda işleyen yapıyı anladıktan sonra, asıl mesele elimizdeki kısıtlı verilere bakarak o gizli yapının şifresini çözmektir. Bu şifre çözme işlemini bizim için yapan temel yaklaşıma Viterbi Algoritması diyoruz. 
@@ -60,7 +64,16 @@ Eğer analiz ettiğimiz mesaj 20 kelimelikse ve arka planda 3 farklı saklı dur
 
 İşte bu noktada Andrew Viterbi'nin geliştirdiği algoritma devreye girer. Bu algoritma, bilgisayar bilimlerinde Dinamik Programlama (Dynamic Programming) dediğimiz bir temel üzerine inşa edilmiştir. Dinamik kelimesi, Yunanca *dunamis* (güç, hareket) kökünden gelir ve baştan sona sabit bir planı takip etmek yerine, ilerledikçe eldeki yeni verilere göre kendini uyarlayan sistemleri ifade eder. 
 
-Süreci zihnimizde somutlaştırmak için karmaşık bir şehirde A noktasından B noktasına gitmeye çalışan bir kurye olduğunuzu varsayın. Şehirde binlerce farklı ara sokak ve rota seçeneği vardır. Kurye her yeni kavşağa geldiğinde, başlangıç noktasından itibaren olabilecek bütün alternatif yolları hafızasında tutmaya çalışmaz. Bunun yerine sadece şu hesabı yapar: "Bu kavşağa ulaşabileceğim en hızlı ve en olası yol hangisiydi?" O kavşağa gelen diğer tüm yavaş yolları tamamen unutur. Bir sonraki kavşağa ilerlerken de sadece bu "en iyi" ara yolların üzerine hesaplama yapar. Viterbi algoritması da tam olarak bu mantıkla, gereksiz hesaplama yükünden kurtularak ilerler.
+Süreci zihnimizde daha net somutlaştırmak için şöyle düşünelim: Bir kuryesiniz ve karmaşık bir şehirde A noktasından B noktasına gitmeniz gerekiyor. Şehir o kadar büyük ki, haritaya ilk baktığınızda önünüzde binlerce farklı sokak kombinasyonu var. Hepsini yolun en başından tek tek hesaplamak bilgisayarlar için bile çok uzun sürer.
+
+Bunun yerine kurye şu zekice taktiği kullanır (işte bu Viterbi mantığıdır):
+1. Şehri mahallelere (kelimeler veya zaman adımları gibi düşünün) ayırarak ilerler.
+2. Diyelim ki 2. mahalledeki "Merkez Kavşağı"na ulaştı. Oraya gelmek için arkasında bıraktığı 5 farklı ara sokak seçeneği vardı.
+3. Kurye o an sadece şu tespiti yapar: *"Bu kavşağa en hızlı ulaşan (en olası) güzergah 1. Sokak üzerinden gelmekti."*
+4. Kurye, geriye kalan diğer 4 yavaş ve ihtimali düşük sokağı tamamen haritasından siler!
+5. Bir sonraki mahalleye geçerken haritayı en baştan çizmez; sadece Merkez Kavşağı'na kadar kesinleştirdiği bu "en iyi yol" üzerinden hesabına devam eder.
+
+Yani Viterbi algoritması, her durakta (zaman anında) "zayıf ihtimalleri" çöpe atarak ilerler ve sadece o noktaya kadarki en güçlü (max) yolu hafızasında tutar. Hedefe ulaştığında trilyonlarca hesabı yapmak yerine, elinde sadece birbirine uç uca eklenmiş mükemmel bir yol zinciri kalmış olur.
 
 Bu yapının zaman içindeki akışını genellikle İngilizcede kafes anlamına gelen *Trellis* diyagramları ile çizeriz.
 
@@ -94,6 +107,7 @@ graph LR
     classDef default fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px;
 ```
 
+### Viterbi Algoritmasının Matematiği
 İşin hesaplama kısmına geçtiğimizde, gençler, bu kurye mantığını matrislere dökeriz. Zamanı $t$ ile, bulunduğumuz saklı durumu ise $k$ ile ifade edelim. Her $t$ anında ve her $k$ durumu için, o noktaya kadar gelen en olası yolun olasılık değerini hesaplar ve bu değeri $V_{t,k}$ değişkeninde tutarız.
 
 Adım adım ilerlerken kullanacağımız denklemdeki matematiksel terimlerin anlamları şunlardır:
@@ -116,6 +130,7 @@ Zaman çizelgesinin en sonuna, yani analiz ettiğimiz verinin son anına ($T$) u
 İşte bu geriye doğru takip işlemi bittiğinde, elimizdeki karmaşık gözlem dizisini üreten en mantıklı, matematiksel olarak kanıtlanmış o saklı durumlar dizisini baştan sona elde etmiş oluruz. Doğal dil işleme algoritmalarından gen dizilimlerinin analizine kadar birçok alanda karşımıza çıkan gürültülü ve belirsiz veriler, bu yöntemle anlamlı yapılara dönüştürülür.
 
 
+## 5. Zaman Serileri ve Markov Varsayımları
 Saklı Markov Modelleri (Hidden Markov Models - HMM) üzerine konuşurken, arka planda işleyen zaman serilerini ve durum geçişlerini iyi anlamamız gerekir. Bir sistemi incelerken, bu sistemin içinde bulunabileceği bir dizi durumu (state) göz önüne alırız ve bunu $S = \{s_1, s_2, ... s_{|S|}\}$ şeklinde ifade ederiz. İngilizcedeki *state* (durum) kelimesi Latince *status* kökünden gelir ve sistemin o anki pozisyonunu veya halini belirtir. Bu durumları zaman içinde ardışık bir dizi olarak gözlemleyebiliriz. Gözlemlerimizin kümesini $\vec{z} \in S^T$ olarak tanımlıyoruz.
 
 Örneğin, dışarıdaki hava durumunu modelliyor olalım. Havanın alabileceği durumlar kümemiz $S = \{sun, cloud, rain\}$ olsun. Burada toplam durum sayımız |S| = 3'tür. Birkaç günlük bir periyotta havayı gözlemlediğimizi düşünün. Beş günlük ($T=5$) bir gözlem dizimiz şu şekilde olabilir: $\{z_1 = s_{sun}, z_2 = s_{cloud}, z_3 = s_{cloud}, z_4 = s_{rain}, z_5 = s_{cloud}\}$.
@@ -150,10 +165,12 @@ $$
 P(z_t | z_{t-1}) = P(z_2 | z_1); \quad t \in 2...T
 $$
 
+## 6. Modelin İnşası ve Geçiş Matrisi
 Sistemi başlatmak için bir ilk durum ve ilk gözlem tanımlamamız gerekir, bunu $z_0 \equiv s_0$ olarak varsayıyoruz. Buradaki $s_0$, $0$ zamanında sistemdeki durumlar üzerindeki başlangıç olasılık dağılımını temsil eder. Bu notasyonel kolaylık, sistemin ilk gerçek durumu olan $z_1$'i $P(z_1 | z_0)$ olarak görme olasılığına ilişkin inancımızı kodlamamızı sağlar. Böylece dizilimi baştan sona $P(z_t|z_{t-1},...,z_1) = P(z_t|z_{t-1},...,z_1, z_0)$ şeklinde ifade edebiliriz.
 
 Şimdi bu olasılıkları sistemli bir şekilde yapılandırmamız gerekiyor. Bunun için Geçiş Matrisi (Transition Matrix) kullanırız ve bunu $A$ ile gösteririz. Boyutları $\mathbb{R}^{(|S|+1) \times (|S|+1)}$ şeklindedir. $+1$ eklememizin sebebi, sisteme dahil ettiğimiz başlangıç durumu olan $s_0$'dır. Matrisin içindeki her bir $A_{ij}$ değeri, sistemin herhangi bir $t$ zamanında $i$ durumundan $j$ durumuna geçiş olasılığıdır.
 
+### Örnek Uygulama: Hava Durumu Modeli
 Güneş, bulut ve yağmur içeren modelimiz için geçiş matrisimizi sayısal değerlerle kuralım.
 
 İlk durumumuz olan $s_0$'dan havanın diğer üç durumuna (güneş, bulut, yağmur) geçiş için eşit (uniform) bir olasılık dağılımı gösterdiğini varsayıyoruz. Bu olasılıklar $0.33$, $0.33$ ve $0.33$ şeklindedir.
