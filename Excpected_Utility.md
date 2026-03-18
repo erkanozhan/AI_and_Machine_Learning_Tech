@@ -10,7 +10,11 @@ Kuramsal olarak, Beklenen Fayda Teorisi, von Neumann-Morgenstern fayda fonksiyon
 Beklenen Fayda Teorisi'nin kökleri 1738 yılına uzanmaktadır. Bu tarihte Daniel Bernoulli, meşhur St. Petersburg paradoksunu ele almış ve karar vericilerin yalnızca parasal değeri değil, sonuçların faydasını dikkate alması gerektiğini ileri sürmüştür. Bernoulli’nin çığır açıcı bu öngörüsü, "bir nesnenin faydası, koşullara bağlı olarak değişebilir" fikrini vurgulayarak, rasyonel karar almanın beklenen değer yerine beklenen fayda ile yönlendirilmesi gerektiği yönündeki temel ilkeyi ortaya koymuştur. Ancak bu yaklaşım, kardinal fayda ölçeği gerektirdiğinden başlangıçta sınırlı kabul görmüştür. Teori, yaklaşık iki yüzyıl boyunca nispeten az gelişme göstermiştir. Ancak 1940’larda, John von Neumann ve Oskar Morgenstern’in 1944 yılında yayımladıkları eser, tercihlere dayalı bazı aksiyomlardan hareketle beklenen fayda kavramını türeterek alanda devrim yaratmıştır. Bu yaklaşımla, beklenen fayda teorisinin gerektirdiği kardinal fayda kavramı ile ekonomistlerin daha çok benimsediği ordinal fayda anlayışı birleştirilmiştir. Bernoulli’nin yaklaşımından farklı olarak bu formülasyon, bireylerin belirsizliklerden elde ettikleri faydayı farklı şekillerde değerlendirdiğini varsaymış ve tercih sıralamasını koruyacak şekilde getiriler için sayısal fayda değerlerinin atanabileceğini ortaya koymuştur. Bu formalizasyondan sonra, Beklenen Fayda Teorisi hızla önem kazanmış ve 1950’lerden 1990’lara kadar risk altındaki karar alma süreçlerinde ekonomik analizlerin temelini oluşturmuştur. Teorinin erken dönem savunucuları arasında Chicago Üniversitesi’nden Milton Friedman ve Leonard Jimmie Savage ile Cowles Komisyonu’ndan Jacob Marschak yer alırken, MIT’den Paul Samuelson gibi bazı önemli ekonomistler başta teoriyi eleştirmiştir. Bu gelişmelerden daha önce, 1926 yılında Frank Ramsey, beklenen fayda konusunda ilk biçimsel aksiyomatik yaklaşımı sunmuş ve bu yaklaşım ilerleyen yıllarda karar teorisinin yaygın olarak kabul edilen temellerini etkilemiştir.
 
 
-Karar verme, bireylerin veya sistemlerin alternatifler arasında seçim yaptığı bir süreçtir. Özellikle belirsizlik ve risk altında karar verme durumlarında, bireylerin hangi temellere göre seçim yaptığını anlamak, iktisat, psikoloji, davranış bilimleri ve yapay zeka gibi pek çok alanda önemli bir araştırma konusudur. Bu bağlamda, Fayda Teorisi ve Beklenen Fayda Teorisi, rasyonel kararların modellenmesinde temel referans çerçevelerdir. Karar teorisi, bireylerin farklı alternatifler arasında nasıl seçim yaptığını inceleyen bir alandır. Kararlar genellikle üç farklı koşul altında değerlendirilir: kesinlik altında karar (tüm sonuçlar ve koşullar bilinir), risk altında karar (sonuçlar belirli olasılıklarla gerçekleşebilir) ve belirsizlik altında karar (olasılıklar dahi bilinmez). Fayda, bireylerin tercihlerini ifade etmek için kullanılan soyut bir değerdir. Her olası sonuç, bireyin ne kadar memnuniyet duyduğunu gösteren bir sayısal değerle temsil edilir. Bu değerler bir fayda fonksiyonu (U) aracılığıyla ifade edilir:
+Karar verme, bireylerin veya sistemlerin alternatifler arasında seçim yaptığı bir süreçtir. Özellikle belirsizlik ve risk altında karar verme durumlarında, bireylerin hangi temellere göre seçim yaptığını anlamak, iktisat, psikoloji, davranış bilimleri ve yapay zeka gibi pek çok alanda önemli bir araştırma konusudur. Bu bağlamda, Fayda Teorisi ve Beklenen Fayda Teorisi, rasyonel kararların modellenmesinde temel referans çerçevelerdir. Karar teorisi, bireylerin farklı alternatifler arasında nasıl seçim yaptığını inceleyen bir alandır. Kararlar genellikle üç farklı koşul altında değerlendirilir: kesinlik altında karar (tüm sonuçlar ve koşullar bilinir), risk altında karar (sonuçlar belirli olasılıklarla gerçekleşebilir) ve belirsizlik altında karar (olasılıklar dahi bilinmez). Fayda, bireylerin tercihlerini ifade etmek için kullanılan soyut bir değerdir. Her olası sonuç, bireyin ne kadar memnuniyet duyduğunu gösteren bir sayısal değerle temsil edilir. Bu değerler bir fayda fonksiyonu aracılığıyla ifade edilir. Fonksiyondaki matematiksel sembollerin anlamları şunlardır:
+* `$U$` (Utility): Fayda fonksiyonudur.
+* `$O$` (Outcomes): Olası tüm sonuçların kümesini ifade eder.
+* `$\rightarrow$`: Bir değerin başka bir değere dönüştürüldüğünü (eşlendiğini) gösteren eşleme (mapping) işaretidir.
+* `$\mathbb{R}$`: Reel (Gerçek) sayılar kümesidir. Yani her sonucun matematiksel olarak gerçek bir sayısal değere karşılık geldiğini belirtir.
 
 $$
 U: O \rightarrow \mathbb{R}
@@ -19,13 +23,24 @@ $$
 burada O sonuçlar kümesini; U(O) ise her sonuca atanan fayda değerini gösterir. Fayda Teorisi, bireylerin kararlarını yalnızca sonuçlara göre verdiklerini varsayar. Yani bir birey, daha yüksek fayda sağlayan sonucu tercih eder. Bu teori, karar vericilerin tercihlerinde tamlık ve geçişlilik gibi rasyonellik ilkelerini sağladığını kabul eder.
 
 
-Beklenen Fayda Teorisi, belirsizlik altında rasyonel karar vermeyi modelleyen bir teoridir. Teoriye göre, karar verici, her bir eylemin farklı olasılıklarla çeşitli sonuçlara yol açabileceği durumlarda, beklenen faydayı (EU) maksimize eden eylemi seçer. Matematiksel tanımı şu şekildedir:
+Beklenen Fayda Teorisi, belirsizlik altında rasyonel karar vermeyi modelleyen bir teoridir. Teoriye göre, karar verici, her bir eylemin farklı olasılıklarla çeşitli sonuçlara yol açabileceği durumlarda, beklenen faydayı (EU) maksimize eden eylemi seçer. Bu formüldeki sembollerin anlamları şöyledir:
+* `$EU(A)$` (Expected Utility): `A` eyleminin beklenen toplam faydasıdır.
+* `$\sum$` (Sigma): Toplam sembolüdür; tüm olası ihtimallerin toplanacağını belirtir.
+* `$O_i$`: Gerçekleşebilecek `i`'inci olası sonuçtur.
+* `$P(O_i | A)$`: `A` eylemi gerçekleştirildiğinde (koşullu olasılık dikkate alınarak) `$O_i$` sonucunun gerçekleşme olasılığıdır (Probability).
+* `$U(O_i)$`: `$O_i$` sonucunun kişiye sağlayacağı faydanın sayısal değeridir.
+
+Matematiksel tanımı şu şekildedir:
 
 $$
 EU(A) = \sum P(O_i | A) \times U(O_i)
 $$
 
-burada A eylemi, $O_i$ eylemin yol açabileceği olası sonuçlardan biri, $P(O_i | A)$ A eylemi gerçekleştiğinde $O_i$ sonucunun ortaya çıkma olasılığı ve $U(O_i)$ $O_i$ sonucunun bireye sağladığı fayda değeridir. Karar kriteri ise:
+Karar kriteri ise eylemler arasından en yüksek faydayı sağlayanı seçmektir. Buradaki matematiksel terimler:
+* `$A^*$`: Tüm eylemler (`A`) arasından seçilmesi gereken en iyi, en optimal eylemdir.
+* `$\operatorname{argmax}_A$`: Argüman maksimizasyonu fonksiyonudur. Kendisinden sonra gelen ifadeyi (burada `$EU(A)$`) en büyük (maksimum) yapan eylemi döndürür. Yani "beklenen faydası en yüksek olan eylemi bul" anlamına gelir.
+
+Karar kriteri formülü:
 
 $$
 A^* = \operatorname{argmax}_A EU(A)

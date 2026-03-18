@@ -23,31 +23,41 @@ Kalman filtresinin temel yeniliği, önceki bilgileri (tahmin) yeni kanıtlarla 
 Bir sistemin durumu, belirli bir zamanda koşulunu tanımlayan bir parametreler kümesidir. Örnekler arasında bir nesnenin konumu, hızı ve ivmesi bulunur. Durum genellikle bir durum vektörü olarak temsil edilir. Durum değişkenlerinin seçimi, sistemi etkili bir şekilde modellemek için çok önemlidir. Bu değişkenler, sistemin problemle ilgili davranışını tanımlamak için yeterli olmalıdır.
 
 * **Durum Denklemi: Sistem Dinamiğini Modelleme.**
-Durum denklemi, sistemin durumunun zaman içinde nasıl geliştiğini açıklar. Ayrık zamanlı bir sistem için tipik olarak şu şekilde temsil edilir:
+Durum denklemi, sistemin durumunun zaman içinde nasıl geliştiğini açıklar. Formülü anlamak için şu temel terimleri bilmeliyiz:
+* `$x(t)$`: Sistemin `t` anındaki durumunu (örneğin nesnenin konumu ve hızı) gösteren vektördür.
+* `$\Phi(T)$` (Durum Geçiş Matrisi): Sistemin `t` anından `t+T` anına geçerken mevcut durumunun fiziksel olarak nasıl değiştiğini matematiksel olarak ifade eden matristir.
+* `$w(t)$`: Modele dahil edemediğimiz dış etkenleri veya sistemdeki belirsizlikleri ifade eden "süreç gürültüsü" (process noise) vektörüdür.
+
+Ayrık zamanlı bir sistem için durum denklemi tipik olarak şu şekilde temsil edilir:
 
 $$
 x(t + T) = \Phi(T)x(t) + w(t)
 $$
 
-Burada `x(t)`, t anındaki durum vektörüdür; `Φ(T)`, durumun t anından t + T anına nasıl dönüştüğünü açıklayan durum geçiş matrisidir; ve `w(t)`, modellenmemiş bozulmaları temsil eden süreç gürültüsü vektörüdür. Durum geçiş matrisi, sistemin deterministik evrimini somutlaştıran doğrusal bir operatördür. Süreç gürültüsü terimi, modelimizin mükemmel olmadığını ve dış etkilerin olabileceğini kabul eder.
+Durum geçiş matrisi, sistemin deterministik evrimini somutlaştıran doğrusal bir operatördür. Süreç gürültüsü terimi ise modelimizin mükemmel olmadığını ve dış etkilerin olabileceğini kabul eder.
 
 * **Ölçüm Denklemi: Durumları Gözlemlere İlişkilendirme.**
-Ölçüm denklemi, ölçümlerin sistemin durumuyla nasıl ilişkili olduğunu açıklar. Tipik olarak şu şekilde temsil edilir:
+Ölçüm denklemi, ölçümlerin sistemin durumuyla nasıl ilişkili olduğunu açıklar. Formüldeki bileşenler şunlardır:
+* `$y(t)$`: Sensörlerden elde ettiğimiz `t` anındaki gözlem/ölçüm vektörüdür.
+* `$H$` (Ölçüm Matrisi): Gerçek durumu (`x`) sensörün ölçebileceği formata (`y`) dönüştüren matristir. (Örneğin, hızı ölçemeyip sadece konumu ölçebilen bir sensörün yapısını yansıtır).
+* `$v(t)$`: Sensörlerin fiziksel yapısından kaynaklanan okuma hatalarını, yani "ölçüm gürültüsünü" temsil eder.
+
+Denklem tipik olarak şu şekilde temsil edilir:
 
 $$
 y(t) = Hx(t) + v(t)
 $$
 
-Burada `y(t)`, t anındaki ölçüm vektörüdür; `H`, durum ile ölçüm arasındaki doğrusal ilişkiyi tanımlayan ölçüm matrisidir; ve `v(t)`, ölçüm sürecindeki hataları temsil eden ölçüm gürültüsü vektörüdür. Ölçüm matrisi, durum vektörünü durum uzayından ölçüm uzayına eşler ve tüm durum değişkenlerini doğrudan ölçmediğimiz gerçeğini hesaba katar. Ölçüm gürültüsü terimi, sensörlerimizin sınırlamalarını kabul ederek ölçüm sürecindeki yanlışlıkları ve belirsizlikleri hesaba katar.
+Ölçüm matrisi, durum vektörünü durum uzayından ölçüm uzayına eşler ve tüm durum değişkenlerini doğrudan ölçmediğimiz gerçeğini hesaba katar. Ölçüm gürültüsü terimi ise sensörlerimizin sınırlamalarını kabul ederek ölçüm sürecindeki yanlışlıkları ve belirsizlikleri hesaba katar.
 
 * **Süreç Gürültüsü ve Ölçüm Gürültüsü: (Belirsizliği Hesaba Katma).**
-Süreç gürültüsü `w(t)`'nin sıfır ortalamalı ve `Q(t)` kovaryans matrisine sahip beyaz Gauss gürültüsü olduğu varsayılır:
+Süreç gürültüsü `w(t)`'nin sıfır ortalamalı ve `Q(t)` kovaryans matrisine sahip beyaz Gauss gürültüsü olduğu varsayılır. Denklemlerde göreceğimiz `$E[...]$` ifadesi "Beklenen Değer"i (Expected Value), yani ortalamayı; `$^T$` ifadesi ise matrisin "Transpozunu" (satır ve sütunlarının yer değiştirmesini) ifade eder. `Q(t)` kovaryans matrisi şu şekilde hesaplanır:
 
 $$
 Q(t) = E[w(t)w(t)ᵀ]
 $$
 
-Kovaryans matrisi `Q`, sistemin dinamiğindeki belirsizliği nicelendirir. Köşegen elemanlar, her durum değişkenindeki gürültünün varyansını temsil ederken, köşegen dışı elemanlar aralarındaki kovaryansları temsil eder. Benzer şekilde, ölçüm gürültüsü `v(t)`'nin de sıfır ortalamalı ve `R(t)` kovaryans matrisine sahip beyaz Gauss gürültüsü olduğu varsayılır:
+Kovaryans matrisi `Q`, sistemin dinamiğindeki belirsizliği nicelendirir. Köşegen elemanlar, her durum değişkenindeki gürültünün varyansını temsil ederken, köşegen dışı elemanlar aralarındaki kovaryansları temsil eder. Benzer şekilde, ölçüm gürültüsü `v(t)`'nin de sıfır ortalamalı ve sensör hatalarını ifade eden `R(t)` kovaryans matrisine sahip beyaz Gauss gürültüsü olduğu varsayılır:
 
 $$
 R(t) = E[v(t)v(t)ᵀ]
@@ -60,7 +70,12 @@ Kovaryans matrisi `R`, ölçümlerdeki belirsizliği nicelendirir. `w(t)` ve `v(
 Algoritma, başlangıç durum vektörü tahmini `x̂₀` ve kovaryans matrisi `P₀` ile başlar. Bu başlangıç değerleri, sistemin başlangıç koşulu hakkındaki en iyi tahminimizi ve buna ilişkin belirsizliği temsil eder. Ön bilgiye sahipsek, buraya dahil edebiliriz; aksi takdirde, bir tahmin ve yüksek bir belirsizlikle başlayabiliriz. Bazı uygulamalarda, başlangıç durumu ilk ölçümle başlatılabilir. Bu, başlangıç durumu hakkında ön bilgi olmadığında makul bir yaklaşım olabilir ve belirsizlik `P₀` tipik olarak ilk ölçümdeki beklenen gürültüye göre ayarlanır.
 
 * **Tahmin Adımı: Durumu ve Kovaryansı Zamanda İleriye Yansıtma.**
-    * Tahmini durum tahmini: Bu adım, önceki tahmine dayalı olarak bir sonraki durumu tahmin etmek için sistemin dinamiğini (`Φ_k` ile temsil edilir) kullanır. Modelimizi kullanarak zamanda ileriye doğru bir projeksiyondur.
+Bu adımda kullanılacak temel matematiksel notasyonlar şunlardır:
+* `$x̂$` (şapkalı x): İfadenin bir kesinlik değil, "tahmin edilen" (estimated) değer olduğunu gösterir.
+* `$k|k-1$` alt indisi: `k-1` anındaki (geçmiş) bilgilere dayanarak, `k` anı (gelecek) için yapılan tahmin anlamına gelir.
+* `$P$`: Sistemin durumuna dair belirsizliğimizi (Kovaryans) temsil eden matristir. `P` büyüdükçe belirsizlik artar.
+
+    * Tahmini durum tahmini: Bu adım, önceki tahmine dayalı olarak bir sonraki durumu tahmin etmek için sistemin dinamiğini (`Φ_k` matrisi ile temsil edilir) kullanır. Modelimizi kullanarak zamanda ileriye doğru bir projeksiyondur.
 
 $$
 x̂_{k|k-1} = \Phi_k x̂_{k-1|k-1}
@@ -73,6 +88,13 @@ P_{k|k-1} = \Phi_k P_{k-1|k-1} \Phi_kᵀ + Q_k
 $$
 
 * **Güncelleme Adımı: Tahminleri İyileştirmek İçin Ölçümleri Dahil Etme.**
+Bu adımda sensör verilerini hesaba dahil edeceğiz. Formüllerde karşılaşacağımız yeni terimler şunlardır:
+* `$K_k$` (Kalman Kazancı - Kalman Gain): Sensör ölçümüne mi yoksa modelimizin tahminine mi daha çok güveneceğimizi belirleyen ağırlık katsayısı/matrisidir.
+* `$z_k$`: Sensörden `k` anında okunan *gerçek ölçüm* değeridir.
+* `$k|k$` alt indisi: `k` anındaki taze ölçümleri kullanarak `k` anı için yapılan "güncellenmiş, en iyi tahmin" anlamına gelir.
+* `$I$` (Birim Matris - Identity Matrix): Matris çarpımlarında etkisiz eleman görevi gören matristir.
+* `$^{-1}$` (Ters Matris - Inverse): Matrisin tersini belirtir, bir matrisi bir nevi bölme işlemine sokmak gibi düşünülebilir.
+
     * Kalman Kazancı: Kalman kazancı, ölçüme mi yoksa tahmine mi ne kadar ağırlık verilmesi gerektiğini belirleyen bir matristir. Tahmini durum kovaryansı `P_{k|k-1}`, ölçüm matrisi `H_k` ve ölçüm gürültüsü kovaryansı `R_k`'ye bağlıdır. `R` küçükse (güvenilir ölçümler), kazanç daha yüksek olur ve ölçüme daha fazla ağırlık verilir. `P_{k|k-1}` küçükse (güvenilir tahmin), kazanç daha düşük olur ve tahmine daha fazla ağırlık verilir.
 
 $$
