@@ -196,4 +196,3 @@ graph LR
 
 Oluşturduğumuz matriste ve diyagramda dikkat ederseniz, havanın kendi kendisiyle ilişkili (self-correlated) olduğu sezgisini temsil eden sayılar vardır. Güneşliyse güneşli kalma eğilimindedir, bulutluysa bulutlu kalır. Bu örüntü, birçok Markov modelinde yaygındır ve geçiş matrisinde güçlü bir köşegen (diyagonal) yapı olarak gözlemlenebilir. Olayların birbiri ardına dizilişindeki bu eğilimler, veri analizi süreçlerinin ve algoritma tasarımlarının temel taşıdır.
 
-Bu durum geçişlerinin matematiksel modellemesi ile ilgili sormak veya hesaplamak istediğiniz başka bir adım var mı?
