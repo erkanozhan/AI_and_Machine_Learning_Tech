@@ -109,7 +109,9 @@ digraph ViterbiTrellis {
 
 Adım adım ilerlerken kullandığımız temel matematiksel bağıntı şudur:
 
-$$V_{t, k} = \max_{x \in S} (V_{t-1, x} \cdot A_{x, k} \cdot B_{k, o_t})$$
+$$
+V_{t, k} = \max_{x \in S} (V_{t-1, x} \cdot A_{x, k} \cdot B_{k, o_t})
+$$
 
 Bu denklemde gördüğümüz değişkenlerin her biri, sistemin geçmişten bugüne taşıdığı bir bilgiyi temsil eder:
 
@@ -134,11 +136,15 @@ Saklı Markov Modelleri (Hidden Markov Models - HMM) üzerine konuşurken, arka 
 
 [cite_start]Birincisi, Sınırlı Görüş Varsayımıdır (Limited Horizon Assumption)[cite: 10]. [cite_start]Bu kural bize, $t$ zamanında belirli bir durumda olma olasılığımızın sadece $t-1$ zamanındaki duruma bağlı olduğunu söyler[cite: 11]. [cite_start]Bu varsayımın altında yatan temel mantık oldukça sadedir: $t$ zamanındaki durum, sistemin gelecek durumunu tahmin etmek için geçmişin yeterli bir özeti ile temsil edilmesidir[cite: 12]. Geçmişe dair tüm veri yükünü sırtımızda taşımayız. Matematiksel olarak bunu şu şekilde yazarız: 
 
-[cite_start]$$P(z_t | z_{t-1}, z_{t-2}, ..., z_1) = P(z_t | z_{t-1})$$ [cite: 13]
+[cite_start]
+$$P(z_t | z_{t-1}, z_{t-2}, ..., z_1) = P(z_t | z_{t-1})$$
+[cite: 13]
 
 [cite_start]İkincisi ise Durağan Süreç Varsayımıdır (The Stationary Process Assumption)[cite: 15]. Durağan kelimesi, Latince *stationarius* (sabit, değişmez) kökünden gelir. [cite_start]Bu varsayım, bir sonraki duruma geçerken mevcut durumun sağladığı koşullu dağılımın zaman içinde değişmediğini ifade eder[cite: 16]. Yani "güneşli bir günden sonra yağmur yağma ihtimali", bugün hesaplasak da on gün sonra hesaplasak da sistemimizde aynı kabul edilir. Formülize edersek: 
 
-[cite_start]$$P(z_t | z_{t-1}) = P(z_2 | z_1); t \in 2...T$$ [cite: 17]
+[cite_start]
+$$P(z_t | z_{t-1}) = P(z_2 | z_1); t \in 2...T$$
+[cite: 17]
 
 [cite_start]Sistemi başlatmak için bir ilk durum ve ilk gözlem tanımlamamız gerekir, bunu $z_0 \equiv s_0$ olarak varsayıyoruz[cite: 18]. [cite_start]Buradaki $s_0$, $0$ zamanında sistemdeki durumlar üzerindeki başlangıç olasılık dağılımını temsil eder[cite: 18]. [cite_start]Bu notasyonel kolaylık, sistemin ilk gerçek durumu olan $z_1$'i $P(z_1 | z_0)$ olarak görme olasılığına ilişkin inancımızı kodlamamızı sağlar[cite: 19]. [cite_start]Böylece dizilimi baştan sona $P(z_t|z_{t-1},...,z_1) = P(z_t|z_{t-1},...,z_1, z_0)$ şeklinde ifade edebiliriz[cite: 20].
 
@@ -155,33 +161,33 @@ Sonrasında sistemin kendi içindeki geçişlerine bakalım:
 
 Bu sistemi bir diyagram üzerinde inceleyelim:
 
-```graphviz
-digraph WeatherHMM {
-    rankdir=LR;
-    node [shape=circle, style=filled, fillcolor="#ecf0f1", fontname="Helvetica", color="#2c3e50", penwidth=2];
-    edge [color="#34495e", penwidth=1.5, fontname="Helvetica", fontsize=10];
-    
-    S0 [label="s_0\n(Başlangıç)", shape=doublecircle, fillcolor="#bdc3c7"];
-    Sun [label="Güneş\n(s_sun)", fillcolor="#f1c40f"];
-    Cloud [label="Bulut\n(s_cloud)", fillcolor="#ecf0f1"];
-    Rain [label="Yağmur\n(s_rain)", fillcolor="#3498db"];
+```mermaid
+graph LR
+    S0(("s_0<br>(Başlangıç)"))
+    Sun(("Güneş<br>(s_sun)"))
+    Cloud(("Bulut<br>(s_cloud)"))
+    Rain(("Yağmur<br>(s_rain)"))
 
-    S0 -> Sun [label=" 0.33"];
-    S0 -> Cloud [label=" 0.33"];
-    S0 -> Rain [label=" 0.33"];
+    S0 -- "0.33" --> Sun
+    S0 -- "0.33" --> Cloud
+    S0 -- "0.33" --> Rain
 
-    Sun -> Sun [label=" 0.8"];
-    Sun -> Cloud [label=" 0.1"];
-    Sun -> Rain [label=" 0.1"];
+    Sun -- "0.8" --> Sun
+    Sun -- "0.1" --> Cloud
+    Sun -- "0.1" --> Rain
 
-    Cloud -> Sun [label=" 0.2"];
-    Cloud -> Cloud [label=" 0.6"];
-    Cloud -> Rain [label=" 0.2"];
+    Cloud -- "0.2" --> Sun
+    Cloud -- "0.6" --> Cloud
+    Cloud -- "0.2" --> Rain
 
-    Rain -> Sun [label=" 0.1"];
-    Rain -> Cloud [label=" 0.2"];
-    Rain -> Rain [label=" 0.7"];
-}
+    Rain -- "0.1" --> Sun
+    Rain -- "0.2" --> Cloud
+    Rain -- "0.7" --> Rain
+
+    style S0 fill:#bdc3c7,stroke:#2c3e50,stroke-width:2px
+    style Sun fill:#f1c40f,stroke:#2c3e50,stroke-width:2px
+    style Cloud fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+    style Rain fill:#3498db,stroke:#2c3e50,stroke-width:2px
 ```
 
 [cite_start]Oluşturduğumuz matriste ve diyagramda dikkat ederseniz, havanın kendi kendisiyle ilişkili (self-correlated) olduğu sezgisini temsil eden sayılar vardır[cite: 46]. [cite_start]Güneşliyse güneşli kalma eğilimindedir, bulutluysa bulutlu kalır[cite: 46]. [cite_start]Bu örüntü, birçok Markov modelinde yaygındır ve geçiş matrisinde güçlü bir köşegen (diyagonal) yapı olarak gözlemlenebilir[cite: 46]. Olayların birbiri ardına dizilişindeki bu eğilimler, veri analizi süreçlerinin ve algoritma tasarımlarının temel taşıdır.

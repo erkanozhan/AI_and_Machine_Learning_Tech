@@ -12,24 +12,24 @@ Beklenen Fayda Teorisi'nin kökleri 1738 yılına uzanmaktadır. Bu tarihte Dani
 
 Karar verme, bireylerin veya sistemlerin alternatifler arasında seçim yaptığı bir süreçtir. Özellikle belirsizlik ve risk altında karar verme durumlarında, bireylerin hangi temellere göre seçim yaptığını anlamak, iktisat, psikoloji, davranış bilimleri ve yapay zeka gibi pek çok alanda önemli bir araştırma konusudur. Bu bağlamda, Fayda Teorisi ve Beklenen Fayda Teorisi, rasyonel kararların modellenmesinde temel referans çerçevelerdir. Karar teorisi, bireylerin farklı alternatifler arasında nasıl seçim yaptığını inceleyen bir alandır. Kararlar genellikle üç farklı koşul altında değerlendirilir: kesinlik altında karar (tüm sonuçlar ve koşullar bilinir), risk altında karar (sonuçlar belirli olasılıklarla gerçekleşebilir) ve belirsizlik altında karar (olasılıklar dahi bilinmez). Fayda, bireylerin tercihlerini ifade etmek için kullanılan soyut bir değerdir. Her olası sonuç, bireyin ne kadar memnuniyet duyduğunu gösteren bir sayısal değerle temsil edilir. Bu değerler bir fayda fonksiyonu (U) aracılığıyla ifade edilir:
 
-
-$U: O \rightarrow \mathbb{R}$
-
+$$
+U: O \rightarrow \mathbb{R}
+$$
 
 burada O sonuçlar kümesini; U(O) ise her sonuca atanan fayda değerini gösterir. Fayda Teorisi, bireylerin kararlarını yalnızca sonuçlara göre verdiklerini varsayar. Yani bir birey, daha yüksek fayda sağlayan sonucu tercih eder. Bu teori, karar vericilerin tercihlerinde tamlık ve geçişlilik gibi rasyonellik ilkelerini sağladığını kabul eder.
 
 
 Beklenen Fayda Teorisi, belirsizlik altında rasyonel karar vermeyi modelleyen bir teoridir. Teoriye göre, karar verici, her bir eylemin farklı olasılıklarla çeşitli sonuçlara yol açabileceği durumlarda, beklenen faydayı (EU) maksimize eden eylemi seçer. Matematiksel tanımı şu şekildedir:
 
-
-$EU(A) = \sum P(O_i | A) \times U(O_i)$
-
+$$
+EU(A) = \sum P(O_i | A) \times U(O_i)
+$$
 
 burada A eylemi, $O_i$ eylemin yol açabileceği olası sonuçlardan biri, $P(O_i | A)$ A eylemi gerçekleştiğinde $O_i$ sonucunun ortaya çıkma olasılığı ve $U(O_i)$ $O_i$ sonucunun bireye sağladığı fayda değeridir. Karar kriteri ise:
 
-
-$A^* = {argmax}_A EU(A)$
-
+$$
+A^* = \operatorname{argmax}_A EU(A)
+$$
 
 yani beklenen faydası en büyük olan eylem (A*) seçilir. Teori şu varsayımlara dayanır: Tamlık (karar verici her iki sonucu da karşılaştırabilir), Geçişlilik (A > B ve B > C ise, A > C olur), Süreklilik (B, A ve C arasında uygun olasılıklarla elde edilebilecek bir karışım olarak ifade edilebilir) ve Bağımsızlık (A > B ise, her iki sonucu aynı C sonucu ile karıştırdığımızda, A’ya dayalı karışım B’ye dayalıdan üstün kalır).
 
@@ -69,12 +69,13 @@ Bu tablo, beklenen fayda analizinin temelini oluşturur. Her bir eylemin beklene
 
 **Uygulamalı Örnek:** Bir yatırımcı, iki yatırım seçeneği arasında karar vermek zorundadır: Yatırım A (%50 ihtimalle 100 birim kar, %50 ihtimalle 0 kar) ve Yatırım B (%100 ihtimalle 45 birim kar). Fayda fonksiyonu olarak doğrudan kar miktarı kullanıldığında: U(100) = 100, U(0) = 0, U(45) = 45. Beklenen faydalar:
 
+$$
+EU(A) = 0.5 \times 100 + 0.5 \times 0 = 50
+$$
 
-$EU(A) = 0.5 \times 100 + 0.5 \times 0 = 50$
-
-
-$EU(B) = 1 \times 45 = 45$
-
+$$
+EU(B) = 1 \times 45 = 45
+$$
 
 Sonuç olarak, yatırımcı daha yüksek beklenen fayda sağlayan Yatırım A’yı tercih eder.
 

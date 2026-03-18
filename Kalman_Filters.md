@@ -62,34 +62,34 @@ Algoritma, başlangıç durum vektörü tahmini `x̂₀` ve kovaryans matrisi `P
 * **Tahmin Adımı: Durumu ve Kovaryansı Zamanda İleriye Yansıtma.**
     * Tahmini durum tahmini: Bu adım, önceki tahmine dayalı olarak bir sonraki durumu tahmin etmek için sistemin dinamiğini (`Φ_k` ile temsil edilir) kullanır. Modelimizi kullanarak zamanda ileriye doğru bir projeksiyondur.
 
-    $$
-    x̂_{k|k-1} = \Phi_k x̂_{k-1|k-1}
-    $$
+$$
+x̂_{k|k-1} = \Phi_k x̂_{k-1|k-1}
+$$
 
     * Tahmini durum kovaryans matrisi: Bu adım, belirsizliği zamanda ileriye doğru yansıtır ve süreç gürültüsü `Q_k`, modelimizin mükemmel olmaması ve dış bozulmaların sistemi etkileyebilmesi gerçeğini yansıtarak bu belirsizliğe katkıda bulunur. Zaman ilerledikçe, yalnızca modele dayalı tahminimize olan güvenimiz, modellenmemiş faktörler nedeniyle azalır.
 
-    $$
-    P_{k|k-1} = \Phi_k P_{k-1|k-1} \Phi_kᵀ + Q_k
-    $$
+$$
+P_{k|k-1} = \Phi_k P_{k-1|k-1} \Phi_kᵀ + Q_k
+$$
 
 * **Güncelleme Adımı: Tahminleri İyileştirmek İçin Ölçümleri Dahil Etme.**
     * Kalman Kazancı: Kalman kazancı, ölçüme mi yoksa tahmine mi ne kadar ağırlık verilmesi gerektiğini belirleyen bir matristir. Tahmini durum kovaryansı `P_{k|k-1}`, ölçüm matrisi `H_k` ve ölçüm gürültüsü kovaryansı `R_k`'ye bağlıdır. `R` küçükse (güvenilir ölçümler), kazanç daha yüksek olur ve ölçüme daha fazla ağırlık verilir. `P_{k|k-1}` küçükse (güvenilir tahmin), kazanç daha düşük olur ve tahmine daha fazla ağırlık verilir.
 
-    $$
-    K_k = P_{k|k-1} H_kᵀ (H_k P_{k|k-1} H_kᵀ + R_k)⁻¹
-    $$
+$$
+K_k = P_{k|k-1} H_kᵀ (H_k P_{k|k-1} H_kᵀ + R_k)⁻¹
+$$
 
     * Güncellenmiş durum tahmini: Durum tahmini, tahmini duruma, gerçek ölçüm `z_k` ile tahmini duruma dayalı beklenen ölçüm (`H_k x̂_{k|k-1}`) arasındaki farkla orantılı bir düzeltme terimi eklenerek güncellenir. Bu fark, inovasyon veya artık olarak adlandırılır ve ölçümün tahmin tarafından yakalanmayan yeni bilgisini temsil eder.
 
-    $$
-    x̂_{k|k} = x̂_{k|k-1} + K_k (z_k – H_k x̂_{k|k-1})
-    $$
+$$
+x̂_{k|k} = x̂_{k|k-1} + K_k (z_k – H_k x̂_{k|k-1})
+$$
 
     * Güncellenmiş durum kovaryans matrisi: Ölçüm dahil edildikten sonra durum tahminindeki belirsizlik azalır. Azalma miktarı Kalman kazancına bağlıdır. Daha güvenilir ölçümler (daha küçük R, daha büyük K), belirsizlikte daha büyük bir azalmaya yol açar.
 
-    $$
-    P_{k|k} = (I – K_k H_k) P_{k|k-1} \quad \text{veya} \quad P_{k|k} = P_{k|k-1} – K_k H_k P_{k|k-1}
-    $$
+$$
+P_{k|k} = (I – K_k H_k) P_{k|k-1} \quad \text{veya} \quad P_{k|k} = P_{k|k-1} – K_k H_k P_{k|k-1}
+$$
 
 * **Kalman Kazancının Rolü.**
 Kalman kazancı `K`, tahmini durumu ölçümle optimal bir şekilde harmanlar. "Optimal" burada, güncellenmiş durum tahmininin ortalama karesel hatasını en aza indirdiği anlamına gelir. Bu, Kalman filtresi türetilmesinin temel bir teorik sonucudur. Kalman kazancı, a posteriori hata kovaryansını en aza indirmek için özel olarak seçilir. Yüksek bir Kalman kazancı, ölçümlere daha fazla ağırlık verir, bu da tahmini yeni verilere daha duyarlı hale getirir ancak potansiyel olarak daha gürültülü olabilir. Düşük bir Kalman kazancı, tahmini duruma daha fazla ağırlık verir, bu da daha yumuşak bir tahmine ancak sistemdeki değişikliklere daha yavaş tepkiye neden olabilir. Kalman kazancı, süreç gürültüsü kovaryansı `Q` ve ölçüm gürültüsü kovaryansı `R`'nin göreli büyüklüklerine bağlıdır. `Q`'nun `R`'ye oranı, filtrenin yanıt verme ve gürültü reddetme açısından davranışını belirler. Bu, `Q` ve `R`'nin doğru şekilde belirtilmesinin önemini vurgular.
@@ -289,13 +289,13 @@ $$
 
 Oyuna başlarken (k=0 anında) tahminlerimizi ve ne kadar az bildiğimizi belirleriz:
 *   İlk En İyi Tahminimiz (`x̂₀`): Kuş 0 metrede ve 20 m/s hızla gidiyor diye tahmin ettik.
-    $$
-    x̂_0 = \begin{bmatrix} 0 \\ 20 \end{bmatrix}
-    $$
+$$
+x̂_0 = \begin{bmatrix} 0 \\ 20 \end{bmatrix}
+$$
 *   İlk Ne Kadar Az Biliyoruz (`P₀`): Başlangıçta konumunu biliyorduk ama hızı hakkında biraz daha az emindik. Bu "ne kadar az biliyoruz"u **Belirsizlik Kutusu (P)** anlatır. Başlangıçta `P₀` şöyle diyelim:
-    $$
-    P_0 = \begin{bmatrix} \text{Konum Belirsizliği} & \text{Birlikte Belirsizlik} \\ \text{Birlikte Belirsizlik} & \text{Hız Belirsizliği} \end{bmatrix}
-    $$
+$$
+P_0 = \begin{bmatrix} \text{Konum Belirsizliği} & \text{Birlikte Belirsizlik} \\ \text{Birlikte Belirsizlik} & \text{Hız Belirsizliği} \end{bmatrix}
+$$
     (Bu sayıları biz belirleriz, ne kadar az bildiğimize bağlı. Mesela $P_0 = \begin{bmatrix} 1 & 0 \\ 0 & 10 \end{bmatrix}$ gibi.)
 
 **Kalman Filtresinin Oyunu Başlıyor! (Her Saniye Tekrarlanır)**
@@ -308,16 +308,16 @@ Her saniye (k = 1, sonra k = 2, sonra k = 3 ... 5'e kadar) şu iki büyük adım
 
 *   **Tahmini Durum Kutusu (`x̂_{k|k-1}`):** Önceki en iyi tahminimizi alır, Planımızdaki hareket kuralını uygularız.
 
-    $$
-    x̂_{k|k-1} = \Phi_k x̂_{k-1|k-1}
-    $$
+$$
+x̂_{k|k-1} = \Phi_k x̂_{k-1|k-1}
+$$
     (Bu formül bize yeni tahmini konum ve hızı verir, sadece Planımıza bakarak. $\Phi_k$ Planın matematiksel kutusudur.)
 
 *   **Tahmini Belirsizlik Kutusu (`P_{k|k-1}`):** Zaman geçtiği için ve Planımız mükemmel olmadığı için tahminimize olan güvenimiz biraz azalır. Bu, Belirsizlik Kutusu'nun biraz büyümesi demektir.
 
-    $$
-    P_{k|k-1} = \Phi_k P_{k-1|k-1} \Phi_kᵀ + Q_k
-    $$
+$$
+P_{k|k-1} = \Phi_k P_{k-1|k-1} \Phi_kᵀ + Q_k
+$$
     (Bu formül bize yeni tahmini belirsizliğimizi verir, Planımızdaki hata payı olan $Q_k$ kutusunu da ekleyerek.)
 
 **Büyük Adım 2: Düzelt (Gördüklerini Kullan ve Tahminini İyileştir!)**
@@ -326,23 +326,23 @@ Her saniye (k = 1, sonra k = 2, sonra k = 3 ... 5'e kadar) şu iki büyük adım
 
 *   **Kalman'ın Karıştırma Oranı (`K_k`):** Plan Tahminimiz ile Gördüğümüz arasındaki farkı ne kadar ciddiye alacağımıza karar veririz. Buna **Kalman Kazancı** denir. Bu, Plan Tahminimizin Belirsizliği (`P_{k|k-1}`) ve Gördüğümüzün Hatası (`R_k`) arasındaki dengeye bağlıdır.
 
-    $$
-    K_k = P_{k|k-1} H_kᵀ (H_k P_{k|k-1} H_kᵀ + R_k)⁻¹
-    $$
+$$
+K_k = P_{k|k-1} H_kᵀ (H_k P_{k|k-1} H_kᵀ + R_k)⁻¹
+$$
     (Bu formül, Plan Tahminimize mi yoksa Gördüğümüze mi daha çok güvenmemiz gerektiğini söyleyen bir sayı kutusu verir. $H_k$ Ölçüm Matrisidir, $R_k$ Gördüğümüzdeki hata payı kutusudur.)
 
 *   **En İyi Durum Kutusu (`x̂_{k|k}`):** Plan Tahminimizi alırız ve Gördüğümüz ile Plan Tahminimiz arasındaki farkı (buna "yenilik" denir) Karıştırma Oranı kadar ekleyerek düzeltiriz.
 
-    $$
-    x̂_{k|k} = x̂_{k|k-1} + K_k (z_k – H_k x̂_{k|k-1})
-    $$
+$$
+x̂_{k|k} = x̂_{k|k-1} + K_k (z_k – H_k x̂_{k|k-1})
+$$
     (Bu formül, hem Planımızı hem de Gördüğümüzü karıştırarak o saniye için kuşun nerede olduğuna dair en iyi tahmini verir.)
 
 *   **En İyi Belirsizlik Kutusu (`P_{k|k}`):** Yeni bir bilgi (Gördüğümüz) kullandığımız için, kuşun nerede olduğunu artık daha iyi biliyoruz. Bu, Belirsizlik Kutusu'nun küçülmesi demektir.
 
-    $$
-    P_{k|k} = (I – K_k H_k) P_{k|k-1}
-    $$
+$$
+P_{k|k} = (I – K_k H_k) P_{k|k-1}
+$$
     ($I$ sihirli bir "hiçbir şeyi değiştirmeyen" matristir. Bu formül, Gördüğümüzü kullandıktan sonra kalan belirsizliğimizi verir.)
 
 **5 Saniye Sonra Ne Olur?**
@@ -370,18 +370,15 @@ Telefon, tünele girmeden önceki son hızınızı ve yönünüzü biliyordur. B
 
 Kalman filtresi tam olarak bu iki adımlı döngüyle çalışır:
 
-```graphviz
-digraph G {
-    rankdir=LR;
-    node [shape=box, style=rounded, fontname="Helvetica", margin=0.3, color="#2c3e50", penwidth=2];
-    edge [color="#34495e", penwidth=1.5, fontname="Helvetica", fontsize=10];
+```mermaid
+graph LR
+    Predict["Tahmin (Predict)<br>Fiziksel modele dayanarak<br>bir sonraki durumu hesapla"]
+    Update["Güncelleme (Update)<br>Sensörden gelen ölçüm ile<br>tahmini düzelt"]
     
-    Predict [label="Tahmin (Predict)\nFiziksel modele dayanarak\nbir sonraki durumu hesapla"];
-    Update [label="Güncelleme (Update)\nSensörden gelen ölçüm ile\ntahmini düzelt"];
+    Predict -- "Öngörü<br>(Belirsizlik artar)" --> Update
+    Update -- "Düzeltilmiş Durum<br>(Belirsizlik azalır)" --> Predict
     
-    Predict -> Update [label=" Öngörü \n (Belirsizlik artar)"];
-    Update -> Predict [label=" Düzeltilmiş Durum \n (Belirsizlik azalır)"];
-}
+    classDef default fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px;
 ```
 
 Mekansal-zamansal (Spatio-Temporal) verilerle çalışırken, örneğin sismik hareketlerin zaman içindeki yayılımını veya hareketli bir hedefin rotasını izlerken, sistemin durumunu sürekli takip etmeliyiz. Sistem durumuna İngilizcede *State* denir. Latince *status* (durma, pozisyon, vaziyet) kökünden gelir. Sistemin o anki hızını, konumunu ve ivmesini bu durum değişkenleri ile ifade ederiz.
