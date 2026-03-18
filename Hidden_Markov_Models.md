@@ -182,6 +182,15 @@ Sonrasında sistemin kendi içindeki geçişlerine bakalım:
 * Bulutlu ($s_{cloud}$) bir günden sonra güneşli olma ihtimali $0.2$, tekrar bulutlu olma ihtimali $0.6$, yağmurlu olma ihtimali ise $0.2$'dir.
 * Yağmurlu ($s_{rain}$) bir günden sonra havanın açıp güneşli olma ihtimali $0.1$, bulutlu olma ihtimali $0.2$ ve yağmurlu kalma ihtimali $0.7$'dir.
 
+Bu geçiş olasılıklarının bir Geçiş Matrisi ($A$) olarak tablo halindeki görünümü şu şekildedir:
+
+| Mevcut Durum \ Sonraki Durum | Güneş ($s_{sun}$) | Bulut ($s_{cloud}$) | Yağmur ($s_{rain}$) |
+| :--- | :---: | :---: | :---: |
+| **Başlangıç ($s_0$)** | 0.33 | 0.33 | 0.33 |
+| **Güneş ($s_{sun}$)** | 0.8 | 0.1 | 0.1 |
+| **Bulut ($s_{cloud}$)** | 0.2 | 0.6 | 0.2 |
+| **Yağmur ($s_{rain}$)** | 0.1 | 0.2 | 0.7 |
+
 Bu sistemi bir diyagram üzerinde inceleyelim:
 
 ```mermaid
