@@ -64,16 +64,18 @@ Eğer analiz ettiğimiz mesaj 20 kelimelikse ve arka planda 3 farklı saklı dur
 
 İşte bu noktada Andrew Viterbi'nin geliştirdiği algoritma devreye girer. Bu algoritma, bilgisayar bilimlerinde Dinamik Programlama (Dynamic Programming) dediğimiz bir temel üzerine inşa edilmiştir. Dinamik kelimesi, Yunanca *dunamis* (güç, hareket) kökünden gelir ve baştan sona sabit bir planı takip etmek yerine, ilerledikçe eldeki yeni verilere göre kendini uyarlayan sistemleri ifade eder. 
 
-Süreci zihnimizde daha net somutlaştırmak için şöyle düşünelim: Bir kuryesiniz ve karmaşık bir şehirde A noktasından B noktasına gitmeniz gerekiyor. Şehir o kadar büyük ki, haritaya ilk baktığınızda önünüzde binlerce farklı sokak kombinasyonu var. Hepsini yolun en başından tek tek hesaplamak bilgisayarlar için bile çok uzun sürer.
+Süreci zihnimizde tam olarak oturtabilmek için Viterbi'nin o "en iyi yolu bütün kombinasyonları hesaplamadan nasıl bulduğu" sorusuna bakalım. Kuryemizin önünde yan yana dizilmiş mahalleler (adımlar) olsun. Viterbi, rotayı baştan sona binlerce ihtimaliyle aynı anda düşünmek yerine, işi küçük ve kesin adımlara böler:
 
-Bunun yerine kurye şu zekice taktiği kullanır (işte bu Viterbi mantığıdır):
-1. Şehri mahallelere (kelimeler veya zaman adımları gibi düşünün) ayırarak ilerler.
-2. Diyelim ki 2. mahalledeki "Merkez Kavşağı"na ulaştı. Oraya gelmek için arkasında bıraktığı 5 farklı ara sokak seçeneği vardı.
-3. Kurye o an sadece şu tespiti yapar: *"Bu kavşağa en hızlı ulaşan (en olası) güzergah 1. Sokak üzerinden gelmekti."*
-4. Kurye, geriye kalan diğer 4 yavaş ve ihtimali düşük sokağı tamamen haritasından siler!
-5. Bir sonraki mahalleye geçerken haritayı en baştan çizmez; sadece Merkez Kavşağı'na kadar kesinleştirdiği bu "en iyi yol" üzerinden hesabına devam eder.
+1. **Adım 1 (İlk Mahalle):** Başlangıç noktasından 1. Mahalledeki diyelim ki 3 farklı kavşağa (A, B ve C kavşakları) gitmenin sürelerini hesaplar ve not eder. (Örn: A'ya 10 dk, B'ye 15 dk, C'ye 12 dk).
+2. **Adım 2 (İkinci Mahalle ve Hesaplama Anı):** Şimdi 2. Mahalledeki "Merkez Kavşağı"na odaklanalım. Buraya 1. Mahalledeki A, B ve C kavşaklarından gelinebilir.
+Sistem şu 3 net hesabı yapar:
+    * "A kavşağına gelmek 10 dakika sürmüştü. A'dan buraya yol 8 dakika. Toplam = **18 dakika**."
+    * "B kavşağına gelmek 15 dakika sürmüştü. B'den buraya yol 2 dakika. Toplam = **17 dakika**. (En Hızlı!)"
+    * "C kavşağına gelmek 12 dakika sürmüştü. C'den buraya yol 10 dakika. Toplam = **22 dakika**."
+3. **Eleme Anı:** İşte kritik nokta burasıdır! Merkez Kavşağı'na ulaşmanın en hızlı yolunun 17 dakika ile "B kavşağından geçmek" olduğunu **tüm olasılıkları hesaplayarak** kesinleştirdik. Artık A ve C'den gelen yolları tamamen haritadan silebiliriz! Çünkü birisi ileride hedef noktasına Merkez Kavşağı üzerinden gidecekse, onun B üzerinden gelmiş olması A veya C'den gelmiş olmasından her zaman daha hızlı olacaktır.
+4. **Sonraki Adımlar:** Algoritma bu işlemi aynı hizada bulunan tüm kavşaklar için yapar. Sonra 3. mahalleye geçer ve sadece bir önceki mahallede hayatta kalan (elenmemiş) yolların üzerine ekleme yaparak ilerler.
 
-Yani Viterbi algoritması, her durakta (zaman anında) "zayıf ihtimalleri" çöpe atarak ilerler ve sadece o noktaya kadarki en güçlü (max) yolu hafızasında tutar. Hedefe ulaştığında trilyonlarca hesabı yapmak yerine, elinde sadece birbirine uç uca eklenmiş mükemmel bir yol zinciri kalmış olur.
+Yani Viterbi algoritması bir şeyleri ezbere varsaymaz; **kendisinden bir önceki anın kesinleşmiş en iyi bilgilerini kullanarak (B'ye 15 dakikada gelindiği bilgisi gibi) bir sonraki anı hesaplar.** Trilyonlarca kombinasyonu hafızada tutmak yerine, her durakta "zayıf ihtimalleri" (A ve C yolları gibi) çöpe atarak ilerler. Hedefe ulaştığında, elinde geriye doğru takip edebileceği mükemmel ve matematiksel olarak kanıtlanmış bir "en güçlü yollar" zinciri kalır.
 
 Bu yapının zaman içindeki akışını genellikle İngilizcede kafes anlamına gelen *Trellis* diyagramları ile çizeriz.
 
