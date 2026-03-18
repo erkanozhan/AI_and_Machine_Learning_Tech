@@ -97,11 +97,11 @@ graph LR
 İşin hesaplama kısmına geçtiğimizde, gençler, bu kurye mantığını matrislere dökeriz. Zamanı $t$ ile, bulunduğumuz saklı durumu ise $k$ ile ifade edelim. Her $t$ anında ve her $k$ durumu için, o noktaya kadar gelen en olası yolun olasılık değerini hesaplar ve bu değeri $V_{t,k}$ değişkeninde tutarız.
 
 Adım adım ilerlerken kullanacağımız denklemdeki matematiksel terimlerin anlamları şunlardır:
-* `$V_{t, k}$`: `t` anında `k` durumunda olmanın hesaplanmış en yüksek olasılığıdır.
-* `$\max_{x \in S}$`: Sistemin önceki anında (`t-1`) bulunabileceği tüm olası saklı durumlar (`S` kümesindeki her bir `x` durumu) arasından olasılığı en yüksek olanı seçeceğimizi ifade eder.
-* `$V_{t-1, x}$`: Bir önceki zaman adımında ($t-1$), $x$ durumunda olmanın hesaplanmış en yüksek olasılığıdır. Kuryenin bir önceki kavşağa ulaşma süresi gibi düşünebilirsiniz.
-* `$A_{x, k}$`: Sistemin $x$ durumundan $k$ durumuna Geçiş Olasılığı (Transition Probability).
-* `$B_{k, o_t}$`: Sistem $k$ durumundayken, elimizdeki o anki $o_t$ verisini (örneğin mesajdaki o kelimeyi) Yayım Olasılığı (Emission Probability).
+* $V_{t, k}$: $t$ anında $k$ durumunda olmanın hesaplanmış en yüksek olasılığıdır.
+* $\max_{x \in S}$: Sistemin önceki anında ($t-1$) bulunabileceği tüm olası saklı durumlar ($S$ kümesindeki her bir $x$ durumu) arasından olasılığı en yüksek olanı seçeceğimizi ifade eder.
+* $V_{t-1, x}$: Bir önceki zaman adımında ($t-1$), $x$ durumunda olmanın hesaplanmış en yüksek olasılığıdır. Kuryenin bir önceki kavşağa ulaşma süresi gibi düşünebilirsiniz.
+* $A_{x, k}$: Sistemin $x$ durumundan $k$ durumuna Geçiş Olasılığı (Transition Probability).
+* $B_{k, o_t}$: Sistem $k$ durumundayken, elimizdeki o anki $o_t$ verisini (örneğin mesajdaki o kelimeyi) Yayım Olasılığı (Emission Probability).
 
 Kullandığımız temel matematiksel bağıntı şudur:
 
@@ -127,9 +127,9 @@ Gençler, zaman serileri hakkında izlenebilir ve hesaplanabilir şekilde akıl 
 Birincisi, Sınırlı Görüş Varsayımıdır (Limited Horizon Assumption). Bu kural bize, $t$ zamanında belirli bir durumda olma olasılığımızın sadece $t-1$ zamanındaki duruma bağlı olduğunu söyler. Bu varsayımın altında yatan temel mantık oldukça sadedir: $t$ zamanındaki durum, sistemin gelecek durumunu tahmin etmek için geçmişin yeterli bir özeti ile temsil edilmesidir. Geçmişe dair tüm veri yükünü sırtımızda taşımayız.
 
 Sınırlı görüş varsayımının formülündeki işaretlerin anlamları:
-* `$P(X | Y)$`: Koşullu olasılık (Conditional Probability) gösterimidir. "Y olayı gerçekleştiği bilindiğinde X olayının gerçekleşme olasılığı" anlamına gelir.
-* `$z_t$`: Sistemin `t` (şimdiki) zamanındaki durumudur.
-* `$z_{t-1}, z_{t-2}, ..., z_1$`: Sistemin geçmişten bugüne kadarki tüm önceki durumlarını ifade eder.
+* $P(X | Y)$: Koşullu olasılık (Conditional Probability) gösterimidir. "Y olayı gerçekleştiği bilindiğinde X olayının gerçekleşme olasılığı" anlamına gelir.
+* $z_t$: Sistemin $t$ (şimdiki) zamanındaki durumudur.
+* $z_{t-1}, z_{t-2}, ..., z_1$: Sistemin geçmişten bugüne kadarki tüm önceki durumlarını ifade eder.
 
 Matematiksel olarak bu kuralı şu şekilde yazarız: 
 
@@ -140,9 +140,9 @@ $$
 İkincisi ise Durağan Süreç Varsayımıdır (The Stationary Process Assumption). Durağan kelimesi, Latince *stationarius* (sabit, değişmez) kökünden gelir. Bu varsayım, bir sonraki duruma geçerken mevcut durumun sağladığı koşullu dağılımın zaman içinde değişmediğini ifade eder. Yani "güneşli bir günden sonra yağmur yağma ihtimali", bugün hesaplasak da on gün sonra hesaplasak da sistemimizde aynı kabul edilir. 
 
 Formüldeki matematiksel terimler:
-* `$P(z_t | z_{t-1})$`: Herhangi bir `t` anında, bir önceki ana `t-1` bağlı olarak hesaplanan durum geçiş olasılığıdır.
-* `$P(z_2 | z_1)$`: Zamanın başındaki ilk geçişte (1. andan 2. ana geçerken) hesaplanan olasılıktır.
-* `$t \in 2...T$`: Zaman birimi olan `t`'nin, 2'den başlayıp `T` (son zaman) anına kadar devam eden kümenin (`\in` işareti "elemanıdır" demektir) bir parçası olduğunu belirtir.
+* $P(z_t | z_{t-1})$: Herhangi bir $t$ anında, bir önceki ana $t-1$ bağlı olarak hesaplanan durum geçiş olasılığıdır.
+* $P(z_2 | z_1)$: Zamanın başındaki ilk geçişte (1. andan 2. ana geçerken) hesaplanan olasılıktır.
+* $t \in 2...T$: Zaman birimi olan $t$'nin, 2'den başlayıp $T$ (son zaman) anına kadar devam eden kümenin ($\in$ işareti "elemanıdır" demektir) bir parçası olduğunu belirtir.
 
 Bunu formülize edersek: 
 
@@ -195,4 +195,3 @@ graph LR
 ```
 
 Oluşturduğumuz matriste ve diyagramda dikkat ederseniz, havanın kendi kendisiyle ilişkili (self-correlated) olduğu sezgisini temsil eden sayılar vardır. Güneşliyse güneşli kalma eğilimindedir, bulutluysa bulutlu kalır. Bu örüntü, birçok Markov modelinde yaygındır ve geçiş matrisinde güçlü bir köşegen (diyagonal) yapı olarak gözlemlenebilir. Olayların birbiri ardına dizilişindeki bu eğilimler, veri analizi süreçlerinin ve algoritma tasarımlarının temel taşıdır.
-

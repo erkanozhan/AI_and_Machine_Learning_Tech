@@ -11,10 +11,10 @@ Beklenen Fayda Teorisi'nin kökleri 1738 yılına uzanmaktadır. Bu tarihte Dani
 
 
 Karar verme, bireylerin veya sistemlerin alternatifler arasında seçim yaptığı bir süreçtir. Özellikle belirsizlik ve risk altında karar verme durumlarında, bireylerin hangi temellere göre seçim yaptığını anlamak, iktisat, psikoloji, davranış bilimleri ve yapay zeka gibi pek çok alanda önemli bir araştırma konusudur. Bu bağlamda, Fayda Teorisi ve Beklenen Fayda Teorisi, rasyonel kararların modellenmesinde temel referans çerçevelerdir. Karar teorisi, bireylerin farklı alternatifler arasında nasıl seçim yaptığını inceleyen bir alandır. Kararlar genellikle üç farklı koşul altında değerlendirilir: kesinlik altında karar (tüm sonuçlar ve koşullar bilinir), risk altında karar (sonuçlar belirli olasılıklarla gerçekleşebilir) ve belirsizlik altında karar (olasılıklar dahi bilinmez). Fayda, bireylerin tercihlerini ifade etmek için kullanılan soyut bir değerdir. Her olası sonuç, bireyin ne kadar memnuniyet duyduğunu gösteren bir sayısal değerle temsil edilir. Bu değerler bir fayda fonksiyonu aracılığıyla ifade edilir. Fonksiyondaki matematiksel sembollerin anlamları şunlardır:
-* `$U$` (Utility): Fayda fonksiyonudur.
-* `$O$` (Outcomes): Olası tüm sonuçların kümesini ifade eder.
-* `$\rightarrow$`: Bir değerin başka bir değere dönüştürüldüğünü (eşlendiğini) gösteren eşleme (mapping) işaretidir.
-* `$\mathbb{R}$`: Reel (Gerçek) sayılar kümesidir. Yani her sonucun matematiksel olarak gerçek bir sayısal değere karşılık geldiğini belirtir.
+* $U$ (Utility): Fayda fonksiyonudur.
+* $O$ (Outcomes): Olası tüm sonuçların kümesini ifade eder.
+* $\rightarrow$: Bir değerin başka bir değere dönüştürüldüğünü (eşlendiğini) gösteren eşleme (mapping) işaretidir.
+* $\mathbb{R}$: Reel (Gerçek) sayılar kümesidir. Yani her sonucun matematiksel olarak gerçek bir sayısal değere karşılık geldiğini belirtir.
 
 $$
 U: O \rightarrow \mathbb{R}
@@ -24,11 +24,11 @@ burada O sonuçlar kümesini; U(O) ise her sonuca atanan fayda değerini göster
 
 
 Beklenen Fayda Teorisi, belirsizlik altında rasyonel karar vermeyi modelleyen bir teoridir. Teoriye göre, karar verici, her bir eylemin farklı olasılıklarla çeşitli sonuçlara yol açabileceği durumlarda, beklenen faydayı (EU) maksimize eden eylemi seçer. Bu formüldeki sembollerin anlamları şöyledir:
-* `$EU(A)$` (Expected Utility): `A` eyleminin beklenen toplam faydasıdır.
-* `$\sum$` (Sigma): Toplam sembolüdür; tüm olası ihtimallerin toplanacağını belirtir.
-* `$O_i$`: Gerçekleşebilecek `i`'inci olası sonuçtur.
-* `$P(O_i | A)$`: `A` eylemi gerçekleştirildiğinde (koşullu olasılık dikkate alınarak) `$O_i$` sonucunun gerçekleşme olasılığıdır (Probability).
-* `$U(O_i)$`: `$O_i$` sonucunun kişiye sağlayacağı faydanın sayısal değeridir.
+* $EU(A)$ (Expected Utility): $A$ eyleminin beklenen toplam faydasıdır.
+* $\sum$ (Sigma): Toplam sembolüdür; tüm olası ihtimallerin toplanacağını belirtir.
+* $O_i$: Gerçekleşebilecek $i$'inci olası sonuçtur.
+* $P(O_i | A)$: $A$ eylemi gerçekleştirildiğinde (koşullu olasılık dikkate alınarak) $O_i$ sonucunun gerçekleşme olasılığıdır (Probability).
+* $U(O_i)$: $O_i$ sonucunun kişiye sağlayacağı faydanın sayısal değeridir.
 
 Matematiksel tanımı şu şekildedir:
 
@@ -37,8 +37,8 @@ EU(A) = \sum P(O_i | A) \times U(O_i)
 $$
 
 Karar kriteri ise eylemler arasından en yüksek faydayı sağlayanı seçmektir. Buradaki matematiksel terimler:
-* `$A^*$`: Tüm eylemler (`A`) arasından seçilmesi gereken en iyi, en optimal eylemdir.
-* `$\operatorname{argmax}_A$`: Argüman maksimizasyonu fonksiyonudur. Kendisinden sonra gelen ifadeyi (burada `$EU(A)$`) en büyük (maksimum) yapan eylemi döndürür. Yani "beklenen faydası en yüksek olan eylemi bul" anlamına gelir.
+* $A^*$: Tüm eylemler ($A$) arasından seçilmesi gereken en iyi, en optimal eylemdir.
+* $\operatorname{argmax}_A$: Argüman maksimizasyonu fonksiyonudur. Kendisinden sonra gelen ifadeyi (burada $EU(A)$) en büyük (maksimum) yapan eylemi döndürür. Yani "beklenen faydası en yüksek olan eylemi bul" anlamına gelir.
 
 Karar kriteri formülü:
 
