@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="340" viewBox="0 0 980 340" role="img" aria-labelledby="title desc">
+  <title id="title">IRIS kumeleme akisi</title>
+  <desc id="desc">Olcekleme, K-Means ve kume degerlendirme surecini gosteren cizim.</desc>
+  <defs>
+    <style>
+      .bg { fill: #fbfcf8; }
+      .box { fill: #e8efe4; stroke: #49604b; stroke-width: 2; rx: 16; ry: 16; }
+      .accent { fill: #efe4d9; stroke: #6a5442; stroke-width: 2; rx: 16; ry: 16; }
+      .text { font-family: "Georgia", "Times New Roman", serif; font-size: 20px; fill: #2c2c28; }
+      .small { font-size: 16px; }
+      .arrow { stroke: #49604b; stroke-width: 3; fill: none; marker-end: url(#m); }
+    </style>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#49604b"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="980" height="340"/>
+
+  <rect class="box" x="30" y="95" width="180" height="110"/>
+  <text class="text" x="120" y="135" text-anchor="middle">IRIS ozellikleri</text>
+  <text class="text small" x="120" y="165" text-anchor="middle">etiketsiz dusun</text>
+  <text class="text small" x="120" y="190" text-anchor="middle">benzerlik ara</text>
+
+  <rect class="box" x="260" y="75" width="190" height="150"/>
+  <text class="text" x="355" y="120" text-anchor="middle">Standardizasyon</text>
+  <text class="text small" x="355" y="150" text-anchor="middle">uzaklik tabanli</text>
+  <text class="text small" x="355" y="175" text-anchor="middle">algoritmada</text>
+  <text class="text small" x="355" y="200" text-anchor="middle">olcek etkisini azalt</text>
+
+  <rect class="box" x="500" y="55" width="205" height="190"/>
+  <text class="text" x="602" y="100" text-anchor="middle">K-Means</text>
+  <text class="text small" x="602" y="132" text-anchor="middle">3 kume</text>
+  <text class="text small" x="602" y="157" text-anchor="middle">merkezleri guncelle</text>
+  <text class="text small" x="602" y="185" text-anchor="middle">ornekleri en yakin</text>
+  <text class="text small" x="602" y="210" text-anchor="middle">merkeze ata</text>
+
+  <rect class="accent" x="755" y="75" width="190" height="150"/>
+  <text class="text" x="850" y="120" text-anchor="middle">Degerlendirme</text>
+  <text class="text small" x="850" y="150" text-anchor="middle">Siluet skoru</text>
+  <text class="text small" x="850" y="175" text-anchor="middle">Rand indeksi</text>
+  <text class="text small" x="850" y="200" text-anchor="middle">kume merkezleri</text>
+
+  <path class="arrow" d="M210 150 L260 150"/>
+  <path class="arrow" d="M450 150 L500 150"/>
+  <path class="arrow" d="M705 150 L755 150"/>
+</svg>
