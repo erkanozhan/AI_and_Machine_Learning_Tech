@@ -1,0 +1,137 @@
+<svg width="740" height="330" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', Arial, sans-serif">
+  <!-- Background -->
+  <rect width="740" height="330" fill="#ffffff" rx="8" stroke="#dde0e3" stroke-width="1.2"/>
+
+  <!-- Main Title -->
+  <text x="370" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a252f">
+    OneHot Encoding — Kategorik Sütunun İkili Sütunlara Dönüştürülmesi
+  </text>
+  <text x="370" y="42" text-anchor="middle" font-size="10" fill="#7f8c8d">
+    drop='first' → Referans kategori (Merkez) çıkarılır · Kukla Değişken Tuzağından kaçınılır
+  </text>
+
+  <!-- ============ LEFT TABLE: Original ============ -->
+  <!-- Table header bg -->
+  <rect x="28" y="58" width="175" height="28" fill="#2c3e50" rx="4"/>
+  <text x="115" y="76" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff">Orijinal Veri</text>
+
+  <!-- Column headers -->
+  <rect x="28" y="86" width="60" height="24" fill="#4a6278" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="58" y="102" text-anchor="middle" font-size="10.5" fill="#ffffff" font-weight="bold">ID</text>
+  <rect x="88" y="86" width="115" height="24" fill="#4a6278" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="145" y="102" text-anchor="middle" font-size="10.5" fill="#ffffff" font-weight="bold">semt</text>
+
+  <!-- Data rows -->
+  <!-- Row 1: Merkez (reference - highlighted) -->
+  <rect x="28" y="110" width="60" height="28" fill="#fef9e7" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="58" y="128" text-anchor="middle" font-size="11" fill="#555">1</text>
+  <rect x="88" y="110" width="115" height="28" fill="#fef9e7" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="145" y="128" text-anchor="middle" font-size="11" fill="#e67e22" font-weight="bold">Merkez</text>
+
+  <rect x="28" y="138" width="60" height="28" fill="#ffffff" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="58" y="156" text-anchor="middle" font-size="11" fill="#555">2</text>
+  <rect x="88" y="138" width="115" height="28" fill="#ffffff" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="145" y="156" text-anchor="middle" font-size="11" fill="#2c3e50">Kuzey</text>
+
+  <rect x="28" y="166" width="60" height="28" fill="#f0f4f8" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="58" y="184" text-anchor="middle" font-size="11" fill="#555">3</text>
+  <rect x="88" y="166" width="115" height="28" fill="#f0f4f8" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="145" y="184" text-anchor="middle" font-size="11" fill="#2c3e50">Güney</text>
+
+  <rect x="28" y="194" width="60" height="28" fill="#ffffff" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="58" y="212" text-anchor="middle" font-size="11" fill="#555">4</text>
+  <rect x="88" y="194" width="115" height="28" fill="#ffffff" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="145" y="212" text-anchor="middle" font-size="11" fill="#2c3e50">Doğu</text>
+
+  <rect x="28" y="222" width="60" height="28" fill="#f0f4f8" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="58" y="240" text-anchor="middle" font-size="11" fill="#555">5</text>
+  <rect x="88" y="222" width="115" height="28" fill="#f0f4f8" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="145" y="240" text-anchor="middle" font-size="11" fill="#e67e22" font-weight="bold">Merkez</text>
+
+  <!-- Merkez dropped note -->
+  <rect x="28" y="258" width="175" height="30" fill="#fef5e7" rx="4" stroke="#f0a500" stroke-width="0.8"/>
+  <text x="115" y="270" text-anchor="middle" font-size="9.5" fill="#b7770d" font-weight="bold">Merkez → Referans Kategori</text>
+  <text x="115" y="283" text-anchor="middle" font-size="9" fill="#b7770d">(drop='first' ile çıkarılır)</text>
+
+  <!-- ============ ARROW ============ -->
+  <!-- Arrow shaft -->
+  <line x1="215" y1="178" x2="265" y2="178" stroke="#2c3e50" stroke-width="2.5"/>
+  <!-- Arrow head -->
+  <polygon points="265,172 278,178 265,184" fill="#2c3e50"/>
+  <text x="246" y="168" text-anchor="middle" font-size="10" fill="#2c3e50" font-weight="bold">pd.get_dummies()</text>
+  <text x="246" y="195" text-anchor="middle" font-size="9" fill="#7f8c8d">/ OneHotEncoder</text>
+
+  <!-- ============ RIGHT TABLE: OneHot Encoded ============ -->
+  <!-- Table header bg -->
+  <rect x="288" y="58" width="430" height="28" fill="#1a5276" rx="4"/>
+  <text x="503" y="76" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff">OneHot Kodlanmış Veri (3 yeni sütun)</text>
+
+  <!-- Column headers -->
+  <rect x="288" y="86" width="45" height="24" fill="#2e86c1" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="310" y="102" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="bold">ID</text>
+
+  <rect x="333" y="86" width="125" height="24" fill="#2e86c1" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="395" y="102" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="bold">semt_Kuzey</text>
+
+  <rect x="458" y="86" width="125" height="24" fill="#2e86c1" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="520" y="102" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="bold">semt_Güney</text>
+
+  <rect x="583" y="86" width="135" height="24" fill="#2e86c1" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="650" y="102" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="bold">semt_Doğu</text>
+
+  <!-- Helper function for rows -->
+  <!-- Row 1: Merkez → 0 0 0 -->
+  <rect x="288" y="110" width="45" height="28" fill="#fef9e7" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="310" y="128" text-anchor="middle" font-size="11" fill="#555">1</text>
+  <rect x="333" y="110" width="125" height="28" fill="#fef9e7" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="395" y="128" text-anchor="middle" font-size="13" fill="#95a5a6" font-weight="bold">0</text>
+  <rect x="458" y="110" width="125" height="28" fill="#fef9e7" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="520" y="128" text-anchor="middle" font-size="13" fill="#95a5a6" font-weight="bold">0</text>
+  <rect x="583" y="110" width="135" height="28" fill="#fef9e7" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="650" y="128" text-anchor="middle" font-size="13" fill="#95a5a6" font-weight="bold">0</text>
+
+  <!-- Row 2: Kuzey → 1 0 0 -->
+  <rect x="288" y="138" width="45" height="28" fill="#ffffff" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="310" y="156" text-anchor="middle" font-size="11" fill="#555">2</text>
+  <rect x="333" y="138" width="125" height="28" fill="#eafaf1" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="395" y="156" text-anchor="middle" font-size="13" fill="#1e8449" font-weight="bold">1</text>
+  <rect x="458" y="138" width="125" height="28" fill="#ffffff" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="520" y="156" text-anchor="middle" font-size="13" fill="#95a5a6" font-weight="bold">0</text>
+  <rect x="583" y="138" width="135" height="28" fill="#ffffff" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="650" y="156" text-anchor="middle" font-size="13" fill="#95a5a6" font-weight="bold">0</text>
+
+  <!-- Row 3: Güney → 0 1 0 -->
+  <rect x="288" y="166" width="45" height="28" fill="#f0f4f8" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="310" y="184" text-anchor="middle" font-size="11" fill="#555">3</text>
+  <rect x="333" y="166" width="125" height="28" fill="#f0f4f8" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="395" y="184" text-anchor="middle" font-size="13" fill="#95a5a6" font-weight="bold">0</text>
+  <rect x="458" y="166" width="125" height="28" fill="#eafaf1" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="520" y="184" text-anchor="middle" font-size="13" fill="#1e8449" font-weight="bold">1</text>
+  <rect x="583" y="166" width="135" height="28" fill="#f0f4f8" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="650" y="184" text-anchor="middle" font-size="13" fill="#95a5a6" font-weight="bold">0</text>
+
+  <!-- Row 4: Doğu → 0 0 1 -->
+  <rect x="288" y="194" width="45" height="28" fill="#ffffff" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="310" y="212" text-anchor="middle" font-size="11" fill="#555">4</text>
+  <rect x="333" y="194" width="125" height="28" fill="#ffffff" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="395" y="212" text-anchor="middle" font-size="13" fill="#95a5a6" font-weight="bold">0</text>
+  <rect x="458" y="194" width="125" height="28" fill="#ffffff" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="520" y="212" text-anchor="middle" font-size="13" fill="#95a5a6" font-weight="bold">0</text>
+  <rect x="583" y="194" width="135" height="28" fill="#eafaf1" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="650" y="212" text-anchor="middle" font-size="13" fill="#1e8449" font-weight="bold">1</text>
+
+  <!-- Row 5: Merkez → 0 0 0 -->
+  <rect x="288" y="222" width="45" height="28" fill="#f0f4f8" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="310" y="240" text-anchor="middle" font-size="11" fill="#555">5</text>
+  <rect x="333" y="222" width="125" height="28" fill="#fef9e7" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="395" y="240" text-anchor="middle" font-size="13" fill="#95a5a6" font-weight="bold">0</text>
+  <rect x="458" y="222" width="125" height="28" fill="#fef9e7" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="520" y="240" text-anchor="middle" font-size="13" fill="#95a5a6" font-weight="bold">0</text>
+  <rect x="583" y="222" width="135" height="28" fill="#fef9e7" stroke="#dde0e3" stroke-width="0.8"/>
+  <text x="650" y="240" text-anchor="middle" font-size="13" fill="#95a5a6" font-weight="bold">0</text>
+
+  <!-- Note at bottom right -->
+  <rect x="288" y="258" width="430" height="30" fill="#eaf2ff" rx="4" stroke="#aed6f1" stroke-width="0.8"/>
+  <text x="503" y="269" text-anchor="middle" font-size="10" fill="#1a5276" font-weight="bold">Kural: Sadece 1 sütun '1', geri kalan '0' — Merkez tüm sütunlar 0 olunca anlaşılır</text>
+  <text x="503" y="282" text-anchor="middle" font-size="9.5" fill="#2471a3">4 kategori → 3 sütun (k−1). Bu, Çoklu Doğrusallık (Multicollinearity) sorununu önler.</text>
+</svg>

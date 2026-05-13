@@ -1,0 +1,82 @@
+<svg width="660" height="320" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', Arial, sans-serif">
+  <!-- Background -->
+  <rect width="660" height="320" fill="#ffffff" rx="8" stroke="#dde0e3" stroke-width="1.2"/>
+
+  <!-- Title -->
+  <text x="330" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a252f">
+    Rastgele Orman — Özellik Önem Puanları (Feature Importance)
+  </text>
+  <text x="330" y="40" text-anchor="middle" font-size="10" fill="#7f8c8d">Ev Fiyat Tahmini · Mean Decrease Impurity (MDI)</text>
+
+  <!-- Chart area bg -->
+  <rect x="200" y="52" width="400" height="240" fill="#fafbfc" rx="4" stroke="#e8eaed" stroke-width="0.8"/>
+
+  <!-- Vertical grid lines: 0.0→200, 0.1→280, 0.2→360, 0.3→440, 0.4→520  scale=800px/unit -->
+  <line x1="280" y1="52" x2="280" y2="292" stroke="#e0e3e6" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="360" y1="52" x2="360" y2="292" stroke="#e0e3e6" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="440" y1="52" x2="440" y2="292" stroke="#e0e3e6" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="520" y1="52" x2="520" y2="292" stroke="#e0e3e6" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="600" y1="52" x2="600" y2="292" stroke="#e0e3e6" stroke-width="1" stroke-dasharray="3,3"/>
+
+  <!-- Y-axis line -->
+  <line x1="200" y1="52" x2="200" y2="292" stroke="#8e9aaa" stroke-width="1.5"/>
+  <!-- X-axis line -->
+  <line x1="200" y1="292" x2="600" y2="292" stroke="#8e9aaa" stroke-width="1.5"/>
+
+  <!-- X-axis tick labels -->
+  <text x="200" y="308" text-anchor="middle" font-size="10" fill="#555">0.00</text>
+  <text x="280" y="308" text-anchor="middle" font-size="10" fill="#555">0.10</text>
+  <text x="360" y="308" text-anchor="middle" font-size="10" fill="#555">0.20</text>
+  <text x="440" y="308" text-anchor="middle" font-size="10" fill="#555">0.30</text>
+  <text x="520" y="308" text-anchor="middle" font-size="10" fill="#555">0.40</text>
+
+  <!-- X-axis title -->
+  <text x="400" y="318" text-anchor="middle" font-size="10" fill="#666" font-style="italic">Önem Puanı (Importance Score)</text>
+
+  <!--
+    Bars — scale: 800 px per unit
+    Row spacing: ~34px, bar height: 22px, start y: 62
+    alan_m2:          0.38 → 304px  →  x1=200, x2=504
+    semt_Merkez:      0.22 → 176px  →  x1=200, x2=376
+    bina_yasi:        0.15 → 120px  →  x1=200, x2=320
+    oda_sayisi:       0.12 →  96px  →  x1=200, x2=296
+    semt_Kuzey:       0.07 →  56px  →  x1=200, x2=256
+    isitma_Dogalgaz:  0.04 →  32px  →  x1=200, x2=232
+    isitma_Elektrik:  0.02 →  16px  →  x1=200, x2=216
+  -->
+
+  <!-- alan_m2: 0.38 -->
+  <rect x="201" y="62" width="304" height="22" fill="#1a6fa8" rx="3"/>
+  <text x="196" y="77" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">alan_m2</text>
+  <text x="510" y="77" font-size="10.5" fill="#1a252f" font-weight="bold">0.38</text>
+
+  <!-- semt_Merkez: 0.22 -->
+  <rect x="201" y="96" width="176" height="22" fill="#2471a3" rx="3"/>
+  <text x="196" y="111" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">semt_Merkez</text>
+  <text x="382" y="111" font-size="10.5" fill="#1a252f" font-weight="bold">0.22</text>
+
+  <!-- bina_yasi: 0.15 -->
+  <rect x="201" y="130" width="120" height="22" fill="#2e86c1" rx="3"/>
+  <text x="196" y="145" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">bina_yasi</text>
+  <text x="326" y="145" font-size="10.5" fill="#1a252f" font-weight="bold">0.15</text>
+
+  <!-- oda_sayisi: 0.12 -->
+  <rect x="201" y="164" width="96" height="22" fill="#5dade2" rx="3"/>
+  <text x="196" y="179" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">oda_sayisi</text>
+  <text x="302" y="179" font-size="10.5" fill="#1a252f" font-weight="bold">0.12</text>
+
+  <!-- semt_Kuzey: 0.07 -->
+  <rect x="201" y="198" width="56" height="22" fill="#7fb3d3" rx="3"/>
+  <text x="196" y="213" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">semt_Kuzey</text>
+  <text x="262" y="213" font-size="10.5" fill="#1a252f" font-weight="bold">0.07</text>
+
+  <!-- isitma_Dogalgaz: 0.04 -->
+  <rect x="201" y="232" width="32" height="22" fill="#a9cce3" rx="3"/>
+  <text x="196" y="247" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">isitma_Dogalgaz</text>
+  <text x="238" y="247" font-size="10.5" fill="#1a252f" font-weight="bold">0.04</text>
+
+  <!-- isitma_Elektrik: 0.02 -->
+  <rect x="201" y="266" width="16" height="22" fill="#d4e6f1" rx="3"/>
+  <text x="196" y="281" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">isitma_Elektrik</text>
+  <text x="222" y="281" font-size="10.5" fill="#1a252f" font-weight="bold">0.02</text>
+</svg>

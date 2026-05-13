@@ -1,0 +1,102 @@
+<svg width="760" height="360" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', Arial, sans-serif">
+  <!-- Background -->
+  <rect width="760" height="360" fill="#ffffff" rx="8" stroke="#dde0e3" stroke-width="1.2"/>
+
+  <!-- Main Title -->
+  <text x="380" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a252f">
+    Feature Importance vs. SHAP: Küresel (Global) ve Yerel (Local) Açıklama
+  </text>
+
+  <!-- ============ LEFT PANEL: Feature Importance (Global) ============ -->
+  <rect x="20" y="42" width="340" height="295" fill="#f0f4f8" rx="8" stroke="#bdc3c7" stroke-width="1"/>
+
+  <!-- Panel header -->
+  <rect x="20" y="42" width="340" height="36" fill="#2c3e50" rx="8"/>
+  <rect x="20" y="60" width="340" height="18" fill="#2c3e50"/>
+  <text x="190" y="65" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">Özellik Önemi (Feature Importance)</text>
+  <text x="190" y="89" text-anchor="middle" font-size="10" fill="#5d6d7e">KÜRESEL — Her özelliğin tüm veri setindeki tek puanı</text>
+
+  <!-- FI bars for 3 features -->
+  <!-- alan_m2: 0.38 → ~230px of 270px range -->
+  <text x="95" y="122" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">alan_m2</text>
+  <rect x="100" y="108" width="232" height="22" fill="#1a6fa8" rx="3"/>
+  <text x="336" y="123" font-size="10" fill="#1a252f" font-weight="bold"> 0.38</text>
+
+  <!-- semt: 0.29 → ~176px -->
+  <text x="95" y="164" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">semt</text>
+  <rect x="100" y="150" width="176" height="22" fill="#2471a3" rx="3"/>
+  <text x="280" y="165" font-size="10" fill="#1a252f" font-weight="bold"> 0.29</text>
+
+  <!-- bina_yasi: 0.15 → ~91px -->
+  <text x="95" y="206" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">bina_yasi</text>
+  <rect x="100" y="192" width="91" height="22" fill="#5dade2" rx="3"/>
+  <text x="195" y="207" font-size="10" fill="#1a252f" font-weight="bold"> 0.15</text>
+
+  <!-- Explanation box left -->
+  <rect x="30" y="240" width="320" height="86" fill="#eaf2ff" rx="6" stroke="#aed6f1" stroke-width="1"/>
+  <text x="190" y="258" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#1f618d">Ne söyler?</text>
+  <text x="45" y="274" font-size="10" fill="#2c3e50">• Tüm modeli açıklar (tek sayı/özellik)</text>
+  <text x="45" y="290" font-size="10" fill="#2c3e50">• Tahmin yönünü göstermez (+/−)</text>
+  <text x="45" y="306" font-size="10" fill="#2c3e50">• Örnek bazında neden açıklayamaz</text>
+  <text x="45" y="322" font-size="10" fill="#c0392b">• "alan_m2 genel olarak önemli"</text>
+
+  <!-- ============ RIGHT PANEL: SHAP (Local) ============ -->
+  <rect x="400" y="42" width="340" height="295" fill="#fff8f0" rx="8" stroke="#bdc3c7" stroke-width="1"/>
+
+  <!-- Panel header -->
+  <rect x="400" y="42" width="340" height="36" fill="#7d3c98" rx="8"/>
+  <rect x="400" y="60" width="340" height="18" fill="#7d3c98"/>
+  <text x="570" y="65" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">SHAP Değerleri</text>
+  <text x="570" y="89" text-anchor="middle" font-size="10" fill="#6c3483">YEREL — Her örneğin katkısı ayrı ayrı hesaplanır</text>
+
+  <!-- SHAP beeswarm-style: dots scattered on feature axis -->
+  <!-- Zero line -->
+  <line x1="560" y1="104" x2="560" y2="228" stroke="#888" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="560" y="100" text-anchor="middle" font-size="9" fill="#888">0</text>
+
+  <!-- alan_m2 row: scattered dots (some positive, some negative) -->
+  <text x="495" y="122" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">alan_m2</text>
+  <!-- dots: positive (red) and negative (blue) scattered -->
+  <circle cx="590" cy="119" r="4" fill="#e74c3c" opacity="0.8"/>
+  <circle cx="618" cy="119" r="4" fill="#e74c3c" opacity="0.8"/>
+  <circle cx="642" cy="119" r="4" fill="#e74c3c" opacity="0.8"/>
+  <circle cx="604" cy="112" r="4" fill="#e74c3c" opacity="0.8"/>
+  <circle cx="630" cy="115" r="4" fill="#e74c3c" opacity="0.7"/>
+  <circle cx="575" cy="122" r="4" fill="#e74c3c" opacity="0.6"/>
+  <circle cx="533" cy="119" r="4" fill="#3498db" opacity="0.8"/>
+  <circle cx="516" cy="119" r="4" fill="#3498db" opacity="0.7"/>
+  <circle cx="548" cy="115" r="4" fill="#3498db" opacity="0.6"/>
+  <text x="658" y="119" font-size="8.5" fill="#888">n=300</text>
+
+  <!-- semt row -->
+  <text x="495" y="164" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">semt</text>
+  <circle cx="600" cy="161" r="4" fill="#e74c3c" opacity="0.8"/>
+  <circle cx="625" cy="158" r="4" fill="#e74c3c" opacity="0.8"/>
+  <circle cx="583" cy="164" r="4" fill="#e74c3c" opacity="0.7"/>
+  <circle cx="612" cy="166" r="4" fill="#e74c3c" opacity="0.6"/>
+  <circle cx="540" cy="161" r="4" fill="#3498db" opacity="0.8"/>
+  <circle cx="522" cy="158" r="4" fill="#3498db" opacity="0.8"/>
+  <circle cx="555" cy="164" r="4" fill="#3498db" opacity="0.7"/>
+  <circle cx="534" cy="166" r="4" fill="#3498db" opacity="0.6"/>
+
+  <!-- bina_yasi row -->
+  <text x="495" y="206" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">bina_yasi</text>
+  <circle cx="578" cy="203" r="4" fill="#e74c3c" opacity="0.7"/>
+  <circle cx="592" cy="206" r="4" fill="#e74c3c" opacity="0.6"/>
+  <circle cx="538" cy="203" r="4" fill="#3498db" opacity="0.8"/>
+  <circle cx="522" cy="200" r="4" fill="#3498db" opacity="0.8"/>
+  <circle cx="548" cy="206" r="4" fill="#3498db" opacity="0.7"/>
+  <circle cx="568" cy="200" r="4" fill="#e74c3c" opacity="0.7"/>
+
+  <!-- Explanation box right -->
+  <rect x="410" y="240" width="320" height="86" fill="#f9ebff" rx="6" stroke="#d7bde2" stroke-width="1"/>
+  <text x="570" y="258" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#6c3483">Ne söyler?</text>
+  <text x="425" y="274" font-size="10" fill="#2c3e50">• Her örneği ayrı ayrı açıklar</text>
+  <text x="425" y="290" font-size="10" fill="#2c3e50">• Tahmin yönünü gösterir (+/−)</text>
+  <text x="425" y="306" font-size="10" fill="#2c3e50">• Global görünüm için toplanabilir</text>
+  <text x="425" y="322" font-size="10" fill="#c0392b">• "Bu ev için alan_m2 +120k katkı yaptı"</text>
+
+  <!-- Arrow between panels -->
+  <text x="380" y="198" text-anchor="middle" font-size="28" fill="#bdc3c7">→</text>
+  <text x="380" y="218" text-anchor="middle" font-size="9" fill="#888">genişletilir</text>
+</svg>
