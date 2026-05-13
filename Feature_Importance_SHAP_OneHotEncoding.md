@@ -11,7 +11,7 @@ Bu üç kavramı ortak bir örnek üzerinde götüreceğiz: **Ev Fiyat Tahmini**
 Veri setimiz 300 satırdan oluşuyor ve aşağıdaki değişkenleri içeriyor:
 
 | Değişken | Tür | Açıklama |
-|---|---|---|
+| --- | --- | --- |
 | `alan_m2` | Sayısal | Evin net alanı (m²) |
 | `bina_yasi` | Sayısal | Binanın yaşı (yıl) |
 | `oda_sayisi` | Sayısal (1–5) | Oda sayısı |
@@ -79,7 +79,7 @@ Dört semtimiz varsa dört sütun mı oluşturmalıyız? **Hayır.** Bu noktada 
 
 Dört kategorimiz için dört sütun açtığımızda, dördüncü sütun her zaman diğer üçünün bir fonksiyonudur:
 
-```
+```text
 semt_Merkez = 1 − semt_Kuzey − semt_Güney − semt_Doğu
 ```
 
@@ -125,7 +125,7 @@ X_transformed = preprocessor.fit_transform(X)
 Kategori sayısı az (2–15 arası) ve sırasal bir anlam taşımıyorsa OneHot Encoding doğru tercihtir. Ancak bazı özel durumlar farklı yaklaşımlar gerektirir:
 
 | Durum | Öneri |
-|---|---|
+| --- | --- |
 | Sıralı anlam var (örn. `Düşük < Orta < Yüksek`) | Ordinal Encoding |
 | Çok fazla kategori (örn. şehir ismi, 500+ ülke kodu) | Target Encoding veya Embedding |
 | Yalnızca ağaç tabanlı model kullanılıyorsa | Label Encoding de kabul edilebilir |
@@ -214,7 +214,7 @@ Bu yöntem güçlüdür ama körce güvenilmemelidir.
 
 **Üçüncü sorun: Korelasyonlu değişkenler.** İki değişken birbiriyle yüksek korelasyon taşıyorsa (örn. `alan_m2` ve `oda_sayisi`), önem puanları ikisi arasında bölünür. İkisi de düşük görünebilir, oysa ikisi birden yüksek öneme sahiptir.
 
-Bu sınırların hepsini aşan araç SHAP'tır.
+Bu sınırların büyük bölümünü ele alan iki araç vardır: SHAP ve LIME. İkisi de yerel açıklama sağlar, ancak birbirinden farklı mekanizmalar ve garantilerle çalışır.
 
 ---
 
@@ -261,6 +261,7 @@ SHAP değerlerinin en kritik özelliği şudur: bir örnek için tüm Shapley de
 $$f(x) = \phi_0 + \sum_{i=1}^{M} \phi_i$$
 
 Burada:
+
 - $f(x)$ : modelin bu örnek için verdiği tahmin
 - $\phi_0$ : temel değer, $E[f(x)]$ — tüm eğitim verisininin ortalama tahmini
 - $\phi_i$ : $i$'inci özelliğin bu örneğe katkısı (pozitif veya negatif olabilir)
@@ -346,47 +347,183 @@ Shapley değerinin teorik hesabı üstel karmaşıklığa sahiptir: $2^{|F|}$ ko
 
 ---
 
-## 4. Feature Importance ile SHAP Karşılaştırması
+## 4. LIME — Local Interpretable Model-agnostic Explanations
 
-Bu iki araç birbiriyle rekabet etmez, birbirini tamamlar. Hangisini ne zaman kullanacağınızı netleştirmek gerekiyor.
+LIME, Ribeiro, Singh ve Guestrin'in 2016 tarihli "Why Should I Trust You?" başlıklı makalesiyle tanıtıldı. İsim açılımı tekniğin özünü özetler:
 
-[Şekil 4: Global ve Yerel Açıklama Karşılaştırması](images/shap_vs_fi.svg)
+- **Local** → Yerel: tek bir tahmini açıklar
+- **Interpretable** → Yorumlanabilir: çıktı basit, insan tarafından okunabilir bir modeldir
+- **Model-agnostic** → Model bağımsız: herhangi bir kara kutuda (black-box) çalışır
+- **Explanations** → Açıklamalar
 
-### 4.1 Temel Farklar
+### 4.1 Temel Fikir: Zor Durumda Basit Harita
 
-| Kriter | Feature Importance (MDI) | SHAP |
-|---|---|---|
-| **Kapsam** | Küresel (Global) — tüm model | Yerel (Local) — her örnek ayrı |
-| **Yön bilgisi** | Yok (+/−?) | Var (+/−) |
-| **Büyüklük** | Göreli oran (0–1) | Orijinal birim (TL, kg…) |
-| **Korelasyona duyarlılık** | Yüksek (değişkenler arası paylaşım) | Daha robust |
-| **Hız** | Çok hızlı (model içinde hazır) | Daha yavaş (TreeSHAP hariç) |
-| **Toplamsallık garantisi** | Yok | Var |
-| **Küresel özet** | Doğrudan | mean(\|SHAP\|) ile elde edilir |
+Karmaşık bir modelin küresel yapısı doğrusal olmayabilir. Ama herhangi bir noktanın çevresine baktığınızda, o küçük bölgede model davranışı çoğunlukla yeterince pürüzsüzdür ve basit bir doğrusal modelle iyi temsil edilebilir. Şehrin tüm yol ağı haritası karmaşıktır; ama o an bulunduğunuz mahalleyi bir peçeteye çizmek kolaydır ve işe yarar.
 
-### 4.2 Somut Bir Ayrım
+LIME tam olarak bunu yapar: sorgu noktasının çevresinde bir doğrusal model uydurur ve bu modelin katsayılarını özellik katkısı olarak kullanır.
 
-Birinin "bu modelde hangi özellikler genel olarak önemli?" diye sormasıyla, birinin "bu 185 m²'lik Merkez semtindeki dairenin neden bu kadar yüksek fiyat biçildi?" diye sorması farklı soru türleridir.
+### 4.2 LIME'ın Çalışma Adımları
 
-Birinci soru için Feature Importance yeterlidir. İkinci soru için SHAP gereklidir.
+Beş adımı vardır:
 
-Gıda kalite kontrol sistemine analoji yaparsak: Feature Importance, aylık üretim raporunda "en çok hataya neden olan makine hangisi" sorusunu cevaplar. SHAP ise bugün reddedilen spesifik ürünün "tam olarak hangi ölçüm neden hata bayrağı kaldırdı" sorusunu cevaplar.
+1. **Sorgu noktası x seç:** Açıklamak istediğiniz tek bir örnek.
+2. **Pertürbe et:** x'in özelliklerini rastgele değiştirerek bir komşuluk örneklemi oluştur: $z_1, z_2, \ldots, z_n$.
+3. **Kara kutuyu çalıştır:** Her pertürbe edilmiş örnek için $f(z_i)$ tahminini al.
+4. **Ağırlıklandır:** Her $z_i$'nin x'e olan uzaklığına göre bir yakınlık puanı hesapla. Uzak örnekler daha az ağırlık taşır.
+5. **Yerel model uydur:** Ağırlıklı bu verilere basit bir lineer regresyon uydur. Bu modelin katsayıları LIME açıklamasıdır.
 
-### 4.3 Çelişen Sonuçlar Geldiğinde
+### 4.3 LIME Optimizasyon Formülü
 
-SHAP ve Feature Importance zaman zaman farklı sıralamalar üretebilir. Bu durumun iki temel nedeni vardır:
+LIME'ın resmi ifadesi bir optimizasyon problemidir:
 
-**Korelasyonlu değişkenler.** MDI, korelasyonlu iki değişkenin önem puanını aralarında böler. SHAP ise her örnek için marjinal katkıyı ölçtüğünden bu bölünmeyi daha gerçekçi yapar.
+$$\xi(x) = \arg\min_{g \in G} \underbrace{\mathcal{L}(f, g, \pi_x)}_{\text{yerel uyum kaybı}} + \underbrace{\Omega(g)}_{\text{karmaşıklık cezası}}$$
 
-**Nadir ama güçlü etkiler.** Bir değişken çok az örnekte devreye giriyor ama girdiğinde tahmini büyük ölçüde değiştiriyorsa, MDI bunu küçük görebilir. Mean(|SHAP|) bunu daha doğru yakalar çünkü o az örnek için yüksek değer alır.
+Burada:
 
-Pratikte önerilen yaklaşım şudur: Model seçimi ve genel yorumlama için Feature Importance, müşteriye/kullanıcıya veya regülatöre spesifik bir tahminin nedenini açıklamak için SHAP kullanın.
+- $G$ : yorumlanabilir modeller ailesi (örn. lineer regresyonlar, küçük karar ağaçları)
+- $f$ : asıl kara kutu model
+- $g$ : seçilen yerel basit model
+- $\mathcal{L}$ : $g$'nin $f$'e yerel olarak ne kadar iyi uyduğunu ölçen kayıp fonksiyonu
+- $\Omega(g)$ : modelin karmaşıklık cezası (kullanılan özellik sayısını sınırlar)
+
+Yakınlık ağırlık fonksiyonu üssel çekirdek (exponential kernel) kullanır:
+
+$$\pi_x(z) = \exp\!\left(-\frac{d(x, z)^2}{\sigma^2}\right)$$
+
+$d(x,z)$ sorgu noktası ile pertürbe edilmiş örnek arasındaki mesafe (Öklid veya kosinüs), $\sigma$ ise çekirdeğin bant genişliğidir. Uzak örnekler üssel olarak küçülür ve yerel modele neredeyse hiç katkı vermez.
+
+### 4.4 Kod Örneği: LIME
+
+```python
+# pip install lime
+from lime import lime_tabular
+
+# LIME Explainer — eğitim verisi istatistikleri üzerinde kurulur
+lime_explainer = lime_tabular.LimeTabularExplainer(
+    training_data = X_train.values,
+    feature_names = X_train.columns.tolist(),
+    mode          = 'regression',
+    random_state  = 42
+)
+
+# Tek bir örneği açıkla
+idx = 0
+
+lime_exp = lime_explainer.explain_instance(
+    data_row   = X_test.iloc[idx].values,
+    predict_fn = rf.predict,
+    num_features = len(X_train.columns)
+)
+
+print(f"Yerel Model R²:             {lime_exp.score:.3f}")
+print(f"LIME Tahmini (yerel model): {lime_exp.predicted_value:,.0f} TL")
+print(f"Kara Kutu Tahmini:          {rf.predict(X_test.iloc[[idx]])[0]:,.0f} TL")
+print()
+print("Özellik Katkıları (yerel lineer katsayılar):")
+for kural, katki in sorted(lime_exp.as_list(), key=lambda x: abs(x[1]), reverse=True):
+    print(f"  {kural:45s}  {katki:+,.0f}")
+# alan_m2 > 140                              +90,200
+# semt_Merkez = 1                            +72,400
+# oda_sayisi > 3                             +11,800
+# bina_yasi > 20                             -18,100
+
+# Görselleştir
+import matplotlib.pyplot as plt
+fig = lime_exp.as_pyplot_figure()
+fig.suptitle(f"LIME Açıklaması — Örnek #{X_test.index[idx]}", fontsize=12)
+plt.tight_layout()
+plt.savefig('lime_explanation.png', dpi=150)
+plt.show()
+```
+
+[Şekil 5: LIME — Sorgu Noktası Çevresi ve Yerel Lineer Model](images/lime_concept.svg)
+
+LIME çıktısındaki kuralların ("alan_m2 > 140") sürekli değişkenleri otomatik olarak aralıklara (bin) böldüğüne dikkat edin. Bu binleştirme SHAP'ın kesin değer üretmesinden farklıdır; açıklamayı bazen daha az hassas kılar.
+
+### 4.5 LIME'ın Güçlü Yanı: Görüntü ve Metin
+
+LIME'ın SHAP'tan belirgin biçimde üstün olduğu alan, **veri tipi esnekliğidir**. Aynı framework tabular verinin ötesinde doğrudan görüntü ve metne uygulanabilir:
+
+**Görüntü:** Pikselleri "süper-piksel" adı verilen bölgelere böler. Her bölgeyi açıp kapatarak kara kutunun tepkisini ölçer. "Model bu X-ray görüntüsünü anormal olarak sınıflandırdı; buna hangi bölge yol açtı?" sorusu yanıtlanabilir.
+
+**Metin:** Kelimeleri teker teker çıkararak hangi kelimenin sınıflandırma kararını etkilediğini ölçer. Duygu analizi, spam tespiti, hukuki belge sınıflandırması gibi alanlarda doğrudan kullanılabilir.
+
+```python
+# Metin sınıflandırması için LIME (yapı örneği)
+from lime.lime_text import LimeTextExplainer
+
+text_explainer = LimeTextExplainer(class_names=['olumsuz', 'olumlu'])
+text_exp = text_explainer.explain_instance(
+    text_instance = "Bu ürün beklentilerin altında kaldı",
+    classifier_fn = metin_modeli.predict_proba,
+    num_features  = 6
+)
+text_exp.show_in_notebook()
+```
+
+### 4.6 LIME'ın Sınırları
+
+**Stokastisite.** Pertürbasyon rastgeleliğe dayandığından aynı örneği iki kez açıklarsanız biraz farklı katsayılar elde edebilirsiniz. Kritik kararlar için bu güvenilirlik sorusu yaratır. `random_state` sabitlense de pertürbasyon sayısı ve bant genişliği seçimi sonuçları etkiler.
+
+**Yerel model uyum kalitesi.** $R^2$ değeri düşükse yerel lineer model o bölgede kara kutuyu iyi temsil etmiyor demektir. Her LIME çıktısında $R^2$ değerini kontrol etmek iyi bir alışkanlıktır; 0.80 altı sonuçlara temkinli yaklaşılmalıdır.
+
+**Toplamsallık garantisi yok.** SHAP'tan farklı olarak, LIME katsayılarının toplamının $f(x) - E[f(x)]$'e eşit olacağına dair matematiksel bir güvence yoktur.
+
+**Binleştirme bilgi kaybı.** Tabular LIME, sürekli özellikleri "alan_m2 > 140" gibi aralıklara böler. Bu bazı durumlarda açıklamanın hassasiyetini düşürür.
 
 ---
 
-## 5. Üç Kavramı Birleştiren Tam Uygulama
+## 5. Üç Yöntemin Karşılaştırması
 
-Aşağıdaki kod parçası veri hazırlama (OneHot Encoding), model eğitimi, Feature Importance analizi ve SHAP analizini baştan sona uygular.
+Bu üç araç birbiriyle rekabet etmez, birbirini tamamlar. Hangisini ne zaman kullanacağınızı soru tipine göre belirlemek gerekiyor.
+
+[Şekil 4: Global ve Yerel Açıklama Karşılaştırması — Feature Importance / SHAP / LIME](images/fi_shap_lime_comparison.svg)
+
+### 5.1 Temel Farklar
+
+| Kriter | Feature Importance (MDI) | SHAP | LIME |
+| --- | --- | --- | --- |
+| **Kapsam** | Küresel — tüm model | Yerel + Küresel | Yerel |
+| **Yön bilgisi** | Yok (+/−?) | Var (+/−) | Var (+/−) |
+| **Büyüklük** | Göreli oran (0–1) | Orijinal birim (TL…) | Katsayı (göreli) |
+| **Toplamsallık garantisi** | Yok | Var | Yok |
+| **Tutarlılık** | Deterministik | Deterministik | Stokastik |
+| **Model bağımsızlığı** | Hayır (ağaç gerekir) | Kısmi (KernelSHAP ile) | Tam |
+| **Görüntü / metin desteği** | Hayır | Kısmi | Tam |
+| **Hız** | Çok hızlı | Hızlı (TreeSHAP) | Orta |
+| **Korelasyona duyarlılık** | Yüksek | Daha robust | Yüksek |
+
+### 5.2 Hangi Soru Hangi Araç
+
+Üç farklı soru tipi var; her biri farklı bir araça işaret eder.
+
+Birinin "bu modelde hangi özellikler genel olarak önemli?" sorusuyla, birinin "bu 185 m²'lik Merkez semtindeki dairenin neden bu kadar yüksek fiyat biçildi?" sorusuyla, birinin "banka kredi reddini müşteriye nasıl açıklayacağım, ve bu açıklama bir lineer kural şeklinde ifade edilebilir mi?" sorusu aynı değildir.
+
+Gıda kalite kontrol sistemine analoji yaparsak: Feature Importance, aylık üretim raporunda "en çok hataya neden olan makine hangisi" sorusunu cevaplar. SHAP bugün reddedilen spesifik ürünün "tam olarak hangi ölçüm neden hata bayrağı kaldırdı" sorusunu cevaplar. LIME ise operatöre "bu ürün şu iki koşul gerçekleştiğinde reddediliyor" şeklinde sade bir kural çıkarır.
+
+| Soru | Önerilen Araç |
+| --- | --- |
+| Model seçimi, değişken seçimi, genel analiz | Feature Importance |
+| Müşteri/regülatör için spesifik karar açıklaması | SHAP |
+| Görüntü veya metin modeli yorumlama | LIME |
+| Hızlı prototip, model bağımsız ortam | LIME |
+| Matematiksel garanti gereken audit/uyumluluk | SHAP |
+
+### 5.3 Çelişen Sonuçlar Geldiğinde
+
+SHAP, LIME ve Feature Importance zaman zaman farklı sıralamalar üretebilir. Bu durumun başlıca nedenleri:
+
+**Korelasyonlu değişkenler.** MDI, korelasyonlu iki değişkenin önem puanını aralarında böler. SHAP her örnek için marjinal katkıyı ölçtüğünden bu bölünmeyi daha gerçekçi yapar. LIME ise pertürbasyon sırasında değişkenleri bağımsız olarak örneklediği için benzer bölünme sorunuyla karşılaşır.
+
+**Nadir ama güçlü etkiler.** Bir değişken çok az örnekte devreye giriyor ama girdiğinde tahmini büyük ölçüde değiştiriyorsa, MDI bunu küçük görebilir. Mean(|SHAP|) bunu daha doğru yakalar. LIME ise yalnızca tek örnek üzerinde çalıştığından bu soruna yapısal olarak karşılaşmaz, ancak o tek örnek için yerel doğruluk sorunu çıkabilir.
+
+**LIME'ın stokastisite payı.** Çalıştırmadan çalıştırmaya değişen sonuçlar görürseniz `num_samples` parametresini artırmak (varsayılan 5000) kararlılığı iyileştirir.
+
+---
+
+## 6. Dört Kavramı Birleştiren Tam Uygulama
+
+Aşağıdaki kod parçası veri hazırlama (OneHot Encoding), model eğitimi, Feature Importance, SHAP ve LIME analizlerini baştan sona uygular.
 
 ```python
 import pandas as pd
@@ -505,11 +642,50 @@ karsilastirma = pd.DataFrame({
 
 print("\n--- FI vs mean(|SHAP|) karşılaştırması ---")
 print(karsilastirma)
+
+# ─── 7. LIME ANALİZİ ─────────────────────────────────────────────────────────
+from lime import lime_tabular
+
+lime_explainer = lime_tabular.LimeTabularExplainer(
+    training_data = X_train.values,
+    feature_names = X_train.columns.tolist(),
+    mode          = 'regression',
+    random_state  = 42
+)
+
+idx = 0
+lime_exp = lime_explainer.explain_instance(
+    data_row   = X_test.iloc[idx].values,
+    predict_fn = rf.predict,
+    num_features = len(X_train.columns),
+    num_samples  = 5000
+)
+
+print(f"\nLIME Yerel Model R²:        {lime_exp.score:.3f}")
+print(f"LIME Tahmini (yerel model): {lime_exp.predicted_value:,.0f} TL")
+print(f"Kara Kutu Tahmini:          {rf.predict(X_test.iloc[[idx]])[0]:,.0f} TL")
+print(f"SHAP Tahmini:               {shap_values[idx].sum() + base_value:,.0f} TL")
+
+print("\nLIME Özellik Katkıları:")
+for kural, katki in sorted(lime_exp.as_list(), key=lambda x: abs(x[1]), reverse=True):
+    print(f"  {kural:45s}  {katki:+,.0f}")
+
+# ─── 8. LIME vs SHAP: aynı örnek için yan yana ──────────────────────────────
+lime_dict = dict(lime_exp.as_list())
+
+shap_df = pd.DataFrame({
+    'SHAP Katkısı (TL)': shap_values[idx]
+}, index=X_test.columns).sort_values('SHAP Katkısı (TL)', ascending=False)
+
+print("\n--- SHAP vs LIME: aynı örnek ---")
+print("SHAP her özellik için kesin bir değer üretir.")
+print("LIME ise aralık kuralları üretir ('alan_m2 > 140' gibi).")
+print(shap_df.round(0))
 ```
 
 ### Beklenen Çıktı Yorumu
 
-`Feature Importance` ile `mean(|SHAP|)` sıralamaları büyük ölçüde örtüşür. Küçük farklılıklar normaldir ve genellikle değişkenler arası korelasyondan kaynaklanır. `alan_m2` her iki sıralamada da açık ara birinci çıkar; bu verinin tasarım gereğidir. Gerçek projelerde bu kadar net ayrışmalar olmaz ve iki yöntemi birlikte değerlendirmek daha sağlıklı sonuç verir.
+`Feature Importance` ile `mean(|SHAP|)` sıralamaları büyük ölçüde örtüşür. LIME ise aynı örnek için benzer yön kararları verir ancak sayısal değerler tam örtüşmez; bu beklenen bir durumdur çünkü LIME'ın hedefi kesin hesap vermek değil, yerel bir lineer modelle tahmin etmektir. `alan_m2` üç yöntemde de açık ara birinci çıkar. Gerçek projelerde bu kadar net ayrışmalar olmaz ve yöntemleri birlikte değerlendirmek daha sağlıklı sonuç verir.
 
 ---
 

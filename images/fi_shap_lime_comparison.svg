@@ -1,0 +1,169 @@
+<svg width="800" height="390" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', Arial, sans-serif">
+  <!-- Background -->
+  <rect width="800" height="390" fill="#ffffff" rx="8" stroke="#dde0e3" stroke-width="1.2"/>
+
+  <!-- Main Title -->
+  <text x="400" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a252f">
+    Feature Importance · SHAP · LIME — Üç Yöntemin Karşılaştırması
+  </text>
+  <text x="400" y="40" text-anchor="middle" font-size="10" fill="#7f8c8d">
+    Kapsam, garanti ve pratik kullanım açısından
+  </text>
+
+  <!-- ============ COLUMN 1: Feature Importance ============ -->
+  <rect x="14" y="52" width="248" height="310" fill="#eaf4fb" rx="8" stroke="#aed6f1" stroke-width="1.2"/>
+
+  <!-- Header -->
+  <rect x="14" y="52" width="248" height="38" fill="#1a5276" rx="8"/>
+  <rect x="14" y="74" width="248" height="16" fill="#1a5276"/>
+  <text x="138" y="67" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">Feature Importance</text>
+  <text x="138" y="83" text-anchor="middle" font-size="10" fill="#aed6f1">MDI / Permutation</text>
+
+  <!-- Badge: GLOBAL -->
+  <rect x="80" y="100" width="116" height="22" fill="#1a5276" rx="11"/>
+  <text x="138" y="115" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#ffffff">KÜRESEL (Global)</text>
+
+  <!-- Mini bar chart -->
+  <text x="35" y="145" font-size="9.5" fill="#555">alan_m2</text>
+  <rect x="95" y="132" width="130" height="14" fill="#2e86c1" rx="2" opacity="0.85"/>
+
+  <text x="35" y="168" font-size="9.5" fill="#555">semt</text>
+  <rect x="95" y="155" width="90" height="14" fill="#3498db" rx="2" opacity="0.85"/>
+
+  <text x="35" y="191" font-size="9.5" fill="#555">bina_yasi</text>
+  <rect x="95" y="178" width="60" height="14" fill="#5dade2" rx="2" opacity="0.85"/>
+
+  <text x="95" y="215" font-size="9" fill="#888" font-style="italic">← Tüm veri seti üzerinden</text>
+
+  <!-- Properties -->
+  <line x1="24" y1="224" x2="252" y2="224" stroke="#aed6f1" stroke-width="0.8"/>
+
+  <text x="28" y="240" font-size="10" fill="#1a5276">✓</text>
+  <text x="40" y="240" font-size="10" fill="#2c3e50">Hızlı (model içinde hazır)</text>
+
+  <text x="28" y="256" font-size="10" fill="#1a5276">✓</text>
+  <text x="40" y="256" font-size="10" fill="#2c3e50">Tüm modele genel bakış</text>
+
+  <text x="28" y="272" font-size="10" fill="#c0392b">✗</text>
+  <text x="40" y="272" font-size="10" fill="#2c3e50">Yön bilgisi yok (+/−?)</text>
+
+  <text x="28" y="288" font-size="10" fill="#c0392b">✗</text>
+  <text x="40" y="288" font-size="10" fill="#2c3e50">Tek örnek açıklaması yok</text>
+
+  <text x="28" y="304" font-size="10" fill="#c0392b">✗</text>
+  <text x="40" y="304" font-size="10" fill="#2c3e50">Korelasyona duyarlı</text>
+
+  <rect x="24" y="316" width="232" height="38" fill="#d6eaf8" rx="5"/>
+  <text x="140" y="330" text-anchor="middle" font-size="10" fill="#1a5276" font-weight="bold">Ne zaman kullan?</text>
+  <text x="140" y="347" text-anchor="middle" font-size="9.5" fill="#1a5276">Model seçimi, değişken seçimi,</text>
+  <!-- remove last line since it overflows -->
+
+  <!-- ============ COLUMN 2: SHAP ============ -->
+  <rect x="278" y="52" width="248" height="310" fill="#f9ebff" rx="8" stroke="#d7bde2" stroke-width="1.2"/>
+
+  <!-- Header -->
+  <rect x="278" y="52" width="248" height="38" fill="#6c3483" rx="8"/>
+  <rect x="278" y="74" width="248" height="16" fill="#6c3483"/>
+  <text x="402" y="67" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">SHAP</text>
+  <text x="402" y="83" text-anchor="middle" font-size="10" fill="#d7bde2">SHapley Additive exPlanations</text>
+
+  <!-- Badge: LOCAL + GLOBAL -->
+  <rect x="318" y="100" width="168" height="22" fill="#6c3483" rx="11"/>
+  <text x="402" y="115" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#ffffff">YEREL + KÜRESEL</text>
+
+  <!-- Mini force/waterfall bars -->
+  <line x1="370" y1="130" x2="370" y2="210" stroke="#888" stroke-width="1.2" stroke-dasharray="3,2"/>
+  <text x="370" y="127" text-anchor="middle" font-size="8.5" fill="#888">0</text>
+
+  <text x="299" y="146" font-size="9.5" fill="#555">alan_m2</text>
+  <rect x="370" y="133" width="90" height="14" fill="#e74c3c" rx="2" opacity="0.85"/>
+  <text x="464" y="145" font-size="8.5" fill="#c0392b">+120k</text>
+
+  <text x="299" y="169" font-size="9.5" fill="#555">semt_Merkez</text>
+  <rect x="370" y="156" width="72" height="14" fill="#e67e22" rx="2" opacity="0.85"/>
+  <text x="446" y="168" font-size="8.5" fill="#d35400">+95k</text>
+
+  <text x="299" y="192" font-size="9.5" fill="#555">bina_yasi</text>
+  <rect x="328" y="179" width="42" height="14" fill="#2980b9" rx="2" opacity="0.85"/>
+  <text x="324" y="191" text-anchor="end" font-size="8.5" fill="#1a5276">−25k</text>
+
+  <text x="330" y="215" font-size="9" fill="#888" font-style="italic">← Tek örnek için +/− katkı</text>
+
+  <line x1="288" y1="224" x2="516" y2="224" stroke="#d7bde2" stroke-width="0.8"/>
+
+  <text x="292" y="240" font-size="10" fill="#6c3483">✓</text>
+  <text x="304" y="240" font-size="10" fill="#2c3e50">Teorik garanti (toplamsallık)</text>
+
+  <text x="292" y="256" font-size="10" fill="#6c3483">✓</text>
+  <text x="304" y="256" font-size="10" fill="#2c3e50">Yön + büyüklük bilgisi</text>
+
+  <text x="292" y="272" font-size="10" fill="#6c3483">✓</text>
+  <text x="304" y="272" font-size="10" fill="#2c3e50">Deterministik (TreeSHAP)</text>
+
+  <text x="292" y="288" font-size="10" fill="#6c3483">✓</text>
+  <text x="304" y="288" font-size="10" fill="#2c3e50">Global özet (mean|SHAP|)</text>
+
+  <text x="292" y="304" font-size="10" fill="#c0392b">✗</text>
+  <text x="304" y="304" font-size="10" fill="#2c3e50">Ağaç dışında yavaş</text>
+
+  <rect x="288" y="316" width="232" height="38" fill="#e8daef" rx="5"/>
+  <text x="404" y="330" text-anchor="middle" font-size="10" fill="#6c3483" font-weight="bold">Ne zaman kullan?</text>
+  <text x="404" y="347" text-anchor="middle" font-size="9.5" fill="#6c3483">Müşteri/regülatör açıklaması,</text>
+
+  <!-- ============ COLUMN 3: LIME ============ -->
+  <rect x="542" y="52" width="245" height="310" fill="#fef9e7" rx="8" stroke="#f0c040" stroke-width="1.2"/>
+
+  <!-- Header -->
+  <rect x="542" y="52" width="245" height="38" fill="#b7770d" rx="8"/>
+  <rect x="542" y="74" width="245" height="16" fill="#b7770d"/>
+  <text x="664" y="67" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">LIME</text>
+  <text x="664" y="83" text-anchor="middle" font-size="10" fill="#fdebd0">Local Interpretable Model-agnostic</text>
+
+  <!-- Badge: LOCAL -->
+  <rect x="604" y="100" width="120" height="22" fill="#b7770d" rx="11"/>
+  <text x="664" y="115" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#ffffff">YEREL (Local)</text>
+
+  <!-- Mini LIME visualization: scattered dots + linear line -->
+  <!-- Background scatter -->
+  <circle cx="618" cy="150" r="4" fill="#e67e22" opacity="0.5"/>
+  <circle cx="635" cy="140" r="4" fill="#e67e22" opacity="0.5"/>
+  <circle cx="705" cy="195" r="4" fill="#2e86c1" opacity="0.5"/>
+  <circle cx="720" cy="180" r="4" fill="#2e86c1" opacity="0.5"/>
+
+  <!-- Perturbed samples (gray) around query -->
+  <circle cx="663" cy="163" r="6" fill="#7f8c8d" opacity="0.4"/>
+  <circle cx="675" cy="158" r="5" fill="#7f8c8d" opacity="0.4"/>
+  <circle cx="655" cy="170" r="5" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="682" cy="170" r="4" fill="#7f8c8d" opacity="0.3"/>
+  <circle cx="648" cy="160" r="4" fill="#7f8c8d" opacity="0.3"/>
+
+  <!-- Query point -->
+  <circle cx="667" cy="165" r="9" fill="none" stroke="#e74c3c" stroke-width="2"/>
+  <circle cx="667" cy="165" r="4" fill="#e74c3c"/>
+
+  <!-- Local linear boundary -->
+  <line x1="595" y1="135" x2="745" y2="195" stroke="#e74c3c" stroke-width="1.8" stroke-dasharray="6,3"/>
+
+  <text x="598" y="215" font-size="9" fill="#888" font-style="italic">← Yerel pertürbasyon + lineer fit</text>
+
+  <line x1="552" y1="224" x2="778" y2="224" stroke="#f0c040" stroke-width="0.8"/>
+
+  <text x="556" y="240" font-size="10" fill="#b7770d">✓</text>
+  <text x="568" y="240" font-size="10" fill="#2c3e50">Her model türüne uygulanır</text>
+
+  <text x="556" y="256" font-size="10" fill="#b7770d">✓</text>
+  <text x="568" y="256" font-size="10" fill="#2c3e50">Görüntü / metin desteği var</text>
+
+  <text x="556" y="272" font-size="10" fill="#b7770d">✓</text>
+  <text x="568" y="272" font-size="10" fill="#2c3e50">Çıktı basit, anlaşılır kural</text>
+
+  <text x="556" y="288" font-size="10" fill="#c0392b">✗</text>
+  <text x="568" y="288" font-size="10" fill="#2c3e50">Stokastik (her çalıştırmada farklı)</text>
+
+  <text x="556" y="304" font-size="10" fill="#c0392b">✗</text>
+  <text x="568" y="304" font-size="10" fill="#2c3e50">Toplamsallık garantisi yok</text>
+
+  <rect x="552" y="316" width="228" height="38" fill="#fdebd0" rx="5"/>
+  <text x="666" y="330" text-anchor="middle" font-size="10" fill="#b7770d" font-weight="bold">Ne zaman kullan?</text>
+  <text x="666" y="347" text-anchor="middle" font-size="9.5" fill="#b7770d">Görüntü/NLP, hızlı prototip,</text>
+</svg>

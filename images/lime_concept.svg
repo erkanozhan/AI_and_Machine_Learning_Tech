@@ -1,0 +1,152 @@
+<svg width="740" height="360" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', Arial, sans-serif">
+  <!-- Background -->
+  <rect width="740" height="360" fill="#ffffff" rx="8" stroke="#dde0e3" stroke-width="1.2"/>
+
+  <!-- Main Title -->
+  <text x="370" y="24" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a252f">
+    LIME — Siyah Kutu Çevresinde Yerel Doğrusal Yaklaşım
+  </text>
+  <text x="370" y="38" text-anchor="middle" font-size="10" fill="#7f8c8d">
+    Karmaşık model bölgesel olarak basit bir doğrusal modelle temsil edilir
+  </text>
+
+  <!-- ============ LEFT PANEL: Conceptual Scatter ============ -->
+  <rect x="18" y="50" width="355" height="282" fill="#f8fafb" rx="6" stroke="#dde0e3" stroke-width="1"/>
+  <text x="195" y="68" text-anchor="middle" font-size="11" font-weight="bold" fill="#2c3e50">Kavramsal Görünüm</text>
+
+  <!-- Axes labels -->
+  <text x="195" y="322" text-anchor="middle" font-size="10" fill="#888">Özellik 1 (alan_m2)</text>
+  <text x="28" y="195" text-anchor="middle" font-size="10" fill="#888" transform="rotate(-90,28,195)">Özellik 2 (bina_yasi)</text>
+
+  <!-- Clip path for left panel -->
+  <defs>
+    <clipPath id="leftPanel">
+      <rect x="40" y="72" width="320" height="240"/>
+    </clipPath>
+  </defs>
+
+  <!-- ── Class A points (high price, orange/red area): upper-left cluster ── -->
+  <circle cx="60"  cy="100" r="6" fill="#e67e22" opacity="0.7" clip-path="url(#leftPanel)"/>
+  <circle cx="85"  cy="82"  r="6" fill="#e67e22" opacity="0.7"/>
+  <circle cx="115" cy="88"  r="6" fill="#e67e22" opacity="0.7"/>
+  <circle cx="95"  cy="115" r="6" fill="#e67e22" opacity="0.7"/>
+  <circle cx="55"  cy="130" r="6" fill="#e67e22" opacity="0.6"/>
+  <circle cx="130" cy="102" r="6" fill="#e67e22" opacity="0.7"/>
+  <circle cx="148" cy="118" r="6" fill="#e67e22" opacity="0.6"/>
+  <circle cx="72"  cy="155" r="6" fill="#e67e22" opacity="0.6"/>
+
+  <!-- ── Class B points (low price, blue): lower-right cluster ── -->
+  <circle cx="245" cy="220" r="6" fill="#2e86c1" opacity="0.7"/>
+  <circle cx="275" cy="205" r="6" fill="#2e86c1" opacity="0.7"/>
+  <circle cx="300" cy="240" r="6" fill="#2e86c1" opacity="0.7"/>
+  <circle cx="260" cy="255" r="6" fill="#2e86c1" opacity="0.7"/>
+  <circle cx="320" cy="215" r="6" fill="#2e86c1" opacity="0.6"/>
+  <circle cx="335" cy="248" r="6" fill="#2e86c1" opacity="0.7"/>
+  <circle cx="310" cy="270" r="6" fill="#2e86c1" opacity="0.6"/>
+  <circle cx="230" cy="265" r="6" fill="#2e86c1" opacity="0.7"/>
+  <circle cx="280" cy="282" r="5" fill="#2e86c1" opacity="0.6"/>
+
+  <!-- Mixed zone points -->
+  <circle cx="170" cy="150" r="6" fill="#e67e22" opacity="0.5"/>
+  <circle cx="195" cy="175" r="6" fill="#2e86c1" opacity="0.5"/>
+  <circle cx="215" cy="160" r="6" fill="#e67e22" opacity="0.5"/>
+
+  <!-- ── Complex (non-linear) decision boundary ── -->
+  <!-- S-curve from top-left to bottom-right -->
+  <path d="M 40,120 C 80,125 110,140 150,160 S 230,195 280,200 L 355,205"
+        fill="none" stroke="#2c3e50" stroke-width="2.5" stroke-dasharray="none" opacity="0.8"/>
+  <text x="290" y="193" font-size="9" fill="#2c3e50" font-style="italic">Siyah Kutu Sınırı</text>
+
+  <!-- ── Query point (x) ── -->
+  <circle cx="188" cy="162" r="11" fill="none" stroke="#e74c3c" stroke-width="2.5"/>
+  <circle cx="188" cy="162" r="5"  fill="#e74c3c"/>
+  <text x="188" y="145" text-anchor="middle" font-size="10.5" fill="#c0392b" font-weight="bold">x (sorgu)</text>
+
+  <!-- ── Perturbed samples around x (gray, varying size = weight) ── -->
+  <!-- Closer = bigger circle -->
+  <circle cx="175" cy="152" r="7" fill="#7f8c8d" opacity="0.55"/>
+  <circle cx="200" cy="155" r="7" fill="#7f8c8d" opacity="0.55"/>
+  <circle cx="180" cy="172" r="6" fill="#7f8c8d" opacity="0.45"/>
+  <circle cx="205" cy="174" r="5" fill="#7f8c8d" opacity="0.40"/>
+  <circle cx="168" cy="170" r="5" fill="#7f8c8d" opacity="0.40"/>
+  <circle cx="212" cy="148" r="6" fill="#7f8c8d" opacity="0.45"/>
+  <circle cx="160" cy="158" r="4" fill="#7f8c8d" opacity="0.30"/>
+  <circle cx="218" cy="168" r="4" fill="#7f8c8d" opacity="0.30"/>
+  <circle cx="190" cy="183" r="4" fill="#7f8c8d" opacity="0.30"/>
+  <circle cx="170" cy="140" r="3" fill="#7f8c8d" opacity="0.22"/>
+  <circle cx="225" cy="157" r="3" fill="#7f8c8d" opacity="0.22"/>
+
+  <!-- ── Local linear boundary (dashed red line) ── -->
+  <line x1="100" y1="128" x2="285" y2="198" stroke="#e74c3c" stroke-width="2" stroke-dasharray="7,4"/>
+  <text x="112" y="120" font-size="9" fill="#c0392b" font-style="italic" font-weight="bold">Yerel Lineer Sınır</text>
+
+  <!-- Legend bottom-left -->
+  <rect x="28" y="300" width="175" height="26" fill="#fdfefe" rx="4" stroke="#e8eaed" stroke-width="0.8"/>
+  <circle cx="42" cy="313" r="5" fill="#e67e22" opacity="0.8"/>
+  <text x="52" y="317" font-size="9.5" fill="#555">Yüksek Fiyat (Sınıf A)</text>
+  <circle cx="120" cy="313" r="5" fill="#2e86c1" opacity="0.8"/>
+  <text x="130" y="317" font-size="9.5" fill="#555">Düşük (B)</text>
+
+  <rect x="28" y="326" width="175" height="20" fill="#fdfefe" rx="4" stroke="#e8eaed" stroke-width="0.8"/>
+  <circle cx="42" cy="336" r="5" fill="#7f8c8d" opacity="0.45"/>
+  <text x="52" y="340" font-size="9.5" fill="#555">Pertürbe edilmiş örnekler z</text>
+
+  <!-- ============ RIGHT PANEL: LIME Output ============ -->
+  <rect x="390" y="50" width="332" height="282" fill="#fff8f0" rx="6" stroke="#dde0e3" stroke-width="1"/>
+  <text x="556" y="68" text-anchor="middle" font-size="11" font-weight="bold" fill="#2c3e50">
+    LIME Çıktısı — Örnek #50 için Açıklama
+  </text>
+
+  <!-- Zero line at x=480, scale: 1k=1.4px -->
+  <line x1="480" y1="80" x2="480" y2="308" stroke="#888" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="480" y="316" text-anchor="middle" font-size="9.5" fill="#666">0</text>
+  <text x="556" y="330" text-anchor="middle" font-size="10" fill="#666" font-style="italic">Yerel Lineer Katsayı (TL)</text>
+
+  <!-- Grid lines at +50k and -50k -->
+  <line x1="550" y1="80" x2="550" y2="308" stroke="#e8eaed" stroke-width="0.8" stroke-dasharray="3,3"/>
+  <text x="550" y="316" text-anchor="middle" font-size="8.5" fill="#aaa">+50k</text>
+  <line x1="620" y1="80" x2="620" y2="308" stroke="#e8eaed" stroke-width="0.8" stroke-dasharray="3,3"/>
+  <text x="620" y="316" text-anchor="middle" font-size="8.5" fill="#aaa">+100k</text>
+  <line x1="410" y1="80" x2="410" y2="308" stroke="#e8eaed" stroke-width="0.8" stroke-dasharray="3,3"/>
+  <text x="410" y="316" text-anchor="middle" font-size="8.5" fill="#aaa">-50k</text>
+
+  <!--
+    Bars (scale: 1.4 px/1000 TL):
+    alan_m2:      +90,000 → +126px  [480, 606]
+    semt_Merkez:  +72,000 → +101px  [480, 581]
+    oda_sayisi:   +12,000 →  +17px  [480, 497]
+    bina_yasi>20: -18,000 →  -25px  [455, 480]
+  -->
+
+  <!-- alan_m2: +90k -->
+  <rect x="480" y="98" width="126" height="26" fill="#e74c3c" rx="3" opacity="0.85"/>
+  <text x="474" y="115" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">alan_m2 &gt; 140</text>
+  <text x="610" y="115" font-size="10" fill="#c0392b" font-weight="bold">+90,000</text>
+
+  <!-- semt_Merkez: +72k -->
+  <rect x="480" y="142" width="101" height="26" fill="#e67e22" rx="3" opacity="0.85"/>
+  <text x="474" y="159" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">semt_Merkez = 1</text>
+  <text x="585" y="159" font-size="10" fill="#d35400" font-weight="bold">+72,000</text>
+
+  <!-- oda_sayisi: +12k -->
+  <rect x="480" y="186" width="17" height="26" fill="#f39c12" rx="3" opacity="0.85"/>
+  <text x="474" y="203" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">oda_sayisi &gt; 3</text>
+  <text x="502" y="203" font-size="10" fill="#e08e0b" font-weight="bold">+12,000</text>
+
+  <!-- bina_yasi: -18k -->
+  <rect x="455" y="230" width="25" height="26" fill="#2980b9" rx="3" opacity="0.85"/>
+  <text x="474" y="247" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">bina_yasi &gt; 20</text>
+  <text x="450" y="247" text-anchor="end" font-size="10" fill="#1a5276" font-weight="bold">−18,000</text>
+
+  <!-- Annotation box at bottom right -->
+  <rect x="398" y="272" width="316" height="50" fill="#fef5e7" rx="5" stroke="#f0a500" stroke-width="0.8"/>
+  <text x="556" y="288" text-anchor="middle" font-size="10" font-weight="bold" fill="#b7770d">
+    Yerel Model Uyum Kalitesi (Local R²): 0.84
+  </text>
+  <text x="556" y="302" text-anchor="middle" font-size="9.5" fill="#6e5016">
+    Lineer model sorgu noktası civarında iyi uydu — açıklamaya güvenilebilir
+  </text>
+  <text x="556" y="316" text-anchor="middle" font-size="9" fill="#999">
+    Düşük R² → pertürbasyon sayısını artır veya σ parametresini küçült
+  </text>
+</svg>
