@@ -1,102 +1,220 @@
-<svg width="760" height="360" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', Arial, sans-serif">
-  <!-- Background -->
-  <rect width="760" height="360" fill="#ffffff" rx="8" stroke="#dde0e3" stroke-width="1.2"/>
-
-  <!-- Main Title -->
-  <text x="380" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a252f">
-    Feature Importance vs. SHAP: Küresel (Global) ve Yerel (Local) Açıklama
-  </text>
-
-  <!-- ============ LEFT PANEL: Feature Importance (Global) ============ -->
-  <rect x="20" y="42" width="340" height="295" fill="#f0f4f8" rx="8" stroke="#bdc3c7" stroke-width="1"/>
-
-  <!-- Panel header -->
-  <rect x="20" y="42" width="340" height="36" fill="#2c3e50" rx="8"/>
-  <rect x="20" y="60" width="340" height="18" fill="#2c3e50"/>
-  <text x="190" y="65" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">Özellik Önemi (Feature Importance)</text>
-  <text x="190" y="89" text-anchor="middle" font-size="10" fill="#5d6d7e">KÜRESEL — Her özelliğin tüm veri setindeki tek puanı</text>
-
-  <!-- FI bars for 3 features -->
-  <!-- alan_m2: 0.38 → ~230px of 270px range -->
-  <text x="95" y="122" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">alan_m2</text>
-  <rect x="100" y="108" width="232" height="22" fill="#1a6fa8" rx="3"/>
-  <text x="336" y="123" font-size="10" fill="#1a252f" font-weight="bold"> 0.38</text>
-
-  <!-- semt: 0.29 → ~176px -->
-  <text x="95" y="164" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">semt</text>
-  <rect x="100" y="150" width="176" height="22" fill="#2471a3" rx="3"/>
-  <text x="280" y="165" font-size="10" fill="#1a252f" font-weight="bold"> 0.29</text>
-
-  <!-- bina_yasi: 0.15 → ~91px -->
-  <text x="95" y="206" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">bina_yasi</text>
-  <rect x="100" y="192" width="91" height="22" fill="#5dade2" rx="3"/>
-  <text x="195" y="207" font-size="10" fill="#1a252f" font-weight="bold"> 0.15</text>
-
-  <!-- Explanation box left -->
-  <rect x="30" y="240" width="320" height="86" fill="#eaf2ff" rx="6" stroke="#aed6f1" stroke-width="1"/>
-  <text x="190" y="258" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#1f618d">Ne söyler?</text>
-  <text x="45" y="274" font-size="10" fill="#2c3e50">• Tüm modeli açıklar (tek sayı/özellik)</text>
-  <text x="45" y="290" font-size="10" fill="#2c3e50">• Tahmin yönünü göstermez (+/−)</text>
-  <text x="45" y="306" font-size="10" fill="#2c3e50">• Örnek bazında neden açıklayamaz</text>
-  <text x="45" y="322" font-size="10" fill="#c0392b">• "alan_m2 genel olarak önemli"</text>
-
-  <!-- ============ RIGHT PANEL: SHAP (Local) ============ -->
-  <rect x="400" y="42" width="340" height="295" fill="#fff8f0" rx="8" stroke="#bdc3c7" stroke-width="1"/>
-
-  <!-- Panel header -->
-  <rect x="400" y="42" width="340" height="36" fill="#7d3c98" rx="8"/>
-  <rect x="400" y="60" width="340" height="18" fill="#7d3c98"/>
-  <text x="570" y="65" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">SHAP Değerleri</text>
-  <text x="570" y="89" text-anchor="middle" font-size="10" fill="#6c3483">YEREL — Her örneğin katkısı ayrı ayrı hesaplanır</text>
-
-  <!-- SHAP beeswarm-style: dots scattered on feature axis -->
-  <!-- Zero line -->
-  <line x1="560" y1="104" x2="560" y2="228" stroke="#888" stroke-width="1.5" stroke-dasharray="4,3"/>
-  <text x="560" y="100" text-anchor="middle" font-size="9" fill="#888">0</text>
-
-  <!-- alan_m2 row: scattered dots (some positive, some negative) -->
-  <text x="495" y="122" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">alan_m2</text>
-  <!-- dots: positive (red) and negative (blue) scattered -->
-  <circle cx="590" cy="119" r="4" fill="#e74c3c" opacity="0.8"/>
-  <circle cx="618" cy="119" r="4" fill="#e74c3c" opacity="0.8"/>
-  <circle cx="642" cy="119" r="4" fill="#e74c3c" opacity="0.8"/>
-  <circle cx="604" cy="112" r="4" fill="#e74c3c" opacity="0.8"/>
-  <circle cx="630" cy="115" r="4" fill="#e74c3c" opacity="0.7"/>
-  <circle cx="575" cy="122" r="4" fill="#e74c3c" opacity="0.6"/>
-  <circle cx="533" cy="119" r="4" fill="#3498db" opacity="0.8"/>
-  <circle cx="516" cy="119" r="4" fill="#3498db" opacity="0.7"/>
-  <circle cx="548" cy="115" r="4" fill="#3498db" opacity="0.6"/>
-  <text x="658" y="119" font-size="8.5" fill="#888">n=300</text>
-
-  <!-- semt row -->
-  <text x="495" y="164" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">semt</text>
-  <circle cx="600" cy="161" r="4" fill="#e74c3c" opacity="0.8"/>
-  <circle cx="625" cy="158" r="4" fill="#e74c3c" opacity="0.8"/>
-  <circle cx="583" cy="164" r="4" fill="#e74c3c" opacity="0.7"/>
-  <circle cx="612" cy="166" r="4" fill="#e74c3c" opacity="0.6"/>
-  <circle cx="540" cy="161" r="4" fill="#3498db" opacity="0.8"/>
-  <circle cx="522" cy="158" r="4" fill="#3498db" opacity="0.8"/>
-  <circle cx="555" cy="164" r="4" fill="#3498db" opacity="0.7"/>
-  <circle cx="534" cy="166" r="4" fill="#3498db" opacity="0.6"/>
-
-  <!-- bina_yasi row -->
-  <text x="495" y="206" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">bina_yasi</text>
-  <circle cx="578" cy="203" r="4" fill="#e74c3c" opacity="0.7"/>
-  <circle cx="592" cy="206" r="4" fill="#e74c3c" opacity="0.6"/>
-  <circle cx="538" cy="203" r="4" fill="#3498db" opacity="0.8"/>
-  <circle cx="522" cy="200" r="4" fill="#3498db" opacity="0.8"/>
-  <circle cx="548" cy="206" r="4" fill="#3498db" opacity="0.7"/>
-  <circle cx="568" cy="200" r="4" fill="#e74c3c" opacity="0.7"/>
-
-  <!-- Explanation box right -->
-  <rect x="410" y="240" width="320" height="86" fill="#f9ebff" rx="6" stroke="#d7bde2" stroke-width="1"/>
-  <text x="570" y="258" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#6c3483">Ne söyler?</text>
-  <text x="425" y="274" font-size="10" fill="#2c3e50">• Her örneği ayrı ayrı açıklar</text>
-  <text x="425" y="290" font-size="10" fill="#2c3e50">• Tahmin yönünü gösterir (+/−)</text>
-  <text x="425" y="306" font-size="10" fill="#2c3e50">• Global görünüm için toplanabilir</text>
-  <text x="425" y="322" font-size="10" fill="#c0392b">• "Bu ev için alan_m2 +120k katkı yaptı"</text>
-
-  <!-- Arrow between panels -->
-  <text x="380" y="198" text-anchor="middle" font-size="28" fill="#bdc3c7">→</text>
-  <text x="380" y="218" text-anchor="middle" font-size="9" fill="#888">genişletilir</text>
+<svg width="760" height="380" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', Arial, sans-serif">
+  <rect width="760" height="380" fill="#ffffff" rx="8" stroke="#dde0e3" stroke-width="1.2"/>
+  <text x="380" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a252f">Özellik Önemi ve SHAP: Aynı Model, İki Farklı Soru</text>
+  <rect x="20" y="40" width="340" height="320" fill="#f0f4f8" rx="8" stroke="#bdc3c7" stroke-width="1"/>
+  <rect x="20" y="40" width="340" height="34" fill="#2c3e50" rx="8"/>
+  <rect x="20" y="58" width="340" height="16" fill="#2c3e50"/>
+  <text x="190" y="62" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">Özellik Önemi (MDI) — küresel tek puan</text>
+  <text x="112" y="111" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">alan_m2</text>
+  <rect x="118" y="96" width="215.8" height="22" fill="#1a6fa8" rx="3"/>
+  <text x="338.8" y="111" font-size="10" fill="#1a252f" font-weight="bold">0.981</text>
+  <text x="112" y="151" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">bina_yasi</text>
+  <rect x="118" y="136" width="2.2" height="22" fill="#1a6fa8" rx="3"/>
+  <text x="125.2" y="151" font-size="10" fill="#1a252f" font-weight="bold">0.010</text>
+  <text x="112" y="191" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">oda_sayisi</text>
+  <rect x="118" y="176" width="1.5" height="22" fill="#1a6fa8" rx="3"/>
+  <text x="124.5" y="191" font-size="10" fill="#1a252f" font-weight="bold">0.003</text>
+  <rect x="30" y="230" width="320" height="120" fill="#eaf2ff" rx="6" stroke="#aed6f1" stroke-width="1"/>
+  <text x="190" y="250" text-anchor="middle" font-weight="bold" fill="#1f618d" font-size="10.5">Ne söyler?</text>
+  <text x="45" y="270" fill="#2c3e50" font-size="10.5">• Her özellik için tek bir sayı (toplamı 1)</text>
+  <text x="45" y="290" fill="#2c3e50" font-size="10.5">• Etkinin yönünü (+/−) göstermez</text>
+  <text x="45" y="310" fill="#2c3e50" font-size="10.5">• Tek bir evin fiyatını açıklamaz</text>
+  <text x="45" y="330" fill="#2c3e50" font-size="10.5">• "alan_m2 genel olarak en önemli özellik"</text>
+  <rect x="400" y="40" width="340" height="320" fill="#fff8f0" rx="8" stroke="#bdc3c7" stroke-width="1"/>
+  <rect x="400" y="40" width="340" height="34" fill="#7d3c98" rx="8"/>
+  <rect x="400" y="58" width="340" height="16" fill="#7d3c98"/>
+  <text x="570" y="62" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff">SHAP — her ev için ayrı katkı (60 test evi)</text>
+  <line x1="610" y1="88" x2="610" y2="212" stroke="#888" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <text x="610" y="224" text-anchor="middle" font-size="9" fill="#888">0 TL</text>
+  <text x="495" y="224" text-anchor="start" font-size="9" fill="#888">−1.166.513</text>
+  <text x="725" y="224" text-anchor="end" font-size="9" fill="#888">+1.166.513</text>
+  <text x="487" y="110" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">alan_m2</text>
+  <circle cx="646.3" cy="106.8" r="3" fill="rgb(171,92,99)" opacity="0.75"/>
+  <circle cx="596.1" cy="109.4" r="3" fill="rgb(129,103,126)" opacity="0.75"/>
+  <circle cx="527.7" cy="107.6" r="3" fill="rgb(75,118,162)" opacity="0.75"/>
+  <circle cx="633.2" cy="106.7" r="3" fill="rgb(162,94,105)" opacity="0.75"/>
+  <circle cx="656.5" cy="104.8" r="3" fill="rgb(179,90,93)" opacity="0.75"/>
+  <circle cx="643.1" cy="108.3" r="3" fill="rgb(163,94,104)" opacity="0.75"/>
+  <circle cx="627.6" cy="105.0" r="3" fill="rgb(153,97,111)" opacity="0.75"/>
+  <circle cx="682.3" cy="112.3" r="3" fill="rgb(203,83,77)" opacity="0.75"/>
+  <circle cx="571.0" cy="113.4" r="3" fill="rgb(111,108,138)" opacity="0.75"/>
+  <circle cx="714.9" cy="104.1" r="3" fill="rgb(230,76,60)" opacity="0.75"/>
+  <circle cx="705.3" cy="110.7" r="3" fill="rgb(227,76,61)" opacity="0.75"/>
+  <circle cx="647.2" cy="106.5" r="3" fill="rgb(170,92,99)" opacity="0.75"/>
+  <circle cx="641.2" cy="107.1" r="3" fill="rgb(170,92,99)" opacity="0.75"/>
+  <circle cx="647.0" cy="112.8" r="3" fill="rgb(175,91,96)" opacity="0.75"/>
+  <circle cx="495.0" cy="99.1" r="3" fill="rgb(42,127,184)" opacity="0.75"/>
+  <circle cx="684.2" cy="99.4" r="3" fill="rgb(200,84,79)" opacity="0.75"/>
+  <circle cx="629.9" cy="98.3" r="3" fill="rgb(153,97,111)" opacity="0.75"/>
+  <circle cx="500.5" cy="111.3" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="670.9" cy="110.5" r="3" fill="rgb(191,86,85)" opacity="0.75"/>
+  <circle cx="524.5" cy="111.9" r="3" fill="rgb(67,120,167)" opacity="0.75"/>
+  <circle cx="551.9" cy="113.7" r="3" fill="rgb(83,116,157)" opacity="0.75"/>
+  <circle cx="498.2" cy="110.8" r="3" fill="rgb(44,127,183)" opacity="0.75"/>
+  <circle cx="554.7" cy="105.4" r="3" fill="rgb(91,114,151)" opacity="0.75"/>
+  <circle cx="682.7" cy="110.5" r="3" fill="rgb(201,84,79)" opacity="0.75"/>
+  <circle cx="647.0" cy="99.9" r="3" fill="rgb(176,90,95)" opacity="0.75"/>
+  <circle cx="560.9" cy="108.2" r="3" fill="rgb(103,110,143)" opacity="0.75"/>
+  <circle cx="667.7" cy="100.3" r="3" fill="rgb(188,87,87)" opacity="0.75"/>
+  <circle cx="608.8" cy="113.1" r="3" fill="rgb(139,101,120)" opacity="0.75"/>
+  <circle cx="589.0" cy="106.3" r="3" fill="rgb(125,104,129)" opacity="0.75"/>
+  <circle cx="568.7" cy="104.6" r="3" fill="rgb(109,109,139)" opacity="0.75"/>
+  <circle cx="669.8" cy="102.2" r="3" fill="rgb(190,87,86)" opacity="0.75"/>
+  <circle cx="647.1" cy="110.4" r="3" fill="rgb(174,91,97)" opacity="0.75"/>
+  <circle cx="715.4" cy="105.3" r="3" fill="rgb(228,76,61)" opacity="0.75"/>
+  <circle cx="713.8" cy="107.1" r="3" fill="rgb(228,76,61)" opacity="0.75"/>
+  <circle cx="645.6" cy="98.3" r="3" fill="rgb(169,92,100)" opacity="0.75"/>
+  <circle cx="683.1" cy="107.9" r="3" fill="rgb(202,83,78)" opacity="0.75"/>
+  <circle cx="512.4" cy="107.8" r="3" fill="rgb(60,122,172)" opacity="0.75"/>
+  <circle cx="511.5" cy="107.9" r="3" fill="rgb(63,121,170)" opacity="0.75"/>
+  <circle cx="508.5" cy="113.1" r="3" fill="rgb(60,122,172)" opacity="0.75"/>
+  <circle cx="555.2" cy="108.9" r="3" fill="rgb(93,113,150)" opacity="0.75"/>
+  <circle cx="643.9" cy="103.8" r="3" fill="rgb(164,94,103)" opacity="0.75"/>
+  <circle cx="556.3" cy="105.0" r="3" fill="rgb(93,113,150)" opacity="0.75"/>
+  <circle cx="669.4" cy="109.2" r="3" fill="rgb(192,86,85)" opacity="0.75"/>
+  <circle cx="623.5" cy="99.0" r="3" fill="rgb(151,97,112)" opacity="0.75"/>
+  <circle cx="659.8" cy="108.7" r="3" fill="rgb(186,88,89)" opacity="0.75"/>
+  <circle cx="499.5" cy="108.7" r="3" fill="rgb(47,126,181)" opacity="0.75"/>
+  <circle cx="659.0" cy="101.4" r="3" fill="rgb(184,88,90)" opacity="0.75"/>
+  <circle cx="511.4" cy="100.1" r="3" fill="rgb(63,121,170)" opacity="0.75"/>
+  <circle cx="525.7" cy="103.0" r="3" fill="rgb(72,119,164)" opacity="0.75"/>
+  <circle cx="629.9" cy="103.8" r="3" fill="rgb(156,96,109)" opacity="0.75"/>
+  <circle cx="631.2" cy="107.1" r="3" fill="rgb(161,95,105)" opacity="0.75"/>
+  <circle cx="602.3" cy="105.0" r="3" fill="rgb(135,102,122)" opacity="0.75"/>
+  <circle cx="598.9" cy="113.8" r="3" fill="rgb(132,102,124)" opacity="0.75"/>
+  <circle cx="496.7" cy="99.6" r="3" fill="rgb(43,127,183)" opacity="0.75"/>
+  <circle cx="598.6" cy="101.3" r="3" fill="rgb(132,102,124)" opacity="0.75"/>
+  <circle cx="659.2" cy="100.6" r="3" fill="rgb(187,87,88)" opacity="0.75"/>
+  <circle cx="548.8" cy="108.4" r="3" fill="rgb(84,116,156)" opacity="0.75"/>
+  <circle cx="710.5" cy="102.1" r="3" fill="rgb(228,76,61)" opacity="0.75"/>
+  <circle cx="626.5" cy="105.5" r="3" fill="rgb(158,95,107)" opacity="0.75"/>
+  <circle cx="509.8" cy="101.9" r="3" fill="rgb(60,122,172)" opacity="0.75"/>
+  <text x="487" y="150" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">bina_yasi</text>
+  <circle cx="616.6" cy="140.5" r="3" fill="rgb(55,123,175)" opacity="0.75"/>
+  <circle cx="614.0" cy="139.8" r="3" fill="rgb(80,117,158)" opacity="0.75"/>
+  <circle cx="607.9" cy="148.5" r="3" fill="rgb(200,84,79)" opacity="0.75"/>
+  <circle cx="612.2" cy="140.2" r="3" fill="rgb(140,100,119)" opacity="0.75"/>
+  <circle cx="610.3" cy="141.1" r="3" fill="rgb(145,99,115)" opacity="0.75"/>
+  <circle cx="611.7" cy="143.9" r="3" fill="rgb(150,97,112)" opacity="0.75"/>
+  <circle cx="613.1" cy="151.1" r="3" fill="rgb(75,118,161)" opacity="0.75"/>
+  <circle cx="611.9" cy="139.6" r="3" fill="rgb(100,111,145)" opacity="0.75"/>
+  <circle cx="607.8" cy="151.4" r="3" fill="rgb(200,84,79)" opacity="0.75"/>
+  <circle cx="608.9" cy="139.5" r="3" fill="rgb(155,96,109)" opacity="0.75"/>
+  <circle cx="611.3" cy="153.6" r="3" fill="rgb(95,112,148)" opacity="0.75"/>
+  <circle cx="611.2" cy="145.5" r="3" fill="rgb(155,96,109)" opacity="0.75"/>
+  <circle cx="599.1" cy="153.6" r="3" fill="rgb(230,76,60)" opacity="0.75"/>
+  <circle cx="606.5" cy="147.7" r="3" fill="rgb(210,81,73)" opacity="0.75"/>
+  <circle cx="613.2" cy="149.8" r="3" fill="rgb(50,125,178)" opacity="0.75"/>
+  <circle cx="610.6" cy="138.6" r="3" fill="rgb(150,97,112)" opacity="0.75"/>
+  <circle cx="614.4" cy="142.5" r="3" fill="rgb(65,121,168)" opacity="0.75"/>
+  <circle cx="606.3" cy="139.9" r="3" fill="rgb(220,78,66)" opacity="0.75"/>
+  <circle cx="608.5" cy="142.7" r="3" fill="rgb(165,93,102)" opacity="0.75"/>
+  <circle cx="612.9" cy="139.9" r="3" fill="rgb(60,122,171)" opacity="0.75"/>
+  <circle cx="612.9" cy="143.1" r="3" fill="rgb(135,102,122)" opacity="0.75"/>
+  <circle cx="610.5" cy="144.6" r="3" fill="rgb(130,103,125)" opacity="0.75"/>
+  <circle cx="614.9" cy="139.0" r="3" fill="rgb(95,112,148)" opacity="0.75"/>
+  <circle cx="610.1" cy="149.1" r="3" fill="rgb(160,95,106)" opacity="0.75"/>
+  <circle cx="607.9" cy="147.1" r="3" fill="rgb(195,85,83)" opacity="0.75"/>
+  <circle cx="610.2" cy="142.2" r="3" fill="rgb(155,96,109)" opacity="0.75"/>
+  <circle cx="612.8" cy="146.4" r="3" fill="rgb(75,118,161)" opacity="0.75"/>
+  <circle cx="607.6" cy="139.5" r="3" fill="rgb(165,93,102)" opacity="0.75"/>
+  <circle cx="615.4" cy="147.2" r="3" fill="rgb(60,122,171)" opacity="0.75"/>
+  <circle cx="610.6" cy="152.9" r="3" fill="rgb(130,103,125)" opacity="0.75"/>
+  <circle cx="609.0" cy="143.1" r="3" fill="rgb(145,99,115)" opacity="0.75"/>
+  <circle cx="616.7" cy="148.7" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="616.0" cy="140.1" r="3" fill="rgb(55,123,175)" opacity="0.75"/>
+  <circle cx="608.1" cy="149.5" r="3" fill="rgb(170,92,99)" opacity="0.75"/>
+  <circle cx="604.6" cy="142.6" r="3" fill="rgb(210,81,73)" opacity="0.75"/>
+  <circle cx="612.3" cy="140.9" r="3" fill="rgb(80,117,158)" opacity="0.75"/>
+  <circle cx="607.0" cy="147.4" r="3" fill="rgb(200,84,79)" opacity="0.75"/>
+  <circle cx="610.9" cy="138.3" r="3" fill="rgb(150,97,112)" opacity="0.75"/>
+  <circle cx="607.0" cy="151.3" r="3" fill="rgb(200,84,79)" opacity="0.75"/>
+  <circle cx="611.5" cy="138.1" r="3" fill="rgb(160,95,106)" opacity="0.75"/>
+  <circle cx="611.3" cy="148.8" r="3" fill="rgb(145,99,115)" opacity="0.75"/>
+  <circle cx="614.3" cy="142.3" r="3" fill="rgb(70,119,165)" opacity="0.75"/>
+  <circle cx="609.2" cy="149.8" r="3" fill="rgb(160,95,106)" opacity="0.75"/>
+  <circle cx="610.8" cy="153.4" r="3" fill="rgb(150,97,112)" opacity="0.75"/>
+  <circle cx="605.0" cy="142.0" r="3" fill="rgb(215,80,69)" opacity="0.75"/>
+  <circle cx="613.2" cy="147.2" r="3" fill="rgb(45,126,181)" opacity="0.75"/>
+  <circle cx="612.6" cy="147.5" r="3" fill="rgb(100,111,145)" opacity="0.75"/>
+  <circle cx="608.1" cy="147.2" r="3" fill="rgb(185,88,89)" opacity="0.75"/>
+  <circle cx="610.1" cy="141.6" r="3" fill="rgb(130,103,125)" opacity="0.75"/>
+  <circle cx="612.0" cy="153.2" r="3" fill="rgb(135,102,122)" opacity="0.75"/>
+  <circle cx="605.2" cy="145.2" r="3" fill="rgb(220,78,66)" opacity="0.75"/>
+  <circle cx="616.1" cy="151.5" r="3" fill="rgb(60,122,171)" opacity="0.75"/>
+  <circle cx="615.1" cy="149.2" r="3" fill="rgb(95,112,148)" opacity="0.75"/>
+  <circle cx="612.0" cy="142.8" r="3" fill="rgb(100,111,145)" opacity="0.75"/>
+  <circle cx="604.3" cy="151.0" r="3" fill="rgb(230,76,60)" opacity="0.75"/>
+  <circle cx="605.0" cy="144.3" r="3" fill="rgb(220,78,66)" opacity="0.75"/>
+  <circle cx="603.7" cy="152.1" r="3" fill="rgb(220,78,66)" opacity="0.75"/>
+  <circle cx="608.7" cy="147.3" r="3" fill="rgb(160,95,106)" opacity="0.75"/>
+  <circle cx="606.0" cy="152.1" r="3" fill="rgb(210,81,73)" opacity="0.75"/>
+  <circle cx="606.3" cy="149.1" r="3" fill="rgb(205,82,76)" opacity="0.75"/>
+  <text x="487" y="190" text-anchor="end" font-size="11" fill="#1a252f" font-weight="600">semt_Merkez</text>
+  <circle cx="612.3" cy="189.6" r="3" fill="rgb(230,76,60)" opacity="0.75"/>
+  <circle cx="612.6" cy="186.0" r="3" fill="rgb(230,76,60)" opacity="0.75"/>
+  <circle cx="609.3" cy="193.3" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="608.6" cy="188.3" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="612.5" cy="184.8" r="3" fill="rgb(230,76,60)" opacity="0.75"/>
+  <circle cx="608.9" cy="187.7" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="608.4" cy="178.3" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.2" cy="182.8" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.2" cy="188.6" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.5" cy="182.6" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="611.5" cy="187.9" r="3" fill="rgb(230,76,60)" opacity="0.75"/>
+  <circle cx="609.0" cy="184.9" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.1" cy="180.2" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.2" cy="182.8" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="608.0" cy="187.1" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.3" cy="187.5" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="608.3" cy="187.2" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="608.1" cy="188.5" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.1" cy="188.4" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.3" cy="184.9" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="613.9" cy="192.3" r="3" fill="rgb(230,76,60)" opacity="0.75"/>
+  <circle cx="608.3" cy="183.9" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="608.6" cy="185.0" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.3" cy="192.3" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.1" cy="190.9" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.2" cy="189.3" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.2" cy="179.6" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="608.5" cy="192.7" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.3" cy="189.4" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.3" cy="194.0" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.1" cy="180.4" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.0" cy="191.9" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.5" cy="180.6" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.5" cy="187.8" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="612.2" cy="180.0" r="3" fill="rgb(230,76,60)" opacity="0.75"/>
+  <circle cx="609.2" cy="191.6" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="615.4" cy="190.9" r="3" fill="rgb(230,76,60)" opacity="0.75"/>
+  <circle cx="607.9" cy="187.1" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="608.1" cy="184.5" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="608.9" cy="179.1" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.0" cy="189.2" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="613.3" cy="185.3" r="3" fill="rgb(230,76,60)" opacity="0.75"/>
+  <circle cx="609.1" cy="189.6" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="608.3" cy="191.9" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.1" cy="193.6" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="614.2" cy="191.7" r="3" fill="rgb(230,76,60)" opacity="0.75"/>
+  <circle cx="612.7" cy="178.2" r="3" fill="rgb(230,76,60)" opacity="0.75"/>
+  <circle cx="608.3" cy="183.8" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.3" cy="189.7" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.0" cy="180.7" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="608.6" cy="186.3" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.0" cy="178.9" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.1" cy="181.2" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="607.9" cy="178.3" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="613.8" cy="190.7" r="3" fill="rgb(230,76,60)" opacity="0.75"/>
+  <circle cx="609.1" cy="181.6" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="609.0" cy="183.5" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="611.4" cy="192.8" r="3" fill="rgb(230,76,60)" opacity="0.75"/>
+  <circle cx="608.6" cy="189.3" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <circle cx="608.3" cy="178.5" r="3" fill="rgb(41,128,185)" opacity="0.75"/>
+  <rect x="410" y="230" width="320" height="120" fill="#f9ebff" rx="6" stroke="#d7bde2" stroke-width="1"/>
+  <text x="570" y="250" text-anchor="middle" font-weight="bold" fill="#6c3483" font-size="10.5">Ne söyler?</text>
+  <text x="425" y="270" fill="#2c3e50" font-size="10.5">• Her evi ayrı ayrı açıklar (yön ve büyüklük)</text>
+  <text x="425" y="290" fill="#2c3e50" font-size="10.5">• Renk: kırmızı = yüksek, mavi = düşük özellik değeri</text>
+  <text x="425" y="310" fill="#2c3e50" font-size="10.5">• |SHAP| ortalaması küresel önem verir</text>
+  <text x="425" y="330" fill="#2c3e50" font-size="10.5">• "Satır 203: alan_m2 = 190 → +368.377 TL"</text>
 </svg>

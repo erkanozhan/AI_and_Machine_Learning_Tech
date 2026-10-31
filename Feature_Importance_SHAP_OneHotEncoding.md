@@ -1,14 +1,16 @@
-# Makine Öğrenmesinde Yorumlanabilirlik: Özellik Önemi, SHAP ve Kategorik Kodlama
+# Makine Öğrenmesinde Yorumlanabilirlik: Özellik Önemi, SHAP, LIME ve Kategorik Kodlama
 
-Bir model inşa etmek bir iştir, o modeli anlamak başka bir iştir. Sektördeki karar alıcı ne model kodundan anlar ne de matematikten. Ona "algoritmam bu sonucu verdi" demek yeterli değildir. Bu ders notunda öğrendiğiniz üç araç — Feature Importance, SHAP ve OneHot Encoding — birbirleriyle doğrudan bağlantılıdır ve yorumlanabilir makine öğrenmesinin (Interpretable Machine Learning — IML) temel taşlarını oluşturur.
+Bir model kurmak bir iştir, o modeli anlamak başka bir iştir. Modelin kararından etkilenen kişi (bir müşteri, bir hekim ya da bir yönetici) çoğu zaman modelin koduyla ya da matematiğiyle ilgilenmez; ona "algoritma bu sonucu verdi" demek yeterli değildir. Bu ders notunda dört araç ele alınmaktadır: kategorik değişkenleri modele hazırlayan **OneHot Encoding** ile modeli açıklayan **Özellik Önemi** (Feature Importance), **SHAP** ve **LIME**. Bu araçlar yorumlanabilir makine öğrenmesinin (Interpretable Machine Learning, IML) temel taşlarıdır.
 
-Bu üç kavramı ortak bir örnek üzerinde götüreceğiz: **Ev Fiyat Tahmini**. Veri setimizde hem sayısal hem kategorik değişkenler var. Bu sayede OneHot Encoding'in neden gerektiğini ve Feature Importance ile SHAP'ın birbirinden nasıl ayrıştığını aynı anda görebileceğiz.
+Dört kavram ortak bir örnek üzerinde işlenecektir: **ev fiyatı tahmini**. Veri kümesinde hem sayısal hem kategorik değişkenler bulunduğundan OneHot Encoding'in neden gerektiği ve açıklama yöntemlerinin birbirinden nasıl ayrıştığı aynı veri üzerinde görülebilir.
+
+> **Çalıştırma ortamı.** Bu nottaki tüm çıktılar, kod blokları sırayla çalıştırılarak Python 3.12, NumPy 2.5, pandas 3.1, scikit-learn 1.9, shap 0.54 ve lime 0.2 ile elde edilmiştir. Gerekli paketler: `pip install pandas scikit-learn matplotlib shap lime` (bkz. depodaki `requirements.txt`). Farklı sürümlerde son basamaklar değişebilir.
 
 ---
 
-## Ortak Veri Seti: Ev Fiyat Tahmini
+## Ortak Veri Seti: Ev Fiyatı Tahmini
 
-Veri setimiz 300 satırdan oluşuyor ve aşağıdaki değişkenleri içeriyor:
+Veri kümesi 300 satırdan oluşan yapay (sentetik) bir veridir ve şu değişkenleri içerir:
 
 | Değişken | Tür | Açıklama |
 | --- | --- | --- |
@@ -18,6 +20,8 @@ Veri setimiz 300 satırdan oluşuyor ve aşağıdaki değişkenleri içeriyor:
 | `semt` | Kategorik | Merkez / Kuzey / Güney / Doğu |
 | `isitma` | Kategorik | Doğalgaz / Elektrik / Kombi |
 | `fiyat_tl` | Hedef | Satış fiyatı (TL) |
+
+Verinin nasıl üretildiğini bilmek, açıklama yöntemlerinin çıktılarını "doğru cevapla" karşılaştırmamızı sağlar. Fiyat; metrekare başına 12.000 TL, binanın yeniliğine göre yıl başına 5.000 TL, oda başına 25.000 TL, semt ve ısıtma primleri ile ortalaması 0, standart sapması 60.000 TL olan rastgele bir gürültüden oluşur.
 
 ```python
 import pandas as pd
@@ -53,56 +57,68 @@ df['fiyat_tl'] = (
 print(df.head())
 ```
 
+Çıktı:
+
+```text
+   alan_m2  bina_yasi  oda_sayisi   semt    isitma  fiyat_tl
+0      162         17           3  Kuzey  Doğalgaz   2319987
+1      239          1           3  Güney  Doğalgaz   3316012
+2      152         34           4  Güney  Doğalgaz   1987366
+3       74         15           4   Doğu  Elektrik   1060073
+4      166         35           4  Güney  Doğalgaz   2301779
+```
+
 ---
 
-## 1. OneHot Encoding (Tek-Sıcak Kodlama)
+## 1. OneHot Encoding (Tek-Etkin Kodlama)
 
-Makineler metinle düşünmez. Bir regresyon veya karar ağacı modeline `"Merkez"` yazıp veriyi gönderirsek model çöker. Tüm matematiksel işlemler sayılar üzerinde yürür, bu nedenle kategorik (sınıflandırılmış) değişkenleri önce sayılara çevirmemiz gerekir.
+Regresyon ve karar ağacı modellerinin scikit-learn uygulamaları yalnızca sayısal girdi kabul eder; `"Merkez"` gibi bir metin değeri içeren veri modele verilirse eğitim hata vererek durur. Bu nedenle kategorik değişkenler önce sayılara çevrilmelidir.
 
-### 1.1 İlk Akla Gelen ve Neden Yanlış Olduğu
+### 1.1 İlk Akla Gelen Yöntem ve Neden Yanlış Olduğu
 
-Bir öğrenci şöyle der: "Semtlere sıra numarası vereyim. Merkez=0, Kuzey=1, Güney=2, Doğu=3." Bu yaklaşıma **Etiket Kodlama** (Label Encoding) denir. Hızlıdır, tek sütuna sığar. Ancak kritik bir sorun taşır.
+Bir öğrenci şunu önerebilir: "Semtlere sıra numarası vereyim: Merkez = 0, Kuzey = 1, Güney = 2, Doğu = 3." Bu yaklaşıma **etiket kodlama** (label encoding) denir. Hızlıdır ve tek sütuna sığar; ancak önemli bir sorun taşır.
 
-Sıra numarası veren bu kodlama, modele şunu söyler: "Doğu (3), Kuzeyden (1) iki kat daha büyük bir anlam taşıyor. Ve Merkez (0) ile Doğu (3) arasındaki fark, Merkez ile Kuzey (1) arasındaki farkın üç katı." Bu ilişkilerin hiçbiri gerçek değildir. Semt isimleri sıralı ya da sayısal bir yapıya sahip değildir; bunlar eşit düzeyde birbirinden bağımsız kategorilerdir.
+Sıra numarası veren bu kodlama modele şunu söyler: "Doğu (3), Kuzey'in (1) üç katıdır; Merkez (0) ile Doğu (3) arasındaki fark, Merkez ile Kuzey (1) arasındaki farkın üç katıdır." Bu ilişkilerin hiçbiri gerçek değildir. Semt adları arasında sıra ya da büyüklük ilişkisi yoktur; birbirinden bağımsız, eşit düzeyde kategorilerdir.
 
-Tıpkı çantanızdaki renklere sıra numarası verip "kırmızı=1, mavi=2, yeşil=3" diye kodladığınızda, modele "yeşil iki mavi ediyor" demeniz gibi.
+Çantadaki kalemlerin renklerini "kırmızı = 1, mavi = 2, yeşil = 3" diye kodlamak, modele "kırmızı ile mavinin toplamı yeşildir" demek gibidir.
 
-### 1.2 Doğru Yaklaşım: Bir Sütunu Birden Fazla Sütuna Yay
+### 1.2 Doğru Yaklaşım: Bir Sütunu Birden Fazla Sütuna Yaymak
 
-**OneHot Encoding** (Tek-Sıcak Kodlama — sıcak Latince `calere`, "ısınmak" anlamına gelir, "aktif olan" için mecazi kullanım) her kategori için ayrı bir ikili (binary) sütun açar. Bir satırda hangi kategori aktifse o sütunun değeri `1`, diğerleri `0` olur. Aynı anda yalnızca bir sütun "sıcak" (1) olabilir.
+**OneHot Encoding** her kategori için ayrı bir ikili (binary) sütun açar. Bir satırda hangi kategori geçerliyse o sütunun değeri `1`, diğerleri `0` olur. Terim sayısal elektronikten gelir: "one-hot" kodlamada bir bit dizisindeki bitlerden yalnızca biri "sıcak", yani etkin (1) durumdadır.
 
-[Şekil 1: OneHot Encoding Dönüşümü](images/onehot_encoding.svg)
+![Şekil 1: OneHot Encoding dönüşümü](images/onehot_encoding.svg)
 
 ### 1.3 Kukla Değişken Tuzağı (Dummy Variable Trap)
 
-Dört semtimiz varsa dört sütun mı oluşturmalıyız? **Hayır.** Bu noktada matematiksel bir sorun ortaya çıkar.
-
-Dört kategorimiz için dört sütun açtığımızda, dördüncü sütun her zaman diğer üçünün bir fonksiyonudur:
+Dört semt için dört sütun mu açılmalıdır? Doğrusal regresyonda bu bir sorun yaratır. Dört kategori için dört sütun açıldığında sütunlardan biri her zaman diğer üçünün bir fonksiyonudur:
 
 ```text
-semt_Merkez = 1 − semt_Kuzey − semt_Güney − semt_Doğu
+semt_Doğu = 1 − semt_Güney − semt_Kuzey − semt_Merkez
 ```
 
-Modeliniz bir doğrusal ilişki kümesiyle çalışıyorsa (regresyon, destek vektör makineleri, yapay sinir ağları) bu doğrusal bağımlılık, parametre tahmini sırasında **Çoklu Doğrusallık** (Multicollinearity) sorununa yol açar. Matrisin tersini almanız gerektiğinde matris tekilleşir (singular), yani tersi yoktur.
+Sabit terimli (intercept) doğrusal regresyon gibi en küçük kareler (ordinary least squares, OLS) yöntemlerinde bu tam doğrusal bağımlılık, $X^{T}X$ matrisini tekil (singular) yapar: Matrisin tersi yoktur ve katsayılar tek biçimde belirlenemez. Bu duruma **tam çoklu doğrusallık** (perfect multicollinearity) denir. Düzenlileştirme (regularization) kullanan modeller, ağaç tabanlı modeller ve yapay sinir ağları matris tersi almadığı için bu tuzağa düşmez; ancak gereksiz bir sütunun atılması onlar için de zararsızdır.
 
-Çözüm basittir: `k` kategoriniz varsa `k−1` sütun açın. Dışarıda bıraktığınız kategori referans kategorisi olur; diğer tüm sütunlar o referansa göre yorumlanır. `pandas`'ta `drop_first=True`, scikit-learn'de `drop='first'` parametresi bunu otomatik yapar.
+Çözüm basittir: $k$ kategori için $k-1$ sütun açılır. Dışarıda bırakılan kategori **referans kategori** olur ve diğer sütunların katsayıları bu referansa göre yorumlanır. `pandas`'ta `drop_first=True`, scikit-learn'de `drop='first'` bunu yapar. Her ikisi de kategorileri **alfabetik** sıralayıp ilkini atar; bu veride referans kategoriler `Doğu` ve `Doğalgaz` olur.
 
 ```python
 # Yöntem 1: pandas ile
 X_encoded = pd.get_dummies(
     df.drop('fiyat_tl', axis=1),
     columns=['semt', 'isitma'],
-    drop_first=True   # Kukla değişken tuzağından kaçınmak için
+    drop_first=True,   # kukla değişken tuzağından kaçınmak için
+    dtype=int          # True/False yerine 1/0
 )
 print(X_encoded.columns.tolist())
-# ['alan_m2', 'bina_yasi', 'oda_sayisi',
-#  'semt_Güney', 'semt_Kuzey', 'semt_Merkez',
-#  'isitma_Elektrik', 'isitma_Kombi']
-# Not: 'semt_Doğu' ve 'isitma_Doğalgaz' referans olarak çıktı
+```
+
+Çıktı:
+
+```text
+['alan_m2', 'bina_yasi', 'oda_sayisi', 'semt_Güney', 'semt_Kuzey', 'semt_Merkez', 'isitma_Elektrik', 'isitma_Kombi']
 ```
 
 ```python
-# Yöntem 2: scikit-learn ColumnTransformer ile (pipeline için önerilir)
+# Yöntem 2: scikit-learn ColumnTransformer ile (iş hattı / pipeline için önerilir)
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 
@@ -114,84 +130,91 @@ preprocessor = ColumnTransformer(transformers=[
     ('num', 'passthrough', sayisal_sutunlar)
 ])
 
-X = df.drop('fiyat_tl', axis=1)
-y = df['fiyat_tl']
+X_transformed = preprocessor.fit_transform(df.drop('fiyat_tl', axis=1))
+print(X_transformed.shape)
+print(preprocessor.get_feature_names_out().tolist())
+```
 
-X_transformed = preprocessor.fit_transform(X)
+Çıktı:
+
+```text
+(300, 8)
+['cat__semt_Güney', 'cat__semt_Kuzey', 'cat__semt_Merkez', 'cat__isitma_Elektrik', 'cat__isitma_Kombi', 'num__alan_m2', 'num__bina_yasi', 'num__oda_sayisi']
 ```
 
 ### 1.4 Ne Zaman OneHot, Ne Zaman Başka Bir Yöntem?
 
-Kategori sayısı az (2–15 arası) ve sırasal bir anlam taşımıyorsa OneHot Encoding doğru tercihtir. Ancak bazı özel durumlar farklı yaklaşımlar gerektirir:
+Kategori sayısı azsa (yaklaşık 2–15) ve kategoriler arasında sıra yoksa OneHot Encoding doğru tercihtir. Bazı durumlar farklı yaklaşımlar gerektirir:
 
 | Durum | Öneri |
 | --- | --- |
-| Sıralı anlam var (örn. `Düşük < Orta < Yüksek`) | Ordinal Encoding |
-| Çok fazla kategori (örn. şehir ismi, 500+ ülke kodu) | Target Encoding veya Embedding |
-| Yalnızca ağaç tabanlı model kullanılıyorsa | Label Encoding de kabul edilebilir |
-| Yüksek kardinalitenin hafızayı şişirdiği durumlar | Hashing Encoding |
+| Sıralı anlam var (örneğin `Düşük < Orta < Yüksek`) | Sıralı kodlama (Ordinal Encoding) |
+| Çok sayıda kategori (örneğin ilçe adları, yaklaşık 250 ülke kodu) | Hedef kodlama (Target Encoding) ya da gömme (embedding) |
+| Yalnızca ağaç tabanlı model kullanılıyor | Etiket kodlama da kabul edilebilir |
+| Yüksek kardinalitenin belleği zorladığı durumlar | Özetleme kodlaması (Hashing Encoding) |
 
-Ağaç tabanlı modeller (Karar Ağacı, Rastgele Orman — Random Forest, XGBoost) aslında Label Encoding ile de çalışabilir, çünkü bu modeller sayıların büyüklüğünü değil yalnızca eşik değerlerini kullanır. Ama doğrusal modellerde ve sinir ağlarında OneHot Encoding tercih edilmelidir.
+Ağaç tabanlı modeller (karar ağacı, Rastgele Orman / Random Forest, XGBoost) etiket kodlamayla da çalışabilir; çünkü sayıların büyüklüğünü değil yalnızca eşik karşılaştırmalarını kullanırlar. Yine de etiket kodlamanın yarattığı yapay sıra, ağacın kategorileri gruplamak için daha fazla bölünme yapmasına yol açabilir. Doğrusal modellerde ve sinir ağlarında OneHot Encoding tercih edilmelidir.
 
 ---
 
 ## 2. Özellik Önemi (Feature Importance)
 
-Modelinizi eğittiniz ve doğruluk metrikleriniz tatmin edici. Şimdi şu soruyu sormak doğaldır: "Bu model hangi değişkenlere bakarak karar veriyor?" Özellik Önemi (Feature Importance) bu soruya sayısal bir cevap verir.
+Model eğitildi ve doğruluk ölçütleri tatmin edici olsun. Sıradaki doğal soru şudur: "Bu model hangi değişkenlere bakarak karar veriyor?" Özellik önemi bu soruya sayısal bir yanıt verir.
 
 ### 2.1 Karar Ağacında Safsızlığın Azalması
 
-Bir karar ağacı (decision tree), veriyi adım adım böler. Her düğümde bir kural sorar: "alan_m2 > 150 mi?" Eğer bu bölünme sonrasında iki grup birbirinden belirgin biçimde ayrışıyorsa, bu özellik iyi bir ayrıştırıcıdır.
+Bir karar ağacı (decision tree) veriyi adım adım böler. Her düğümde bir kural sorar: "`alan_m2` > 150 mi?" Bölünmeden sonra oluşan iki grup kendi içinde daha türdeşse (homojen) bu özellik iyi bir ayırıcıdır. Türdeşlik bir **safsızlık** (impurity) ölçütüyle ölçülür ve ölçüt problemin türüne göre değişir.
 
-Bölünme kalitesini ölçmek için Gini Safsızlığı (Gini Impurity — İtalyan matematikçi Corrado Gini'den) kullanılır:
+**Sınıflandırmada** en yaygın ölçüt Gini safsızlığıdır (Gini impurity; İtalyan istatistikçi Corrado Gini'den):
 
 $$G(D) = 1 - \sum_{k=1}^{K} p_k^2$$
 
-Burada $p_k$, $D$ düğümündeki $k$ sınıfının oranıdır. Safsızlık sıfıra yakın ise düğüm homojen (tüm örnekler aynı sınıfta), bire yakın ise heterojendir.
+Burada $p_k$, $D$ düğümündeki $k$ sınıfının oranıdır. Düğümdeki tüm örnekler aynı sınıftaysa $G = 0$ olur. En büyük değer, sınıfların eşit dağıldığı durumda $1 - 1/K$'dir; iki sınıfta $0.5$, dört sınıfta $0.75$. Entropi tabanlı ölçüt kullanıldığında safsızlıktaki azalmaya **bilgi kazancı** (information gain) denir.
 
-Bir düğümdeki bölünmenin sağladığı **Bilgi Kazanımı** (Information Gain):
+**Regresyonda** (bu nottaki ev fiyatı problemi) safsızlık, düğümdeki hedef değerlerin varyansı, yani ortalama kare hatadır (mean squared error, MSE):
 
-$$\Delta G(D, j) = G(D) - \frac{|D_L|}{|D|} \cdot G(D_L) - \frac{|D_R|}{|D|} \cdot G(D_R)$$
+$$\text{MSE}(D) = \frac{1}{|D|} \sum_{i \in D} \left(y_i - \bar{y}_D\right)^2$$
 
-Burada $D_L$ ve $D_R$ bölünme sonucunda oluşan sol ve sağ alt kümelerdir. $j$ özelliğinin tüm ağaçtaki önemi, bu özelliğin kullanıldığı her düğümdeki kazanımların ağırlıklı toplamıdır.
+Hangi ölçüt kullanılırsa kullanılsın, $j$ özelliğiyle yapılan bir bölünmenin sağladığı safsızlık azalması şöyledir:
+
+$$\Delta I(D, j) = I(D) - \frac{|D_L|}{|D|} \cdot I(D_L) - \frac{|D_R|}{|D|} \cdot I(D_R)$$
+
+Burada $I$ safsızlık ölçütü (Gini ya da MSE), $D_L$ ve $D_R$ bölünme sonucunda oluşan sol ve sağ alt kümelerdir.
 
 ### 2.2 Rastgele Ormanda Özellik Önemi
 
-Rastgele Orman (Random Forest) yüzlerce karar ağacından oluşur. Her ağaçta aynı özellik birden fazla düğümde kullanılabilir, ve her ağaç rastgele bir özellik alt kümesi görür. Bir özelliğin modeldeki toplam önem puanı, tüm ağaçlardaki katkılarının ortalamasıdır:
+Rastgele Orman (Random Forest) çok sayıda karar ağacından oluşur. Her ağaç verinin yerine koymalı bir örneklemi (bootstrap) üzerinde eğitilir ve **her bölünmede** aday özellikler rastgele bir alt kümeden seçilir (Breiman, 2001). Bu alt kümenin büyüklüğünü `max_features` belirler; scikit-learn'de `RandomForestRegressor` için varsayılan değer `1.0`'dır, yani regresyonda varsayılan olarak her bölünmede tüm özellikler değerlendirilir ve rastgelelik yalnızca örneklemeden gelir.
 
-$$\text{FI}(j) = \frac{1}{B} \sum_{b=1}^{B} \sum_{\substack{t \in T_b \\ \text{split}(t)=j}} \frac{n_t}{N} \cdot \Delta G_t$$
+Bir özelliğin ormandaki önem puanı, o özelliğin kullanıldığı tüm düğümlerdeki ağırlıklı safsızlık azalmalarının ağaçlar üzerinden ortalamasıdır:
 
-Burada $B$ ağaç sayısı, $T_b$ $b$'inci ağacın düğümleri, $n_t$ düğüme düşen örnek sayısı ve $N$ toplam örnek sayısıdır. Bu yönteme **MDI** (Mean Decrease in Impurity — Ortalama Safsızlık Azalması) denir.
+$$\text{FI}(j) = \frac{1}{B} \sum_{b=1}^{B} \sum_{\substack{t \in T_b \\ \text{split}(t)=j}} \frac{n_t}{N} \cdot \Delta I_t$$
 
-Puanlar normalizasyon sonrası 0 ile 1 arasına sıkıştırılır ve toplamları 1 eder.
+Burada $B$ ağaç sayısı, $T_b$ $b$'inci ağacın düğümleri, $n_t$ $t$ düğümüne düşen örnek sayısı ve $N$ toplam örnek sayısıdır. Bu yönteme **MDI** (Mean Decrease in Impurity, ortalama safsızlık azalması) denir. scikit-learn her ağacın puanlarını toplamı 1 olacak biçimde normalleştirir; bu nedenle puanlar 0 ile 1 arasındadır ve toplamları 1'dir.
 
-### 2.3 Kod Örneği: Feature Importance
+### 2.3 Kod Örneği: Özellik Önemi
+
+Model eğitilmeden önce veri eğitim ve test kümelerine ayrılır; açıklama yöntemleri de daha sonra bu aynı model ve aynı test kümesi üzerinde çalıştırılacaktır.
 
 ```python
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
-# Veriyi hazırla (önceki bölümdeki X_encoded ve y)
-X = df.drop('fiyat_tl', axis=1)
+X = X_encoded
 y = df['fiyat_tl']
-X_enc = pd.get_dummies(X, columns=['semt', 'isitma'], drop_first=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
-# Model eğit
-rf = RandomForestRegressor(n_estimators=200, random_state=42, n_jobs=-1)
-rf.fit(X_enc, y)
+rf = RandomForestRegressor(n_estimators=200, max_depth=12,
+                           random_state=42, n_jobs=-1)
+rf.fit(X_train, y_train)
+print(f"Test R²: {rf.score(X_test, y_test):.4f}")
 
 # Önem puanlarını al ve sırala
-fi_series = pd.Series(rf.feature_importances_, index=X_enc.columns)
+fi_series = pd.Series(rf.feature_importances_, index=X.columns)
 fi_series = fi_series.sort_values(ascending=False)
-
 print(fi_series.round(3))
-# alan_m2           0.382
-# semt_Merkez       0.221
-# bina_yasi         0.148
-# oda_sayisi        0.122
-# semt_Kuzey        0.071
-# isitma_Doğalgaz   0.038
-# isitma_Kombi      0.018
 
 # Görselleştir
 fi_series.sort_values().plot(kind='barh', figsize=(8, 5), color='steelblue')
@@ -202,41 +225,58 @@ plt.savefig('feature_importance.png', dpi=150)
 plt.show()
 ```
 
-[Şekil 2: Feature Importance — Rastgele Orman Modeli](images/feature_importance_bar.svg)
+Çıktı:
 
-### 2.4 Feature Importance'ın Sınırları
+```text
+Test R²: 0.9867
+alan_m2            0.981
+bina_yasi          0.010
+oda_sayisi         0.003
+semt_Merkez        0.002
+isitma_Elektrik    0.001
+semt_Güney         0.001
+semt_Kuzey         0.001
+isitma_Kombi       0.001
+dtype: float64
+```
 
-Bu yöntem güçlüdür ama körce güvenilmemelidir.
+![Şekil 2: Özellik önemi — Rastgele Orman modeli](images/feature_importance_bar.svg)
 
-**Birinci sorun: Yorumlama eksikliği.** Sonuç şunu söyler: "alan_m2 önemli." Ancak şunu söylemez: "Büyük alan fiyatı artırır mı düşürür mü? Ve ne kadar?" Yönü ve büyüklüğü göremezsiniz.
+Sonuç ilk bakışta şaşırtıcı görünebilir: Semt primi 50.000 ile 200.000 TL arasında değiştiği hâlde `semt_Merkez`'in payı yalnızca 0.002'dir. Bunun nedeni verinin yapısıdır. `alan_m2` 60–249 m² arasında değiştiği için tek başına yaklaşık 2,3 milyon TL'lik bir fark yaratır; fiyat varyansının neredeyse tamamı alandan gelir. MDI, safsızlığı (burada varyansı) en çok azaltan özelliği ödüllendirir; bu nedenle diğer özelliklerin göreli payı çok küçük kalır. Bu durum, önem puanlarının "etkinin TL cinsinden büyüklüğünü" değil "varyans azaltmadaki payı" gösterdiğini hatırlatır.
 
-**İkinci sorun: Küresellik.** Tek bir önem puanı tüm veri setini temsil eder. Bir mahalledeki evler için alan önemliyken, Merkez semtindeki pahalı ama küçük lüks dairelerde alan belki çok da belirleyici değildir. Bu ayrımı göremezsiniz.
+### 2.4 Özellik Öneminin Sınırları
 
-**Üçüncü sorun: Korelasyonlu değişkenler.** İki değişken birbiriyle yüksek korelasyon taşıyorsa (örn. `alan_m2` ve `oda_sayisi`), önem puanları ikisi arasında bölünür. İkisi de düşük görünebilir, oysa ikisi birden yüksek öneme sahiptir.
+Bu yöntem kullanışlıdır, ancak sonuçlarına körü körüne güvenilmemelidir.
 
-Bu sınırların büyük bölümünü ele alan iki araç vardır: SHAP ve LIME. İkisi de yerel açıklama sağlar, ancak birbirinden farklı mekanizmalar ve garantilerle çalışır.
+**Birinci sorun: Yön bilgisi yoktur.** Sonuç "`alan_m2` önemli" der; ancak "büyük alan fiyatı artırır mı, azaltır mı ve ne kadar?" sorusunu yanıtlamaz.
+
+**İkinci sorun: Küreseldir (global).** Tek bir puan tüm veri kümesini temsil eder. Bir evin fiyatında hangi özelliğin ne kadar rol oynadığını, örneğin merkezdeki küçük ama pahalı bir dairede alanın belirleyici olup olmadığını göstermez.
+
+**Üçüncü sorun: İlişkili özellikler.** İki özellik birbiriyle güçlü biçimde ilişkiliyse (örneğin gerçek bir veri kümesinde alan ile oda sayısı) ağaçlar bölünmelerde bazen birini, bazen diğerini kullanır ve önem puanı ikisi arasında paylaşılır. İkisi de olduğundan düşük görünebilir. Bu nottaki yapay veride alan ile oda sayısı birbirinden bağımsız üretilmiştir (korelasyon katsayısı −0.031); bu yüzden burada böyle bir paylaşım görülmez.
+
+**Dördüncü sorun: Yanlılık.** MDI eğitim verisi üzerinden hesaplanır ve çok sayıda farklı değer alan sürekli özellikleri, az değerli (örneğin ikili) özelliklere göre kayırma eğilimindedir. Test verisi üzerinde hesaplanan **permütasyon önemi** (permutation importance, `sklearn.inspection.permutation_importance`) bu yanlılığa karşı daha dayanıklı bir alternatiftir.
+
+Bu sınırların bir kısmını gideren iki araç vardır: SHAP ve LIME. İkisi de tek bir örneğin tahminini açıklayan **yerel** (local) açıklamalar üretir, ancak farklı düzenekler ve güvencelerle çalışır.
 
 ---
 
 ## 3. SHAP Analizi
 
-SHAP, SHapley Additive exPlanations kelimelerinin kısaltmasıdır:
+SHAP, **SH**apley **A**dditive ex**P**lanations (Shapley toplamsal açıklamaları) ifadesinin kısaltmasıdır:
 
-- **SHapley** → Nobel Ekonomi Ödülü sahibi (2012) Amerikalı matematikçi Lloyd Shapley'den
-- **Additive** → Katkılar toplanabilir; tüm özellik katkıları toplanınca tahmin farkını verir
-- **exPlanations** → Açıklamalar
+- **Shapley:** 2012 Nobel İktisat Ödülü'nü (Alvin Roth ile birlikte) alan Amerikalı matematikçi ve iktisatçı Lloyd Shapley'den.
+- **Additive (toplamsal):** Tüm özellik katkıları toplandığında tahmin ile temel değer arasındaki farkı verir. *Additive* sözcüğü Latince *addere* (eklemek) kökünden gelir.
+- **Explanations:** Açıklamalar.
 
-Kavramın kökeni 1950'lerin kooperatif oyun teorisine (cooperative game theory) dayanır. Shapley 1953'te şu soruya yanıt aradı: "Birden fazla oyuncu ortak çalışarak bir ödül kazanırsa, bu ödül oyuncular arasında nasıl adil biçimde paylaştırılır?"
-
-2017'de Lundberg ve Lee bu fikri makine öğrenmesine taşıdı. "Oyuncular" özelliklerdir, "ödül" modelin yaptığı tahmindir.
+Kavramın kökeni işbirlikçi oyun kuramına (cooperative game theory) dayanır. Shapley (1953) şu soruyu yanıtladı: "Birden fazla oyuncu birlikte çalışarak bir ödül kazandığında bu ödül oyuncular arasında nasıl adil biçimde paylaştırılır?" Lundberg ve Lee (2017) bu fikri makine öğrenmesine taşıdı: "Oyuncular" özelliklerdir; paylaştırılan "ödül" ise modelin bir örnek için yaptığı tahmin ile ortalama tahmin arasındaki farktır.
 
 ### 3.1 Fikrin Özü
 
-Mutfak analojisiyle düşünelim. Dört kişilik bir ekip birlikte yemek yarışmasında birincilik kazandı ve 100.000 TL ödül aldı. Kimin katkısı ne kadardı? Başçefin mi, pastacının mı, teslimatçının mı?
+Dört kişilik bir ekip bir yemek yarışmasında birinci olup 100.000 TL ödül kazansın. Kimin katkısı ne kadardı: aşçıbaşının mı, pastacının mı, malzeme sorumlusunun mu?
 
-Shapley değeri şunu hesaplar: Bu kişi farklı takım kombinasyonlarına katılsaydı, her birinde ne kadar ek katkı getirirdi? Tüm bu marjinal katkıların ağırlıklı ortalaması o kişinin adil payıdır.
+Shapley değeri şu soruyu sorar: Bu kişi, diğerlerinin oluşturabileceği her olası takıma katılsaydı her birine ne kadar ek katkı getirirdi? Bu **marjinal katkıların** uygun ağırlıklarla alınmış ortalaması, o kişinin adil payıdır.
 
-Makine öğrenmesine çevirirsek: Bir özellik farklı özellik alt kümeleriyle birlikte olduğunda, her kombinasyona ne kadar ek tahmin değişikliği getiriyor?
+Makine öğrenmesine çevrildiğinde: Bir özellik, diğer özelliklerin her olası alt kümesine eklendiğinde tahmini ne kadar değiştirir?
 
 ### 3.2 Shapley Değeri Formülü
 
@@ -246,151 +286,175 @@ $$\phi_i = \sum_{S \subseteq F \setminus \{i\}} \frac{|S|!\,(|F|-|S|-1)!}{|F|!} 
 
 Burada:
 
-- $F$ : tüm özellikler kümesi
-- $S$ : $i$ özelliği **dışındaki** bir alt küme
-- $v(S)$ : yalnızca $S$ özellikleri bilindiğinde modelin tahmini
-- $v(S \cup \{i\}) - v(S)$ : $i$ özelliğinin $S$'e eklenmesiyle tahminlerdeki değişim (marjinal katkı)
-- $\frac{|S|!\,(|F|-|S|-1)!}{|F|!}$ : bu kombinasyonun karşıladığı sıralama oranı (ağırlık)
+- $F$: tüm özelliklerin kümesi.
+- $S$: $i$ özelliğini **içermeyen** bir alt küme.
+- $v(S)$: yalnızca $S$'deki özelliklerin değerleri bilindiğinde modelin beklenen tahmini (bilinmeyen özellikler veri dağılımı üzerinden ortalanır).
+- $v(S \cup \{i\}) - v(S)$: $i$ özelliğinin $S$'ye eklenmesiyle tahminde oluşan değişim (marjinal katkı).
+- $\frac{|S|!\,(|F|-|S|-1)!}{|F|!}$: özelliklerin tüm olası sıralamaları içinde, $i$'den önce tam olarak $S$'deki özelliklerin geldiği sıralamaların oranı.
 
-Formülün ağırlık kısmı, $i$'nin varlığıyla yokluğu arasındaki farkın hesaplandığı kombinasyonun tüm olası sıralamalar içindeki yüzdesini verir. Tüm olası özellik sıralamalarının ortalamasını alıyorsunuz, denilebilir.
+Formül şu yorumla da okunabilir: Özellikler rastgele bir sırayla tek tek "masaya" gelsin; $i$ özelliği geldiğinde tahmini ne kadar değiştiriyorsa bu değişimin tüm sıralamalar üzerinden ortalaması $\phi_i$'dir.
 
-### 3.3 SHAP'ın Toplamsallık Özelliği
+### 3.3 Elle Hesaplanan Küçük Bir Örnek
 
-SHAP değerlerinin en kritik özelliği şudur: bir örnek için tüm Shapley değerleri toplanınca, temel değerden (base value) tahmine olan farkı tam olarak açıklar.
+Formülü somutlaştırmak için iki oyunculu küçük bir "oyun" düşünelim. Bir dükkânı iki ortak, A ve B, işletsin. Yalnızca A çalıştığında günlük kazanç 60 TL, yalnızca B çalıştığında 20 TL, ikisi birlikte çalıştığında 100 TL, hiçbiri çalışmadığında 0 TL olsun: $v(\varnothing) = 0$, $v(\{A\}) = 60$, $v(\{B\}) = 20$, $v(\{A, B\}) = 100$. İki olası sıralama vardır:
+
+| Sıralama | A'nın marjinal katkısı | B'nin marjinal katkısı |
+| :---: | :---: | :---: |
+| A, sonra B | $v(\{A\}) - v(\varnothing) = 60$ | $v(\{A,B\}) - v(\{A\}) = 40$ |
+| B, sonra A | $v(\{A,B\}) - v(\{B\}) = 80$ | $v(\{B\}) - v(\varnothing) = 20$ |
+| **Ortalama ($\phi$)** | **70** | **30** |
+
+$\phi_A + \phi_B = 70 + 30 = 100 = v(\{A,B\}) - v(\varnothing)$: Paylar toplam kazancı eksiksiz dağıtır. Aynı sonuç formülden de elde edilir: $\phi_A = \tfrac{0!\,1!}{2!}(60-0) + \tfrac{1!\,0!}{2!}(100-20) = 30 + 40 = 70$. Birlikte çalışmanın getirdiği 20 TL'lik ek kazanç ($100 - 60 - 20$) iki ortak arasında eşit bölünmüştür.
+
+### 3.4 SHAP'ın Toplamsallık Özelliği
+
+SHAP değerlerinin en önemli özelliği şudur: Bir örnek için tüm Shapley değerleri toplandığında, temel değerden (base value) modelin tahminine olan fark tam olarak açıklanır:
 
 $$f(x) = \phi_0 + \sum_{i=1}^{M} \phi_i$$
 
 Burada:
 
-- $f(x)$ : modelin bu örnek için verdiği tahmin
-- $\phi_0$ : temel değer, $E[f(x)]$ — tüm eğitim verisininin ortalama tahmini
-- $\phi_i$ : $i$'inci özelliğin bu örneğe katkısı (pozitif veya negatif olabilir)
+- $f(x)$: modelin bu örnek için tahmini.
+- $\phi_0$: temel değer, $E[f(X)]$; modelin eğitim verisi üzerindeki ortalama tahmini.
+- $\phi_i$: $i$'inci özelliğin bu örneğe katkısı (pozitif ya da negatif olabilir).
+- $M$: özellik sayısı.
 
-Bu toplamsallık özelliği SHAP'ı güçlü kılan şeydir. Diğer yorumlama yöntemlerinin çoğu bu garantiyi vermez.
+Bu özellik yerel doğruluk (local accuracy) olarak da adlandırılır; diğer açıklama yöntemlerinin çoğu bu güvenceyi vermez.
 
-### 3.4 Kod Örneği: SHAP
+### 3.5 Kod Örneği: SHAP
 
 ```python
 import shap
 
-# TreeExplainer: ağaç tabanlı modeller için optimize edilmiş hızlı hesaplama
+# TreeExplainer: ağaç tabanlı modeller için hızlı ve kesin hesaplama
 explainer   = shap.TreeExplainer(rf)
-shap_values = explainer.shap_values(X_enc)
-# shap_values shape: (300, 8) — her örnek x her özellik için bir değer
+shap_values = explainer.shap_values(X_test)
+print(shap_values.shape)   # (test örneği sayısı, özellik sayısı)
 
-# Temel değer (E[f(x)])
-print(f"Temel Değer: {explainer.expected_value:,.0f} TL")
-# Temel Değer: 851,423 TL
+# Temel değer E[f(X)]. Yeni shap sürümlerinde expected_value
+# tek elemanlı bir dizi olarak döner; bu yüzden sayıya çevrilir.
+base_value = float(np.ravel(explainer.expected_value)[0])
+print(f"Temel Değer: {base_value:,.0f} TL")
 
-# Tek bir örnek için SHAP değerlerine bakalım (50. satır)
-idx = 50
+# Test kümesinin ilk satırı için SHAP değerleri
+idx = 0
 shap_df = pd.DataFrame({
-    'Özellik':     X_enc.columns,
-    'Özellik Değeri': X_enc.iloc[idx].values,
-    'SHAP Değeri': shap_values[idx]
+    'Özellik':        X_test.columns,
+    'Özellik Değeri': X_test.iloc[idx].values,
+    'SHAP Değeri':    shap_values[idx].round(0)
 }).sort_values('SHAP Değeri', ascending=False)
+print(f"Örnek: satır {X_test.index[idx]}")
+print(shap_df.to_string(index=False))
 
-print(shap_df)
-# Özellik         Özellik Değeri  SHAP Değeri
-# alan_m2                   185   +118,420
-# semt_Merkez                 1    +96,300
-# oda_sayisi                  4    +14,150
-# isitma_Elektrik             0     -4,820
-# bina_yasi                  27   -24,600
-
-# Tahmin kontrolü
-toplam_phi = shap_values[idx].sum() + explainer.expected_value
-print(f"Tahmin (f(x)):  {rf.predict(X_enc.iloc[[idx]])[0]:,.0f} TL")
-print(f"Temel + SHAP:   {toplam_phi:,.0f} TL")
-# İki değer birbirine eşit — toplamsallık kanıtlandı
+# Toplamsallık kontrolü
+print(f"Tahmin (f(x)):  {rf.predict(X_test.iloc[[idx]])[0]:,.0f} TL")
+print(f"Temel + SHAP:   {base_value + shap_values[idx].sum():,.0f} TL")
 ```
 
+Çıktı:
+
+```text
+(60, 8)
+Temel Değer: 2,227,614 TL
+Örnek: satır 203
+        Özellik  Özellik Değeri  SHAP Değeri
+        alan_m2             190     368377.0
+      bina_yasi               3      66485.0
+    semt_Merkez               1      23188.0
+isitma_Elektrik               0       9733.0
+     semt_Güney               0       1387.0
+     semt_Kuzey               0       -379.0
+   isitma_Kombi               0      -2210.0
+     oda_sayisi               2     -22541.0
+Tahmin (f(x)):  2,671,655 TL
+Temel + SHAP:   2,671,655 TL
+```
+
+İki değer birbirine eşittir; toplamsallık sayısal olarak doğrulanmıştır.
+
+**Çıktının yorumu.** 203 numaralı ev 190 m², 3 yaşında, Merkez semtinde ve doğalgazlı bir dairedir. Ortalama tahmin 2.227.614 TL'dir; bu evin tahmini 2.671.655 TL'dir. Farkın büyük kısmını ortalamanın (yaklaşık 155 m²) üzerindeki alan (+368.377 TL) ve binanın yeniliği (+66.485 TL) açıklar. İki oda ise ortalamanın altında olduğu için tahmini düşürür (−22.541 TL). Dikkat çekici bir ayrıntı: `isitma_Elektrik = 0` değeri tahmini artırır (+9.733 TL). Bu evin elektrikli ısıtmalı **olmaması**, elektrikli ısıtmanın düşük primini taşımadığı anlamına gelir; SHAP'ta bir özelliğin "yokluğu" da katkı üretebilir. Modelin semt etkisini (+23.188 TL) veri üretim sürecindeki gerçek farktan küçük bulması ise Bölüm 2.3'te açıklanan durumla tutarlıdır: Model, alanın baskın olduğu bu küçük veride semt etkisini tam olarak öğrenememiştir. SHAP **modeli** açıklar; veriyi üreten gerçek süreci değil.
+
 ```python
-# --- SHAP Görselleştirmeleri ---
+# --- SHAP görselleştirmeleri ---
 
-# 1. Summary Plot (Özet Grafik): tüm veri için her özelliğin dağılımı
-shap.summary_plot(shap_values, X_enc, plot_type='dot')
-# Yatay eksen: SHAP değeri (ne kadar büyükse o kadar güçlü etki)
-# Renk: özelliğin yüksek mi (kırmızı) düşük mü (mavi) değer aldığı
+# 1. Özet grafik (summary plot): tüm test örnekleri için her özelliğin dağılımı
+shap.summary_plot(shap_values, X_test, plot_type='dot')
+# Yatay eksen: SHAP değeri (sağ: tahmini artırır, sol: azaltır)
+# Renk: özelliğin değeri (kırmızı: yüksek, mavi: düşük)
 
-# 2. Bar Plot (Çubuk Grafik): ortalama mutlak SHAP değerleri
-shap.summary_plot(shap_values, X_enc, plot_type='bar')
+# 2. Çubuk grafik: ortalama mutlak SHAP değerleri (küresel önem)
+shap.summary_plot(shap_values, X_test, plot_type='bar')
 
-# 3. Waterfall Plot (Şelale Grafik): tek örnek açıklaması
+# 3. Şelale grafiği (waterfall plot): tek bir örneğin açıklaması
 shap.waterfall_plot(
     shap.Explanation(
-        values    = shap_values[idx],
-        base_values = explainer.expected_value,
-        data        = X_enc.iloc[idx],
-        feature_names = X_enc.columns.tolist()
+        values        = shap_values[idx],
+        base_values   = base_value,
+        data          = X_test.iloc[idx].values,
+        feature_names = X_test.columns.tolist()
     )
 )
 
-# 4. Force Plot (Kuvvet Grafici): tek örnek, inline
-shap.initjs()
-shap.force_plot(
-    explainer.expected_value,
-    shap_values[idx],
-    X_enc.iloc[idx]
-)
+# 4. Kuvvet grafiği (force plot): tek örnek, yatay gösterim
+shap.force_plot(base_value, shap_values[idx], X_test.iloc[idx], matplotlib=True)
 ```
 
-[Şekil 3: SHAP Katkı Grafiği — Tek Örnek](images/shap_waterfall.svg)
+Jupyter not defterinde etkileşimli (JavaScript tabanlı) kuvvet grafiği için `shap.initjs()` çağrılıp `matplotlib=True` seçeneği kaldırılabilir.
 
-### 3.5 TreeSHAP ve KernelSHAP
+![Şekil 3: SHAP şelale grafiği — test kümesindeki 203 numaralı ev](images/shap_waterfall.svg)
 
-Shapley değerinin teorik hesabı üstel karmaşıklığa sahiptir: $2^{|F|}$ kombinasyon denenmesi gerekir. 8 özellik için 256, 20 özellik için zaten 1 milyonun üzerinde kombinasyon var. Bu nedenle uygulamada iki pratik yaklaşım kullanılır:
+### 3.6 TreeSHAP ve KernelSHAP
 
-**TreeSHAP** — Ağaç yapısından yararlanarak Shapley değerlerini polinom zamanda (polynomial time) hesaplar. Karar ağaçları, Rastgele Orman, XGBoost, LightGBM gibi ağaç tabanlı modellerde kullanılır. `shap.TreeExplainer` bunu çağırır.
+Shapley değerinin formüldeki gibi doğrudan hesaplanması üstel karmaşıklığa sahiptir: Her özellik için $2^{|F|-1}$ alt kümenin değerlendirilmesi gerekir. 8 özellikli bir modelde tüm alt kümelerin sayısı $2^8 = 256$, 20 özellikli bir modelde ise $2^{20} = 1\,048\,576$'dır. Bu nedenle uygulamada iki pratik yaklaşım kullanılır:
 
-**KernelSHAP** — Model bağımsızdır (model-agnostic). Herhangi bir kara kutu (black-box) modele uygulanabilir. Özellik alt kümelerini rastgele örnekleyerek yaklaşık Shapley değerleri hesaplar. Daha yavaştır. `shap.KernelExplainer` ile çağrılır.
+**TreeSHAP:** Ağaç yapısından yararlanarak Shapley değerlerini polinom zamanda ve kesin olarak hesaplar (Lundberg ve ark., 2020). Karar ağacı, Rastgele Orman, XGBoost, LightGBM gibi ağaç tabanlı modellerde kullanılır; `shap.TreeExplainer` bu yöntemi uygular.
+
+**KernelSHAP:** Modelden bağımsızdır (model-agnostic); herhangi bir kara kutu (black-box) modele uygulanabilir. Özellik alt kümelerini örnekleyip ağırlıklı doğrusal regresyonla Shapley değerlerine yaklaşır. Daha yavaştır ve sonuçları örneklemeye bağlı olarak küçük farklılıklar gösterebilir. `shap.KernelExplainer` ile çağrılır.
 
 ---
 
 ## 4. LIME — Local Interpretable Model-agnostic Explanations
 
-LIME, Ribeiro, Singh ve Guestrin'in 2016 tarihli "Why Should I Trust You?" başlıklı makalesiyle tanıtıldı. İsim açılımı tekniğin özünü özetler:
+LIME, Ribeiro, Singh ve Guestrin'in 2016 tarihli "Why Should I Trust You?" başlıklı makalesiyle tanıtılmıştır. Adının açılımı yöntemin özünü özetler:
 
-- **Local** → Yerel: tek bir tahmini açıklar
-- **Interpretable** → Yorumlanabilir: çıktı basit, insan tarafından okunabilir bir modeldir
-- **Model-agnostic** → Model bağımsız: herhangi bir kara kutuda (black-box) çalışır
-- **Explanations** → Açıklamalar
+- **Local (yerel):** Tek bir tahmini açıklar.
+- **Interpretable (yorumlanabilir):** Çıktı, insanın okuyabileceği basit bir modeldir.
+- **Model-agnostic (modelden bağımsız):** Herhangi bir kara kutu modelde çalışır.
+- **Explanations:** Açıklamalar.
 
-### 4.1 Temel Fikir: Zor Durumda Basit Harita
+### 4.1 Temel Fikir: Karmaşık Bir Modelin Yerel Haritası
 
-Karmaşık bir modelin küresel yapısı doğrusal olmayabilir. Ama herhangi bir noktanın çevresine baktığınızda, o küçük bölgede model davranışı çoğunlukla yeterince pürüzsüzdür ve basit bir doğrusal modelle iyi temsil edilebilir. Şehrin tüm yol ağı haritası karmaşıktır; ama o an bulunduğunuz mahalleyi bir peçeteye çizmek kolaydır ve işe yarar.
+Karmaşık bir modelin küresel yapısı doğrusal olmayabilir. Ancak herhangi bir noktanın yakın çevresinde model davranışı çoğu zaman yeterince düzgündür ve basit bir doğrusal modelle yaklaşık olarak temsil edilebilir. Bir şehrin tüm yol ağı karmaşıktır; ama o an bulunulan mahallenin krokisini bir kâğıda çizmek kolaydır ve iş görür.
 
-LIME tam olarak bunu yapar: sorgu noktasının çevresinde bir doğrusal model uydurur ve bu modelin katsayılarını özellik katkısı olarak kullanır.
+LIME tam olarak bunu yapar: Sorgu noktasının çevresinde doğrusal bir model uydurur ve bu modelin katsayılarını özellik katkıları olarak sunar.
 
 ### 4.2 LIME'ın Çalışma Adımları
 
-Beş adımı vardır:
+1. **Sorgu noktası $x$'in seçilmesi:** Açıklanmak istenen tek bir örnek.
+2. **Pertürbasyon (perturbation, bozma):** $x$'in özellikleri rastgele değiştirilerek bir komşuluk örneklemi oluşturulur: $z_1, z_2, \ldots, z_n$. *Perturbation* sözcüğü Latince *perturbare* (karıştırmak, bozmak) kökünden gelir.
+3. **Kara kutunun çalıştırılması:** Her $z_i$ için $f(z_i)$ tahmini alınır.
+4. **Ağırlıklandırma:** Her $z_i$'ye $x$'e uzaklığına göre bir yakınlık ağırlığı verilir; uzak örnekler daha az ağırlık taşır.
+5. **Yerel modelin uydurulması:** Ağırlıklı veriye basit bir doğrusal regresyon uydurulur; katsayıları LIME açıklamasıdır.
 
-1. **Sorgu noktası x seç:** Açıklamak istediğiniz tek bir örnek.
-2. **Pertürbe et:** x'in özelliklerini rastgele değiştirerek bir komşuluk örneklemi oluştur: $z_1, z_2, \ldots, z_n$.
-3. **Kara kutuyu çalıştır:** Her pertürbe edilmiş örnek için $f(z_i)$ tahminini al.
-4. **Ağırlıklandır:** Her $z_i$'nin x'e olan uzaklığına göre bir yakınlık puanı hesapla. Uzak örnekler daha az ağırlık taşır.
-5. **Yerel model uydur:** Ağırlıklı bu verilere basit bir lineer regresyon uydur. Bu modelin katsayıları LIME açıklamasıdır.
+### 4.3 LIME Eniyileme Problemi
 
-### 4.3 LIME Optimizasyon Formülü
-
-LIME'ın resmi ifadesi bir optimizasyon problemidir:
+LIME'ın biçimsel tanımı bir eniyileme (optimization) problemidir:
 
 $$\xi(x) = \arg\min_{g \in G} \underbrace{\mathcal{L}(f, g, \pi_x)}_{\text{yerel uyum kaybı}} + \underbrace{\Omega(g)}_{\text{karmaşıklık cezası}}$$
 
 Burada:
 
-- $G$ : yorumlanabilir modeller ailesi (örn. lineer regresyonlar, küçük karar ağaçları)
-- $f$ : asıl kara kutu model
-- $g$ : seçilen yerel basit model
-- $\mathcal{L}$ : $g$'nin $f$'e yerel olarak ne kadar iyi uyduğunu ölçen kayıp fonksiyonu
-- $\Omega(g)$ : modelin karmaşıklık cezası (kullanılan özellik sayısını sınırlar)
+- $G$: yorumlanabilir modeller ailesi (örneğin doğrusal modeller, küçük karar ağaçları).
+- $f$: açıklanan kara kutu model.
+- $g$: seçilen yerel basit model.
+- $\mathcal{L}$: $g$'nin $f$'ye $x$ çevresinde ne kadar iyi uyduğunu ölçen kayıp fonksiyonu.
+- $\Omega(g)$: modelin karmaşıklık cezası (örneğin kullanılan özellik sayısını sınırlar).
 
-Yakınlık ağırlık fonksiyonu üssel çekirdek (exponential kernel) kullanır:
+Yakınlık ağırlıkları üstel bir çekirdekle (exponential kernel) hesaplanır:
 
 $$\pi_x(z) = \exp\!\left(-\frac{d(x, z)^2}{\sigma^2}\right)$$
 
-$d(x,z)$ sorgu noktası ile pertürbe edilmiş örnek arasındaki mesafe (Öklid veya kosinüs), $\sigma$ ise çekirdeğin bant genişliğidir. Uzak örnekler üssel olarak küçülür ve yerel modele neredeyse hiç katkı vermez.
+$d(x,z)$ sorgu noktası ile pertürbe edilmiş örnek arasındaki uzaklık (Öklid ya da kosinüs), $\sigma$ ise çekirdeğin bant genişliğidir. Uzak örneklerin ağırlığı üstel olarak küçülür ve yerel modele neredeyse hiç katkı vermez.
 
 ### 4.4 Kod Örneği: LIME
 
@@ -398,37 +462,35 @@ $d(x,z)$ sorgu noktası ile pertürbe edilmiş örnek arasındaki mesafe (Öklid
 # pip install lime
 from lime import lime_tabular
 
-# LIME Explainer — eğitim verisi istatistikleri üzerinde kurulur
+# OneHot sütunlarının konumları: LIME'a bunların kategorik olduğu bildirilir
+kategorik_indeksler = [X_train.columns.get_loc(c) for c in X_train.columns
+                       if c.startswith(('semt_', 'isitma_'))]
+
 lime_explainer = lime_tabular.LimeTabularExplainer(
-    training_data = X_train.values,
-    feature_names = X_train.columns.tolist(),
-    mode          = 'regression',
-    random_state  = 42
+    training_data        = X_train.values,
+    feature_names        = X_train.columns.tolist(),
+    categorical_features = kategorik_indeksler,
+    mode                 = 'regression',
+    random_state         = 42
 )
 
-# Tek bir örneği açıkla
+# SHAP ile aynı örneği açıkla
 idx = 0
-
 lime_exp = lime_explainer.explain_instance(
-    data_row   = X_test.iloc[idx].values,
-    predict_fn = rf.predict,
-    num_features = len(X_train.columns)
+    data_row     = X_test.iloc[idx].values,
+    predict_fn   = rf.predict,
+    num_features = len(X_train.columns),
+    num_samples  = 5000
 )
 
 print(f"Yerel Model R²:             {lime_exp.score:.3f}")
-print(f"LIME Tahmini (yerel model): {lime_exp.predicted_value:,.0f} TL")
+print(f"LIME Tahmini (yerel model): {lime_exp.local_pred[0]:,.0f} TL")
 print(f"Kara Kutu Tahmini:          {rf.predict(X_test.iloc[[idx]])[0]:,.0f} TL")
-print()
-print("Özellik Katkıları (yerel lineer katsayılar):")
+print("Özellik Katkıları (yerel doğrusal katsayılar):")
 for kural, katki in sorted(lime_exp.as_list(), key=lambda x: abs(x[1]), reverse=True):
-    print(f"  {kural:45s}  {katki:+,.0f}")
-# alan_m2 > 140                              +90,200
-# semt_Merkez = 1                            +72,400
-# oda_sayisi > 3                             +11,800
-# bina_yasi > 20                             -18,100
+    print(f"  {kural:30s}  {katki:+,.0f}")
 
 # Görselleştir
-import matplotlib.pyplot as plt
 fig = lime_exp.as_pyplot_figure()
 fig.suptitle(f"LIME Açıklaması — Örnek #{X_test.index[idx]}", fontsize=12)
 plt.tight_layout()
@@ -436,20 +498,38 @@ plt.savefig('lime_explanation.png', dpi=150)
 plt.show()
 ```
 
-[Şekil 5: LIME — Sorgu Noktası Çevresi ve Yerel Lineer Model](images/lime_concept.svg)
+Çıktı:
 
-LIME çıktısındaki kuralların ("alan_m2 > 140") sürekli değişkenleri otomatik olarak aralıklara (bin) böldüğüne dikkat edin. Bu binleştirme SHAP'ın kesin değer üretmesinden farklıdır; açıklamayı bazen daha az hassas kılar.
+```text
+Yerel Model R²:             0.084
+LIME Tahmini (yerel model): 2,556,000 TL
+Kara Kutu Tahmini:          2,671,655 TL
+Özellik Katkıları (yerel doğrusal katsayılar):
+  162.00 < alan_m2 <= 206.25      +427,786
+  bina_yasi <= 11.00              +48,651
+  semt_Güney=0                    -42,723
+  isitma_Kombi=0                  -27,977
+  isitma_Elektrik=0               +12,878
+  semt_Merkez=1                   +12,556
+  oda_sayisi <= 2.00              -7,528
+  semt_Kuzey=0                    -2,745
+```
+
+![Şekil 4: LIME — sorgu noktası çevresi ve yerel doğrusal model](images/lime_concept.svg)
+
+**Çıktının yorumu.** LIME, sürekli özellikleri varsayılan olarak eğitim verisinin çeyreklerine göre aralıklara (bin) böler; `162.00 < alan_m2 <= 206.25` kuralı bu ayrıklaştırmanın (discretization) sonucudur. Katkıların yönü SHAP ile büyük ölçüde örtüşür (alan ve bina yaşı artırıcı, oda sayısı azaltıcı). Ancak yerel modelin uyumu çok düşüktür ($R^2 = 0.084$) ve yerel modelin tahmini (2.556.000 TL) kara kutunun tahmininden (2.671.655 TL) belirgin biçimde farklıdır. Bu, LIME'ın en önemli uyarısını somut olarak gösterir: Yerel doğrusal model bu noktada kara kutuyu iyi temsil etmiyorsa katsayılar güvenilir bir açıklama değildir. `categorical_features` parametresi verilmeseydi LIME, OneHot sütunlarını da sürekli değişken gibi aralıklara bölecek ve `0.00 < semt_Merkez <= 1.00` gibi okunması güç kurallar üretecekti.
 
 ### 4.5 LIME'ın Güçlü Yanı: Görüntü ve Metin
 
-LIME'ın SHAP'tan belirgin biçimde üstün olduğu alan, **veri tipi esnekliğidir**. Aynı framework tabular verinin ötesinde doğrudan görüntü ve metne uygulanabilir:
+LIME'ın SHAP'tan belirgin biçimde daha kolay uygulandığı alan **veri türü esnekliğidir**. Aynı çerçeve tablo verisinin ötesinde görüntü ve metne de doğrudan uygulanabilir:
 
-**Görüntü:** Pikselleri "süper-piksel" adı verilen bölgelere böler. Her bölgeyi açıp kapatarak kara kutunun tepkisini ölçer. "Model bu X-ray görüntüsünü anormal olarak sınıflandırdı; buna hangi bölge yol açtı?" sorusu yanıtlanabilir.
+**Görüntü:** Pikseller "süper piksel" adı verilen bölgelere ayrılır. Bölgeler açılıp kapatılarak kara kutunun tepkisi ölçülür. "Model bu röntgen görüntüsünü anormal olarak sınıflandırdı; buna hangi bölge yol açtı?" sorusu yanıtlanabilir.
 
-**Metin:** Kelimeleri teker teker çıkararak hangi kelimenin sınıflandırma kararını etkilediğini ölçer. Duygu analizi, spam tespiti, hukuki belge sınıflandırması gibi alanlarda doğrudan kullanılabilir.
+**Metin:** Sözcükler tek tek çıkarılarak hangi sözcüğün sınıflandırma kararını etkilediği ölçülür. Duygu analizi, istenmeyen ileti (spam) tespiti ve hukuki belge sınıflandırması gibi alanlarda kullanılabilir.
 
 ```python
-# Metin sınıflandırması için LIME (yapı örneği)
+# Metin sınıflandırması için LIME (yapı örneği; metin_modeli, predict_proba
+# yöntemi olan ve ham metin alan eğitilmiş bir sınıflandırıcıdır)
 from lime.lime_text import LimeTextExplainer
 
 text_explainer = LimeTextExplainer(class_names=['olumsuz', 'olumlu'])
@@ -463,67 +543,94 @@ text_exp.show_in_notebook()
 
 ### 4.6 LIME'ın Sınırları
 
-**Stokastisite.** Pertürbasyon rastgeleliğe dayandığından aynı örneği iki kez açıklarsanız biraz farklı katsayılar elde edebilirsiniz. Kritik kararlar için bu güvenilirlik sorusu yaratır. `random_state` sabitlense de pertürbasyon sayısı ve bant genişliği seçimi sonuçları etkiler.
+**Rastgelelik (stochasticity).** Pertürbasyon rastgeleliğe dayandığından aynı örnek iki kez açıklandığında biraz farklı katsayılar elde edilebilir. `random_state` sabitlense de örnek sayısı (`num_samples`) ve çekirdek genişliği seçimi sonuçları etkiler.
 
-**Yerel model uyum kalitesi.** $R^2$ değeri düşükse yerel lineer model o bölgede kara kutuyu iyi temsil etmiyor demektir. Her LIME çıktısında $R^2$ değerini kontrol etmek iyi bir alışkanlıktır; 0.80 altı sonuçlara temkinli yaklaşılmalıdır.
+**Yerel model uyumu.** $R^2$ değeri düşükse yerel doğrusal model o bölgede kara kutuyu iyi temsil etmiyor demektir; Bölüm 4.4'teki örnek bunun somut bir göstergesidir. Her LIME çıktısında $R^2$ değerini kontrol etmek iyi bir alışkanlıktır.
 
-**Toplamsallık garantisi yok.** SHAP'tan farklı olarak, LIME katsayılarının toplamının $f(x) - E[f(x)]$'e eşit olacağına dair matematiksel bir güvence yoktur.
+**Toplamsallık güvencesi yoktur.** SHAP'tan farklı olarak LIME katsayılarının toplamının $f(x) - E[f(X)]$ farkına eşit olacağına dair matematiksel bir güvence yoktur.
 
-**Binleştirme bilgi kaybı.** Tabular LIME, sürekli özellikleri "alan_m2 > 140" gibi aralıklara böler. Bu bazı durumlarda açıklamanın hassasiyetini düşürür.
+**Ayrıklaştırmanın yol açtığı bilgi kaybı.** Tablo verisinde LIME sürekli özellikleri `162.00 < alan_m2 <= 206.25` gibi aralıklara böler; bu durum açıklamanın hassasiyetini düşürebilir.
 
 ---
 
-## 5. Üç Yöntemin Karşılaştırması
+## 5. Üç Açıklama Yönteminin Karşılaştırılması
 
-Bu üç araç birbiriyle rekabet etmez, birbirini tamamlar. Hangisini ne zaman kullanacağınızı soru tipine göre belirlemek gerekiyor.
+Bu üç açıklama aracı birbiriyle yarışmaz, birbirini tamamlar. Hangisinin ne zaman kullanılacağı sorulan soruya göre belirlenir.
 
-[Şekil 4: Global ve Yerel Açıklama Karşılaştırması — Feature Importance / SHAP / LIME](images/fi_shap_lime_comparison.svg)
+![Şekil 5: Küresel ve yerel açıklamaların karşılaştırılması — Özellik Önemi, SHAP ve LIME](images/fi_shap_lime_comparison.svg)
+
+![Şekil 6: Özellik önemi ve SHAP — aynı model, iki farklı soru](images/shap_vs_fi.svg)
 
 ### 5.1 Temel Farklar
 
-| Kriter | Feature Importance (MDI) | SHAP | LIME |
+| Ölçüt | Özellik Önemi (MDI) | SHAP | LIME |
 | --- | --- | --- | --- |
-| **Kapsam** | Küresel — tüm model | Yerel + Küresel | Yerel |
-| **Yön bilgisi** | Yok (+/−?) | Var (+/−) | Var (+/−) |
-| **Büyüklük** | Göreli oran (0–1) | Orijinal birim (TL…) | Katsayı (göreli) |
-| **Toplamsallık garantisi** | Yok | Var | Yok |
-| **Tutarlılık** | Deterministik | Deterministik | Stokastik |
-| **Model bağımsızlığı** | Hayır (ağaç gerekir) | Kısmi (KernelSHAP ile) | Tam |
-| **Görüntü / metin desteği** | Hayır | Kısmi | Tam |
-| **Hız** | Çok hızlı | Hızlı (TreeSHAP) | Orta |
-| **Korelasyona duyarlılık** | Yüksek | Daha robust | Yüksek |
+| **Kapsam** | Küresel — tüm model | Yerel ve küresel | Yerel |
+| **Yön bilgisi** | Yok | Var (+/−) | Var (+/−) |
+| **Büyüklük birimi** | Göreli pay (0–1) | Hedefin birimi (TL) | Yerel katsayı (TL) |
+| **Toplamsallık güvencesi** | Yok | Var | Yok |
+| **Tekrarlanabilirlik** | Aynı eğitilmiş model için sabit | TreeSHAP kesin; KernelSHAP örneklemeye bağlı | Örneklemeye bağlı |
+| **Modelden bağımsızlık** | Hayır (ağaç gerekir) | Kısmi (KernelSHAP ile tam) | Tam |
+| **Görüntü / metin desteği** | Hayır | Var, ancak uygulaması daha zahmetli | Doğrudan |
+| **Hız** | Çok hızlı | Ağaçlarda hızlı (TreeSHAP) | Orta |
+| **İlişkili özelliklere duyarlılık** | Yüksek | Var | Yüksek |
 
-### 5.2 Hangi Soru Hangi Araç
+### 5.2 Hangi Soru, Hangi Araç?
 
-Üç farklı soru tipi var; her biri farklı bir araça işaret eder.
+Üç farklı soru tipi üç farklı araca işaret eder: "Bu modelde genel olarak hangi özellikler önemli?", "190 m²'lik bu Merkez dairesine neden bu fiyat biçildi?" ve "Bir kredi başvurusunun reddini müşteriye basit bir kuralla nasıl açıklarım?"
 
-Birinin "bu modelde hangi özellikler genel olarak önemli?" sorusuyla, birinin "bu 185 m²'lik Merkez semtindeki dairenin neden bu kadar yüksek fiyat biçildi?" sorusuyla, birinin "banka kredi reddini müşteriye nasıl açıklayacağım, ve bu açıklama bir lineer kural şeklinde ifade edilebilir mi?" sorusu aynı değildir.
+Bir gıda kalite kontrol sistemi üzerinden düşünelim: Özellik önemi, aylık üretim raporunda "en çok hataya hangi ölçüm yol açıyor?" sorusunu yanıtlar. SHAP, bugün reddedilen belirli bir ürün için "hangi ölçüm ne kadar etkili oldu?" sorusunu yanıtlar. LIME ise operatöre "bu ürün şu iki koşul birlikte gerçekleştiğinde reddediliyor" biçiminde yerel ve sade bir kural sunar.
 
-Gıda kalite kontrol sistemine analoji yaparsak: Feature Importance, aylık üretim raporunda "en çok hataya neden olan makine hangisi" sorusunu cevaplar. SHAP bugün reddedilen spesifik ürünün "tam olarak hangi ölçüm neden hata bayrağı kaldırdı" sorusunu cevaplar. LIME ise operatöre "bu ürün şu iki koşul gerçekleştiğinde reddediliyor" şeklinde sade bir kural çıkarır.
-
-| Soru | Önerilen Araç |
+| Soru | Önerilen araç |
 | --- | --- |
-| Model seçimi, değişken seçimi, genel analiz | Feature Importance |
-| Müşteri/regülatör için spesifik karar açıklaması | SHAP |
-| Görüntü veya metin modeli yorumlama | LIME |
-| Hızlı prototip, model bağımsız ortam | LIME |
-| Matematiksel garanti gereken audit/uyumluluk | SHAP |
+| Model seçimi, değişken seçimi, genel analiz | Özellik önemi (tercihen permütasyon önemi) |
+| Müşteri ya da düzenleyici için belirli bir kararın açıklaması | SHAP |
+| Görüntü veya metin modelinin yorumlanması | LIME |
+| Hızlı ön inceleme, modelden bağımsız ortam | LIME |
+| Matematiksel güvence gerektiren denetim | SHAP |
 
-### 5.3 Çelişen Sonuçlar Geldiğinde
+### 5.3 Sonuçlar Çeliştiğinde
 
-SHAP, LIME ve Feature Importance zaman zaman farklı sıralamalar üretebilir. Bu durumun başlıca nedenleri:
+SHAP, LIME ve özellik önemi zaman zaman farklı sıralamalar üretebilir. Bu nottaki modelde MDI ile ortalama mutlak SHAP değerleri karşılaştırıldığında:
 
-**Korelasyonlu değişkenler.** MDI, korelasyonlu iki değişkenin önem puanını aralarında böler. SHAP her örnek için marjinal katkıyı ölçtüğünden bu bölünmeyi daha gerçekçi yapar. LIME ise pertürbasyon sırasında değişkenleri bağımsız olarak örneklediği için benzer bölünme sorunuyla karşılaşır.
+```python
+mean_abs_shap = pd.Series(np.abs(shap_values).mean(axis=0), index=X_test.columns)
+karsilastirma = pd.DataFrame({
+    'FI (MDI)': fi_series,
+    'mean(|SHAP|) TL': mean_abs_shap.round(0)
+}).sort_values('FI (MDI)', ascending=False)
+print(karsilastirma.round(3))
+```
 
-**Nadir ama güçlü etkiler.** Bir değişken çok az örnekte devreye giriyor ama girdiğinde tahmini büyük ölçüde değiştiriyorsa, MDI bunu küçük görebilir. Mean(|SHAP|) bunu daha doğru yakalar. LIME ise yalnızca tek örnek üzerinde çalıştığından bu soruna yapısal olarak karşılaşmaz, ancak o tek örnek için yerel doğruluk sorunu çıkabilir.
+Çıktı:
 
-**LIME'ın stokastisite payı.** Çalıştırmadan çalıştırmaya değişen sonuçlar görürseniz `num_samples` parametresini artırmak (varsayılan 5000) kararlılığı iyileştirir.
+```text
+                 FI (MDI)  mean(|SHAP|) TL
+alan_m2             0.981         587048.0
+bina_yasi           0.010          30024.0
+oda_sayisi          0.003           8081.0
+semt_Merkez         0.002          15066.0
+isitma_Elektrik     0.001           7376.0
+semt_Güney          0.001           4531.0
+semt_Kuzey          0.001           3291.0
+isitma_Kombi        0.001           3116.0
+```
+
+İlk iki sıra aynıdır; ancak üçüncü sırada MDI `oda_sayisi`'nı, ortalama mutlak SHAP ise `semt_Merkez`'i öne çıkarır. Farkın başlıca nedenleri şunlardır:
+
+**Farklı soruları yanıtlamaları.** MDI eğitim verisinde safsızlık azalmasındaki payı, ortalama mutlak SHAP ise test örneklerinin tahminlerindeki ortalama katkıyı (TL cinsinden) ölçer.
+
+**İlişkili özellikler.** MDI, ilişkili iki özelliğin önemini ağaçların hangisini seçtiğine bağlı olarak aralarında böler. SHAP da bu sorundan kurtulamaz: Shapley değerinin simetri ilkesi, model açısından birbirinin yerine geçebilen özellikler arasında katkıyı paylaştırır; ayrıca SHAP'ın girişimsel (interventional) sürümü, ilişkili özellikleri birbirinden bağımsızmış gibi değiştirerek gerçekte görülmeyen veri noktaları üzerinden hesap yapabilir. LIME de pertürbasyonda özellikleri bağımsız örneklediği için aynı sorunu yaşar. İlişkili özellikler varsa bunları gruplayarak birlikte açıklamak daha sağlıklıdır.
+
+**Nadir ama güçlü etkiler.** Bir özellik az sayıda örnekte devreye giriyor ama girdiğinde tahmini büyük ölçüde değiştiriyorsa, MDI bu özelliği küçük görebilir. SHAP değerlerinin dağılımı (özet grafik) bu tür etkileri görünür kılar.
+
+**LIME'ın rastgeleliği.** Çalıştırmadan çalıştırmaya değişen sonuçlar görülürse `num_samples` parametresini artırmak (varsayılan 5000) kararlılığı iyileştirir.
 
 ---
 
 ## 6. Dört Kavramı Birleştiren Tam Uygulama
 
-Aşağıdaki kod parçası veri hazırlama (OneHot Encoding), model eğitimi, Feature Importance, SHAP ve LIME analizlerini baştan sona uygular.
+Aşağıdaki kod; veri hazırlamayı (OneHot Encoding), model eğitimini, özellik önemini, SHAP ve LIME analizlerini tek bir betikte baştan sona uygular. Bölüm 1–5'teki kod blokları sırayla çalıştırıldığında da aynı sonuçlar elde edilir.
 
 ```python
 import pandas as pd
@@ -531,6 +638,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 import shap
+from lime import lime_tabular
 import matplotlib.pyplot as plt
 
 # ─── 1. VERİ SETİ ────────────────────────────────────────────────────────────
@@ -553,145 +661,65 @@ df['fiyat_tl'] = (
 ).clip(lower=0).astype(int)
 
 # ─── 2. ONEHOT ENCODING ──────────────────────────────────────────────────────
-X = pd.get_dummies(
-    df.drop('fiyat_tl', axis=1),
-    columns=['semt', 'isitma'],
-    drop_first=True
-)
+X = pd.get_dummies(df.drop('fiyat_tl', axis=1), columns=['semt', 'isitma'],
+                   drop_first=True, dtype=int)
 y = df['fiyat_tl']
-
-print("Kodlanmış Sütunlar:", X.columns.tolist())
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # ─── 3. MODEL EĞİTİMİ ───────────────────────────────────────────────────────
-rf = RandomForestRegressor(n_estimators=200, max_depth=12,
-                           random_state=42, n_jobs=-1)
+rf = RandomForestRegressor(n_estimators=200, max_depth=12, random_state=42, n_jobs=-1)
 rf.fit(X_train, y_train)
+print(f"Test R²: {rf.score(X_test, y_test):.4f}")
 
-test_r2 = rf.score(X_test, y_test)
-print(f"Test R²: {test_r2:.4f}")
-
-# ─── 4. FEATURE IMPORTANCE ──────────────────────────────────────────────────
-fi = pd.Series(rf.feature_importances_, index=X.columns) \
-       .sort_values(ascending=False)
-
-print("\n--- Feature Importance (MDI) ---")
+# ─── 4. ÖZELLİK ÖNEMİ ───────────────────────────────────────────────────────
+fi = pd.Series(rf.feature_importances_, index=X.columns).sort_values(ascending=False)
+print("\n--- Özellik Önemi (MDI) ---")
 print(fi.round(3))
-
-fi.sort_values().plot(kind='barh', figsize=(8, 5), color='#2471a3')
-plt.xlabel('Önem Puanı')
-plt.title('Feature Importance — Rastgele Orman')
-plt.tight_layout()
-plt.savefig('fi_plot.png', dpi=150)
-plt.show()
 
 # ─── 5. SHAP ANALİZİ ────────────────────────────────────────────────────────
 explainer   = shap.TreeExplainer(rf)
-shap_values = explainer.shap_values(X_test)   # shape: (60, 8)
+shap_values = explainer.shap_values(X_test)
+base_value  = float(np.ravel(explainer.expected_value)[0])
+print(f"\nTemel Değer E[f(X)]: {base_value:,.0f} TL")
 
-base_value = explainer.expected_value
-print(f"\nTemel Değer E[f(x)]: {base_value:,.0f} TL")
+idx = 0
+print(f"Örnek #{X_test.index[idx]}: model = {rf.predict(X_test.iloc[[idx]])[0]:,.0f} TL, "
+      f"temel + SHAP = {base_value + shap_values[idx].sum():,.0f} TL")
 
-# Global özet: Summary Plot
-plt.figure()
 shap.summary_plot(shap_values, X_test, plot_type='dot', show=False)
-plt.tight_layout()
-plt.savefig('shap_summary.png', dpi=150)
-plt.show()
+plt.tight_layout(); plt.savefig('shap_summary.png', dpi=150); plt.close()
 
-# Yerel örnek: test setinin ilk satırı
-idx = 0
-tahmin_gercek = rf.predict(X_test.iloc[[idx]])[0]
-toplam_shap   = shap_values[idx].sum() + base_value
-
-print(f"\nÖrnek #{X_test.index[idx]} için:")
-print(f"  Model tahmini:      {tahmin_gercek:,.0f} TL")
-print(f"  phi_0 + sum(phi_i): {toplam_shap:,.0f} TL  (eşit olmalı)")
-
-shap_ornek = pd.DataFrame({
-    'Özellik':         X_test.columns,
-    'Değer':           X_test.iloc[idx].values,
-    'SHAP Katkısı':    shap_values[idx]
-}).sort_values('SHAP Katkısı', ascending=False)
-
-print(shap_ornek.to_string(index=False))
-
-# Waterfall plot
-shap.waterfall_plot(
-    shap.Explanation(
-        values       = shap_values[idx],
-        base_values  = base_value,
-        data         = X_test.iloc[idx],
-        feature_names= X_test.columns.tolist()
-    )
-)
-
-# ─── 6. KARŞILAŞTIRMA: FI vs mean(|SHAP|) ──────────────────────────────────
-mean_abs_shap = pd.Series(
-    np.abs(shap_values).mean(axis=0),
-    index=X_test.columns
-).sort_values(ascending=False)
-
-karsilastirma = pd.DataFrame({
-    'Feature Importance (MDI)': fi,
-    'mean(|SHAP|) × 10⁻⁵':    mean_abs_shap / 1e5
-}).round(3)
-
-print("\n--- FI vs mean(|SHAP|) karşılaştırması ---")
-print(karsilastirma)
-
-# ─── 7. LIME ANALİZİ ─────────────────────────────────────────────────────────
-from lime import lime_tabular
-
+# ─── 6. LIME ANALİZİ ─────────────────────────────────────────────────────────
+kategorik = [X_train.columns.get_loc(c) for c in X_train.columns
+             if c.startswith(('semt_', 'isitma_'))]
 lime_explainer = lime_tabular.LimeTabularExplainer(
-    training_data = X_train.values,
-    feature_names = X_train.columns.tolist(),
-    mode          = 'regression',
-    random_state  = 42
-)
-
-idx = 0
+    training_data=X_train.values, feature_names=X_train.columns.tolist(),
+    categorical_features=kategorik, mode='regression', random_state=42)
 lime_exp = lime_explainer.explain_instance(
-    data_row   = X_test.iloc[idx].values,
-    predict_fn = rf.predict,
-    num_features = len(X_train.columns),
-    num_samples  = 5000
-)
+    X_test.iloc[idx].values, rf.predict,
+    num_features=len(X_train.columns), num_samples=5000)
+print(f"\nLIME yerel R²: {lime_exp.score:.3f}, yerel tahmin: {lime_exp.local_pred[0]:,.0f} TL")
+for kural, katki in sorted(lime_exp.as_list(), key=lambda t: abs(t[1]), reverse=True)[:4]:
+    print(f"  {kural:30s} {katki:+,.0f}")
 
-print(f"\nLIME Yerel Model R²:        {lime_exp.score:.3f}")
-print(f"LIME Tahmini (yerel model): {lime_exp.predicted_value:,.0f} TL")
-print(f"Kara Kutu Tahmini:          {rf.predict(X_test.iloc[[idx]])[0]:,.0f} TL")
-print(f"SHAP Tahmini:               {shap_values[idx].sum() + base_value:,.0f} TL")
-
-print("\nLIME Özellik Katkıları:")
-for kural, katki in sorted(lime_exp.as_list(), key=lambda x: abs(x[1]), reverse=True):
-    print(f"  {kural:45s}  {katki:+,.0f}")
-
-# ─── 8. LIME vs SHAP: aynı örnek için yan yana ──────────────────────────────
-lime_dict = dict(lime_exp.as_list())
-
-shap_df = pd.DataFrame({
-    'SHAP Katkısı (TL)': shap_values[idx]
-}, index=X_test.columns).sort_values('SHAP Katkısı (TL)', ascending=False)
-
-print("\n--- SHAP vs LIME: aynı örnek ---")
-print("SHAP her özellik için kesin bir değer üretir.")
-print("LIME ise aralık kuralları üretir ('alan_m2 > 140' gibi).")
-print(shap_df.round(0))
+# ─── 7. KARŞILAŞTIRMA: MDI ve ortalama |SHAP| ───────────────────────────────
+mean_abs_shap = pd.Series(np.abs(shap_values).mean(axis=0), index=X_test.columns)
+print(pd.DataFrame({'FI (MDI)': fi,
+                    'mean(|SHAP|) TL': mean_abs_shap.round(0)}).round(3))
 ```
 
-### Beklenen Çıktı Yorumu
+### Beklenen Çıktının Yorumu
 
-`Feature Importance` ile `mean(|SHAP|)` sıralamaları büyük ölçüde örtüşür. LIME ise aynı örnek için benzer yön kararları verir ancak sayısal değerler tam örtüşmez; bu beklenen bir durumdur çünkü LIME'ın hedefi kesin hesap vermek değil, yerel bir lineer modelle tahmin etmektir. `alan_m2` üç yöntemde de açık ara birinci çıkar. Gerçek projelerde bu kadar net ayrışmalar olmaz ve yöntemleri birlikte değerlendirmek daha sağlıklı sonuç verir.
+`alan_m2` üç yöntemde de açık ara birinci çıkar; çünkü bu yapay veride fiyat varyansının neredeyse tamamı alandan gelmektedir. Özellik önemi ile ortalama mutlak SHAP sıralamaları ilk iki sırada örtüşür, sonraki sıralarda küçük farklar gösterir. LIME aynı örnek için SHAP'a benzer yönler bulur, ancak yerel modelin düşük $R^2$ değeri bu açıklamaya temkinle yaklaşılması gerektiğini gösterir. Gerçek projelerde bu kadar net ayrışmalar nadirdir; yöntemleri birlikte değerlendirmek daha sağlıklı sonuç verir.
 
 ---
 
-## Notlar ve Referanslar
+## Notlar ve Kaynaklar
 
-- **SHAP kütüphanesi:** Lundberg, S. M., & Lee, S.-I. (2017). A unified approach to interpreting model predictions. *NeurIPS 2017*. `pip install shap`
+- **SHAP:** Lundberg, S. M. ve Lee, S.-I. (2017). A unified approach to interpreting model predictions. *Advances in Neural Information Processing Systems 30 (NeurIPS 2017)*. `pip install shap`
+- **TreeSHAP:** Lundberg, S. M. ve ark. (2020). From local explanations to global understanding with explainable AI for trees. *Nature Machine Intelligence*, 2, 56–67.
 - **Shapley, L. S.** (1953). A value for n-person games. *Contributions to the Theory of Games*, 2, 307–317.
-- **Molnar, C.** (2022). *Interpretable Machine Learning* (2nd ed.). Güncel çevrimiçi sürüm için: [christophm.github.io/interpretable-ml-book](https://christophm.github.io/interpretable-ml-book)
-- **scikit-learn dokümantasyonu:** `sklearn.ensemble.RandomForestRegressor.feature_importances_`, `sklearn.preprocessing.OneHotEncoder`
+- **LIME:** Ribeiro, M. T., Singh, S. ve Guestrin, C. (2016). "Why should I trust you?": Explaining the predictions of any classifier. *KDD 2016*.
+- **Rastgele Orman:** Breiman, L. (2001). Random forests. *Machine Learning*, 45, 5–32.
+- **Molnar, C.** (2022). *Interpretable Machine Learning* (2. baskı). Çevrimiçi sürüm: [christophm.github.io/interpretable-ml-book](https://christophm.github.io/interpretable-ml-book)
+- **scikit-learn belgeleri:** `RandomForestRegressor.feature_importances_`, `sklearn.inspection.permutation_importance`, `OneHotEncoder`.

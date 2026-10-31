@@ -24,7 +24,7 @@ def build_models() -> dict[str, object]:
     return {
         "Karar Agaci": DecisionTreeClassifier(max_depth=4, random_state=42),
         "Naive Bayes": GaussianNB(),
-        "Destek Vektor Makinasi": make_pipeline(
+        "Destek Vektor Makinesi": make_pipeline(
             StandardScaler(),
             SVC(kernel="rbf", C=1.0, gamma="scale"),
         ),

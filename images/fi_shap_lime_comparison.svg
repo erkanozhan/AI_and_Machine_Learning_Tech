@@ -25,32 +25,35 @@
 
   <!-- Mini bar chart -->
   <text x="35" y="145" font-size="9.5" fill="#555">alan_m2</text>
-  <rect x="95" y="132" width="130" height="14" fill="#2e86c1" rx="2" opacity="0.85"/>
+  <rect x="95" y="132" width="128" height="14" fill="#2e86c1" rx="2" opacity="0.85"/>
+  <text x="227" y="143" font-size="8.5" fill="#1a5276">0.981</text>
 
-  <text x="35" y="168" font-size="9.5" fill="#555">semt</text>
-  <rect x="95" y="155" width="90" height="14" fill="#3498db" rx="2" opacity="0.85"/>
+  <text x="35" y="168" font-size="9.5" fill="#555">bina_yasi</text>
+  <rect x="95" y="155" width="2" height="14" fill="#3498db" rx="1" opacity="0.85"/>
+  <text x="101" y="166" font-size="8.5" fill="#1a5276">0.010</text>
 
-  <text x="35" y="191" font-size="9.5" fill="#555">bina_yasi</text>
-  <rect x="95" y="178" width="60" height="14" fill="#5dade2" rx="2" opacity="0.85"/>
+  <text x="35" y="191" font-size="9.5" fill="#555">oda_sayisi</text>
+  <rect x="95" y="178" width="1" height="14" fill="#5dade2" rx="1" opacity="0.85"/>
+  <text x="100" y="189" font-size="8.5" fill="#1a5276">0.003</text>
 
   <text x="95" y="215" font-size="9" fill="#888" font-style="italic">← Tüm veri seti üzerinden</text>
 
   <!-- Properties -->
   <line x1="24" y1="224" x2="252" y2="224" stroke="#aed6f1" stroke-width="0.8"/>
 
-  <text x="28" y="240" font-size="10" fill="#1a5276">✓</text>
+  <text x="28" y="240" font-size="10" fill="#1a5276">+</text>
   <text x="40" y="240" font-size="10" fill="#2c3e50">Hızlı (model içinde hazır)</text>
 
-  <text x="28" y="256" font-size="10" fill="#1a5276">✓</text>
+  <text x="28" y="256" font-size="10" fill="#1a5276">+</text>
   <text x="40" y="256" font-size="10" fill="#2c3e50">Tüm modele genel bakış</text>
 
-  <text x="28" y="272" font-size="10" fill="#c0392b">✗</text>
+  <text x="28" y="272" font-size="10" fill="#c0392b">−</text>
   <text x="40" y="272" font-size="10" fill="#2c3e50">Yön bilgisi yok (+/−?)</text>
 
-  <text x="28" y="288" font-size="10" fill="#c0392b">✗</text>
+  <text x="28" y="288" font-size="10" fill="#c0392b">−</text>
   <text x="40" y="288" font-size="10" fill="#2c3e50">Tek örnek açıklaması yok</text>
 
-  <text x="28" y="304" font-size="10" fill="#c0392b">✗</text>
+  <text x="28" y="304" font-size="10" fill="#c0392b">−</text>
   <text x="40" y="304" font-size="10" fill="#2c3e50">Korelasyona duyarlı</text>
 
   <rect x="24" y="316" width="232" height="38" fill="#d6eaf8" rx="5"/>
@@ -76,34 +79,34 @@
   <text x="370" y="127" text-anchor="middle" font-size="8.5" fill="#888">0</text>
 
   <text x="299" y="146" font-size="9.5" fill="#555">alan_m2</text>
-  <rect x="370" y="133" width="90" height="14" fill="#e74c3c" rx="2" opacity="0.85"/>
-  <text x="464" y="145" font-size="8.5" fill="#c0392b">+120k</text>
+  <rect x="370" y="133" width="92" height="14" fill="#e74c3c" rx="2" opacity="0.85"/>
+  <text x="466" y="145" font-size="8.5" fill="#c0392b">+368k</text>
 
-  <text x="299" y="169" font-size="9.5" fill="#555">semt_Merkez</text>
-  <rect x="370" y="156" width="72" height="14" fill="#e67e22" rx="2" opacity="0.85"/>
-  <text x="446" y="168" font-size="8.5" fill="#d35400">+95k</text>
+  <text x="299" y="169" font-size="9.5" fill="#555">bina_yasi</text>
+  <rect x="370" y="156" width="17" height="14" fill="#e67e22" rx="2" opacity="0.85"/>
+  <text x="391" y="168" font-size="8.5" fill="#d35400">+66k</text>
 
-  <text x="299" y="192" font-size="9.5" fill="#555">bina_yasi</text>
-  <rect x="328" y="179" width="42" height="14" fill="#2980b9" rx="2" opacity="0.85"/>
-  <text x="324" y="191" text-anchor="end" font-size="8.5" fill="#1a5276">−25k</text>
+  <text x="299" y="192" font-size="9.5" fill="#555">oda_sayisi</text>
+  <rect x="364" y="179" width="6" height="14" fill="#2980b9" rx="1" opacity="0.85"/>
+  <text x="374" y="191" font-size="8.5" fill="#1a5276">−23k</text>
 
   <text x="330" y="215" font-size="9" fill="#888" font-style="italic">← Tek örnek için +/− katkı</text>
 
   <line x1="288" y1="224" x2="516" y2="224" stroke="#d7bde2" stroke-width="0.8"/>
 
-  <text x="292" y="240" font-size="10" fill="#6c3483">✓</text>
+  <text x="292" y="240" font-size="10" fill="#6c3483">+</text>
   <text x="304" y="240" font-size="10" fill="#2c3e50">Teorik garanti (toplamsallık)</text>
 
-  <text x="292" y="256" font-size="10" fill="#6c3483">✓</text>
+  <text x="292" y="256" font-size="10" fill="#6c3483">+</text>
   <text x="304" y="256" font-size="10" fill="#2c3e50">Yön + büyüklük bilgisi</text>
 
-  <text x="292" y="272" font-size="10" fill="#6c3483">✓</text>
+  <text x="292" y="272" font-size="10" fill="#6c3483">+</text>
   <text x="304" y="272" font-size="10" fill="#2c3e50">Deterministik (TreeSHAP)</text>
 
-  <text x="292" y="288" font-size="10" fill="#6c3483">✓</text>
+  <text x="292" y="288" font-size="10" fill="#6c3483">+</text>
   <text x="304" y="288" font-size="10" fill="#2c3e50">Global özet (mean|SHAP|)</text>
 
-  <text x="292" y="304" font-size="10" fill="#c0392b">✗</text>
+  <text x="292" y="304" font-size="10" fill="#c0392b">−</text>
   <text x="304" y="304" font-size="10" fill="#2c3e50">Ağaç dışında yavaş</text>
 
   <rect x="288" y="316" width="232" height="38" fill="#e8daef" rx="5"/>
@@ -148,19 +151,19 @@
 
   <line x1="552" y1="224" x2="778" y2="224" stroke="#f0c040" stroke-width="0.8"/>
 
-  <text x="556" y="240" font-size="10" fill="#b7770d">✓</text>
+  <text x="556" y="240" font-size="10" fill="#b7770d">+</text>
   <text x="568" y="240" font-size="10" fill="#2c3e50">Her model türüne uygulanır</text>
 
-  <text x="556" y="256" font-size="10" fill="#b7770d">✓</text>
+  <text x="556" y="256" font-size="10" fill="#b7770d">+</text>
   <text x="568" y="256" font-size="10" fill="#2c3e50">Görüntü / metin desteği var</text>
 
-  <text x="556" y="272" font-size="10" fill="#b7770d">✓</text>
+  <text x="556" y="272" font-size="10" fill="#b7770d">+</text>
   <text x="568" y="272" font-size="10" fill="#2c3e50">Çıktı basit, anlaşılır kural</text>
 
-  <text x="556" y="288" font-size="10" fill="#c0392b">✗</text>
+  <text x="556" y="288" font-size="10" fill="#c0392b">−</text>
   <text x="568" y="288" font-size="10" fill="#2c3e50">Stokastik (her çalıştırmada farklı)</text>
 
-  <text x="556" y="304" font-size="10" fill="#c0392b">✗</text>
+  <text x="556" y="304" font-size="10" fill="#c0392b">−</text>
   <text x="568" y="304" font-size="10" fill="#2c3e50">Toplamsallık garantisi yok</text>
 
   <rect x="552" y="316" width="228" height="38" fill="#fdebd0" rx="5"/>

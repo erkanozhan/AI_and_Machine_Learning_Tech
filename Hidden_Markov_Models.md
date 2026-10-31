@@ -1,208 +1,73 @@
-# Saklı Markov Modelleri (Hidden Markov Models - HMM)
+# Saklı Markov Modelleri (Hidden Markov Models, HMM)
 
 ## 1. Giriş: Saklı Durumlar ve Gözlemler
-Gençler, sistemlerin veya süreçlerin anlık durumlarını her zaman doğrudan ölçemeyiz. Bazen asıl ilgilendiğimiz yapı, doğrudan gözlemleyebildiğimiz verilerin arkasına gizlenmiştir. Doğal dil işleme (Natural Language Processing - NLP) çalışmalarında, örneğin bir SMS metninin içindeki kelimelerin dizilimine bakarak o mesajın dolandırıcılık amacı taşıyıp taşımadığını anladığımız süreci düşünün. Mesajın kendisi gözlemlediğimiz veridir, mesajı yazanın asıl niyeti ise saklı durumdur.
 
-Bir arkadaşınızın uzaktaki bir şehirde yaşadığını varsayın. Arkadaşınızla sadece mesajlaşıyorsunuz ve size o gün ne yaptığını söylüyor: Ya kitap okuyor, ya yürüyüşe çıkıyor ya da evde temizlik yapıyor. Siz ise o şehrin hava durumunu merak ediyorsunuz. Hava durumunu doğrudan göremiyorsunuz, bu sizin için **Saklı Durum** (Hidden State). Durum kelimesinin İngilizcesi olan *state*, Latince *status* (durma, pozisyon, vaziyet) kökünden gelir. Sistemin içinde bulunduğu vaziyeti ifade eder.
+Sistemlerin ya da süreçlerin anlık durumları her zaman doğrudan ölçülemez. Çoğu zaman asıl ilgilenilen yapı, doğrudan gözlenebilen verilerin arkasında gizlidir. Doğal dil işlemede (Natural Language Processing, NLP) bir cümledeki sözcükler gözlenir; ama her sözcüğün isim mi, fiil mi, sıfat mı olduğu (sözcük türü) doğrudan görülmez.
 
-Arkadaşınızın size bildirdiği günlük aktiviteler ise sizin **Gözlem**inizdir (Observation). Gözlem kelimesi Latince *observare* (dikkatle bakmak, gözetlemek) fiiline dayanır. Elimizde sadece bu gözetlediğimiz veriler vardır.
+Uzak bir şehirde yaşayan bir arkadaşla yalnızca mesajlaştığımızı düşünelim. Arkadaşımız her gün ne yaptığını yazar: Ya yürüyüşe çıkar, ya kitap okur ya da evde temizlik yapar. Biz ise o şehrin hava durumunu merak ediyoruz. Hava durumunu doğrudan göremeyiz; bu bizim için **saklı durumdur** (hidden state). İngilizce *state* sözcüğü Latince *status* (duruş, vaziyet) kökünden gelir ve sistemin içinde bulunduğu hâli anlatır.
 
-Arkadaşınızın güneşli günlerde yürüyüşe çıkma ihtimalinin, yağmurlu günlerde ise evde kitap okuma ihtimalinin daha yüksek olduğunu biliyorsunuz. Aynı zamanda o şehirde güneşli bir günden sonraki günün de güneşli olma ihtimalinin yüksek olduğunu biliyorsunuz. İşte elinizdeki bu sınırlı mesajlardan yola çıkarak, "Dün kitap okudu, bugün temizlik yaptı, demek ki dünden beri hava büyük ihtimalle yağmurlu" şeklinde geriye dönük yaptığınız çıkarım, zihninizde çalışan bir dizilim modelidir.
+Arkadaşımızın bildirdiği günlük etkinlikler ise **gözlemimizdir** (observation). *Observation* sözcüğü Latince *observare* (dikkatle bakmak, gözetlemek) fiiline dayanır. Elimizde yalnızca bu gözlemler vardır.
 
-Bu mantıksal sürecin matematiğe dökülmüş haline **Saklı Markov Modeli** (Hidden Markov Model - HMM) diyoruz. Adını Rus matematikçi Andrey Markov'dan alır. Markov'un kurduğu yapının en temel prensibi şudur: Bir sistemin gelecekteki durumu, sadece ve sadece onun şu anki durumuna bağlıdır. Tüm geçmişin veri yükünü hafızada taşımamıza gerek yoktur. Buna Markov Özelliği (Markov Property) denir.
+Arkadaşımızın güneşli günlerde yürüyüşe çıkma olasılığının, yağmurlu günlerde ise evde kitap okuma ya da temizlik yapma olasılığının yüksek olduğunu biliyoruz. Ayrıca o şehirde havanın bir günden ötekine genellikle aynı kaldığını da biliyoruz. Bu bilgilerle "Dün kitap okudu, bugün temizlik yaptı; demek ki dünden beri hava büyük olasılıkla yağmurlu" biçiminde geriye dönük bir çıkarım yaparız. Zihnimizde çalışan bu dizi modelinin matematiğe dökülmüş hâline **Saklı Markov Modeli** (Hidden Markov Model, HMM) denir.
 
-Aşağıdaki şemada bu yapının zaman içindeki ilerleyişini görebilirsiniz:
+Model adını Rus matematikçi Andrey Markov'dan (1856–1922) alır. Markov zincirlerinin temel ilkesi şudur: Sistemin bir sonraki durumunun olasılık dağılımı yalnızca şimdiki durumuna bağlıdır; geçmişin tamamını bilmek gerekmez. Buna **Markov özelliği** (Markov property) denir. HMM'yi anlamak için önce durumların doğrudan gözlendiği Markov zincirini ele alacağız (Bölüm 2), ardından durumları saklayıp yalnızca gözlemleri görünür bırakacağız (Bölüm 3).
 
-```mermaid
-graph LR
-    H1(("Saklı Durum<br>(Zaman: t)"))
-    H2(("Saklı Durum<br>(Zaman: t+1)"))
-    H3(("Saklı Durum<br>(Zaman: t+2)"))
-    
-    O1["Gözlem<br>(Zaman: t)"]
-    O2["Gözlem<br>(Zaman: t+1)"]
-    O3["Gözlem<br>(Zaman: t+2)"]
-    
-    H1 -- "Geçiş<br>Olasılığı (A)" --> H2
-    H2 -- "Geçiş<br>Olasılığı (A)" --> H3
-    
-    H1 -- "Yayım<br>Olasılığı (B)" --> O1
-    H2 -- "Yayım<br>Olasılığı (B)" --> O2
-    H3 -- "Yayım<br>Olasılığı (B)" --> O3
-    
-    classDef hiddenState fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px;
-    classDef observation fill:#d5dbdb,stroke:#2c3e50,stroke-width:2px;
-    
-    class H1,H2,H3 hiddenState;
-    class O1,O2,O3 observation;
-```
+---
 
-## 2. Sistemin Matematiksel Parametreleri
-Bir sistemin arka plandaki bu ağ yapısını bilgisayarlara anlatmak ve hesaplanabilir hale getirmek için matrisleri kullanırız. Bir HMM temel olarak üç ana parametre ile tanımlanır ve genellikle $\lambda = (A, B, \pi)$ şeklinde gösterilir.
+## 2. Markov Zincirleri ve Markov Varsayımları
 
-**1. A Matrisi (Geçiş Olasılıkları - Transition Probabilities):** Sistemin bir saklı durumdan diğerine geçme ihtimallerini barındırır. "Bugün güneşliyse yarın da güneşli olma ihtimali nedir?" veya mekansal-zamansal (spatio-temporal) bir veride "Sistem $S_1$ durumundan $S_2$ durumuna hangi olasılıkla geçer?" sorularının matematiksel karşılığıdır.
+### 2.1 Durumlar ve Durum Dizileri
 
-**2. B Matrisi (Yayım Olasılıkları - Emission Probabilities):** İngilizcedeki *emission* kelimesi Latince *emittere* (dışarı salmak, yaymak) kökünden gelir. Belirli bir saklı durumdayken, sistemin belirli bir gözlemi dışarı yayma ihtimalini ifade eder. "Hava yağmurluyken arkadaşımın kitap okuma ihtimali nedir?" sorusu bu matrisin içindeki bir değerdir.
+Bir sistemin bulunabileceği durumların kümesi $S = \{s_1, s_2, \ldots, s_{|S|}\}$ ile gösterilir. Sistem zaman içinde bu durumlar arasında geçiş yapar; $t$ anındaki durum $z_t$ ile gösterilir ve $T$ uzunluğundaki bir durum dizisi $\vec{z} = (z_1, \ldots, z_T) \in S^T$ olarak yazılır. Bu bölümde durumların **doğrudan gözlendiği** varsayılır.
 
-**3. $\pi$ Vektörü (Başlangıç Olasılıkları - Initial Probabilities):** Süreci gözlemlemeye başladığımız o ilk anda ($t=1$), sistemin hangi saklı durumda olduğuna dair elimizdeki başlangıç olasılık dağılımıdır.
+Örneğin havanın alabileceği durumlar $S = \{\text{güneş}, \text{bulut}, \text{yağmur}\}$ olsun; $|S| = 3$'tür. Beş günlük ($T = 5$) bir gözlem dizisi şöyle olabilir: $(z_1, \ldots, z_5) = (\text{güneş}, \text{bulut}, \text{bulut}, \text{yağmur}, \text{bulut})$.
 
-## 3. HMM ile Çözülebilen Temel Problemler
-Bu modeli kurduğumuzda, veri madenciliği (data mining) süreçlerinde genellikle karşımıza çıkan üç temel problemi çözebiliriz:
+Hiçbir varsayım yapılmazsa $t$ anındaki hava, $1$'den $t-1$'e kadarki tüm geçmişin (hatta modellenmemiş birçok değişkenin) bir fonksiyonu olabilir. Bugünün havasını kestirmek için tüm geçmişi hesaba katmak zorunda olsaydık, hiçbir sistem bu hesabı yapamazdı. Zaman serileri hakkında hesaplanabilir biçimde akıl yürütmek için iki varsayım kullanılır.
 
-* **Değerlendirme (Evaluation):** Elimizde bir model ($\lambda$) ve peş peşe dizilmiş bir gözlem dizisi var. Kurduğumuz bu modelin, elimizdeki bu gözlem dizisini üretme olasılığı nedir? Bu problemi çözmek için İleri (Forward) algoritmasını kullanırız.
-* **Şifre Çözme (Decoding):** Elimizde yine gözlemler var ve biz bu gözlemleri üreten en olası *saklı durum dizisini* bulmak istiyoruz. Bir cümlede arka arkaya dizilmiş kelimelerin isim mi, fiil mi, sıfat mı (Part-of-Speech Tagging) olduğunu sırasıyla bulmak tam olarak bu problemdir. Burada devreye Viterbi Algoritması girer ve tüm olasılık ağacını hesaplamak yerine en güçlü yolu bulur.
-* **Öğrenme (Learning):** Elimizde sadece saf gözlemler var. Sistemi en iyi tanımlayacak olan $A$, $B$ ve $\pi$ parametrelerini, yani modelin kendisini bu veriden öğrenmek istiyoruz. Bu durumda Baum-Welch algoritması gibi yöntemlerle parametrelerimizi optimize ederiz.
+### 2.2 Sınırlı Ufuk Varsayımı (Limited Horizon Assumption)
 
-## 4. Şifre Çözme: Viterbi Algoritması ve Dinamik Programlama
-Bu algoritmalar içinden özellikle saklı durumların şifresini çözmemizi sağlayan Viterbi algoritmasının nasıl çalıştığına bakalım. 
+$t$ anında belirli bir durumda bulunma olasılığı yalnızca $t-1$ anındaki duruma bağlıdır:
 
-Saklı Markov Modellerinde (Hidden Markov Model - HMM) arka planda işleyen yapıyı anladıktan sonra, asıl mesele elimizdeki kısıtlı verilere bakarak o gizli yapının şifresini çözmektir. Bu şifre çözme işlemini bizim için yapan temel yaklaşıma Viterbi Algoritması diyoruz. 
+$$P(z_t \mid z_{t-1}, z_{t-2}, \ldots, z_1) = P(z_t \mid z_{t-1})$$
 
-Doğal dil işleme (Natural Language Processing - NLP) modellerinde analiz edilen bir metni düşünün. Örneğin cep telefonunuza gelen şüpheli bir SMS mesajını inceliyoruz. Mesajdaki kelimeler sırasıyla akıyor: "Hemen", "tıklayın", "kazanın". Bu kelimeler bizim gözlemleyebildiğimiz verilerdir. Arka planda ise bu kelime dizilimini üreten asıl niyet, yani metnin "Normal" mi yoksa "Dolandırıcılık" (Fraud) amaçlı mı olduğu gibi saklı durumlar (hidden states) yer alır. Amacımız, sadece okuduğumuz bu kelimelere bakarak, arka planda işleyen en olası durumlar zincirini ortaya çıkarmaktır.
+Burada $P(X \mid Y)$, "$Y$ bilindiğinde $X$'in olasılığı" anlamına gelen **koşullu olasılıktır** (conditional probability). Varsayımın arkasındaki düşünce şudur: Şimdiki durum, geleceği kestirmek için geçmişin yeterli bir özetidir.
 
-Eğer analiz ettiğimiz mesaj 20 kelimelikse ve arka planda 3 farklı saklı durum ihtimali varsa, toplamda $3^{20}$ farklı olası yol ortaya çıkar. Kelime sayısı arttıkça tüm bu ihtimalleri tek tek hesaplamak bilgisayarların işlemci gücünü aşar.
+### 2.3 Durağanlık Varsayımı (Stationary Process Assumption)
 
-İşte bu noktada Andrew Viterbi'nin geliştirdiği algoritma devreye girer. Bu algoritma, bilgisayar bilimlerinde Dinamik Programlama (Dynamic Programming) dediğimiz bir temel üzerine inşa edilmiştir. Dinamik kelimesi, Yunanca *dunamis* (güç, hareket) kökünden gelir ve baştan sona sabit bir planı takip etmek yerine, ilerledikçe eldeki yeni verilere göre kendini uyarlayan sistemleri ifade eder. 
+Bir durumdan diğerine geçiş olasılıkları zamanla değişmez:
 
-Süreci zihnimizde tam olarak oturtabilmek için Viterbi'nin o "en iyi yolu bütün kombinasyonları hesaplamadan nasıl bulduğu" sorusuna bakalım. Kuryemizin önünde yan yana dizilmiş mahalleler (adımlar) olsun. Viterbi, rotayı baştan sona binlerce ihtimaliyle aynı anda düşünmek yerine, işi küçük ve kesin adımlara böler:
+$$P(z_t \mid z_{t-1}) = P(z_2 \mid z_1), \qquad t \in \{2, \ldots, T\}$$
 
-1. **Adım 1 (İlk Mahalle):** Başlangıç noktasından 1. Mahalledeki diyelim ki 3 farklı kavşağa (A, B ve C kavşakları) gitmenin sürelerini hesaplar ve not eder. (Örn: A'ya 10 dk, B'ye 15 dk, C'ye 12 dk).
-2. **Adım 2 (İkinci Mahalle ve Hesaplama Anı):** Şimdi 2. Mahalledeki "Merkez Kavşağı"na odaklanalım. Buraya 1. Mahalledeki A, B ve C kavşaklarından gelinebilir.
-Sistem şu 3 net hesabı yapar:
-    * "A kavşağına gelmek 10 dakika sürmüştü. A'dan buraya yol 8 dakika. Toplam = **18 dakika**."
-    * "B kavşağına gelmek 15 dakika sürmüştü. B'den buraya yol 2 dakika. Toplam = **17 dakika**. (En Hızlı!)"
-    * "C kavşağına gelmek 12 dakika sürmüştü. C'den buraya yol 10 dakika. Toplam = **22 dakika**."
-3. **Eleme Anı:** İşte kritik nokta burasıdır! Merkez Kavşağı'na ulaşmanın en hızlı yolunun 17 dakika ile "B kavşağından geçmek" olduğunu **tüm olasılıkları hesaplayarak** kesinleştirdik. Artık A ve C'den gelen yolları tamamen haritadan silebiliriz! Çünkü birisi ileride hedef noktasına Merkez Kavşağı üzerinden gidecekse, onun B üzerinden gelmiş olması A veya C'den gelmiş olmasından her zaman daha hızlı olacaktır.
-4. **Sonraki Adımlar:** Algoritma bu işlemi aynı hizada bulunan tüm kavşaklar için yapar. Sonra 3. mahalleye geçer ve sadece bir önceki mahallede hayatta kalan (elenmemiş) yolların üzerine ekleme yaparak ilerler.
+*Stationary* sözcüğü Latince *stationarius* (yerinde duran, sabit) kökünden gelir. "Güneşli bir günden sonra yağmur yağma olasılığı" bugün de on gün sonra da aynı kabul edilir.
 
-Yani Viterbi algoritması bir şeyleri ezbere varsaymaz; **kendisinden bir önceki anın kesinleşmiş en iyi bilgilerini kullanarak (B'ye 15 dakikada gelindiği bilgisi gibi) bir sonraki anı hesaplar.** Trilyonlarca kombinasyonu hafızada tutmak yerine, her durakta "zayıf ihtimalleri" (A ve C yolları gibi) çöpe atarak ilerler. Hedefe ulaştığında, elinde geriye doğru takip edebileceği mükemmel ve matematiksel olarak kanıtlanmış bir "en güçlü yollar" zinciri kalır.
+### 2.4 Başlangıç Dağılımı ve Geçiş Matrisi
 
-Bu yapının zaman içindeki akışını genellikle İngilizcede kafes anlamına gelen *Trellis* diyagramları ile çizeriz.
+Bir Markov zinciri iki parametreyle tanımlanır:
 
-```mermaid
-graph LR
-    subgraph t1 ["t=1 (1. Kelime)"]
-        S1_1(("Durum A"))
-        S2_1(("Durum B"))
-    end
+- **Başlangıç olasılıkları** $\pi$: $\pi_i = P(z_1 = s_i)$, ilk andaki durumun dağılımı.
+- **Geçiş matrisi** $A$ (transition matrix): $A_{ij} = P(z_t = s_j \mid z_{t-1} = s_i)$. Her satır bir olasılık dağılımı olduğundan satır toplamları 1'dir.
 
-    subgraph t2 ["t=2 (2. Kelime)"]
-        S1_2(("Durum A"))
-        S2_2(("Durum B"))
-    end
+(Bazı kaynaklar, $\pi$'yi ayrı tutmak yerine sanal bir başlangıç durumu $s_0$ ekleyip $\pi$'yi $A$ matrisinin ilk satırı olarak yazar; bu durumda $A$, $(|S|+1) \times (|S|+1)$ boyutlu olur. Bu notta, HMM'de yaygın olan $\pi$ ve $A$'nın ayrı tutulduğu gösterim kullanılmaktadır.)
 
-    subgraph t3 ["t=3 (3. Kelime)"]
-        S1_3(("Durum A"))
-        S2_3(("Durum B"))
-    end
-    
-    S1_1 -. "Düşük" .-> S2_2
-    S2_1 -. "Düşük" .-> S1_2
-    S2_2 -. "Düşük" .-> S2_3
-    
-    S1_1 == "En Yüksek P" ==> S1_2
-    S1_2 == "En Yüksek P" ==> S1_3
-    S2_1 == "Maks" ==> S2_2
-    S1_2 == "Maks" ==> S2_3
-    
-    style S1_3 fill:#f1c40f,stroke:#2c3e50,stroke-width:2px
-    classDef default fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px;
-```
+### 2.5 Örnek: Üç Durumlu Hava Modeli
 
-### Viterbi Algoritmasının Matematiği
-İşin hesaplama kısmına geçtiğimizde, gençler, bu kurye mantığını matrislere dökeriz. Zamanı $t$ ile, bulunduğumuz saklı durumu ise $k$ ile ifade edelim. Her $t$ anında ve her $k$ durumu için, o noktaya kadar gelen en olası yolun olasılık değerini hesaplar ve bu değeri $V_{t,k}$ değişkeninde tutarız.
+Başlangıçta üç durumun eşit olasılıklı olduğunu varsayalım: $\pi = (1/3,\ 1/3,\ 1/3)$. Durumlar arasındaki geçişler şöyle olsun:
 
-Adım adım ilerlerken kullanacağımız denklemdeki matematiksel terimlerin anlamları şunlardır:
-* $V_{t, k}$: $t$ anında $k$ durumunda olmanın hesaplanmış en yüksek olasılığıdır.
-* $\max_{x \in S}$: Sistemin önceki anında ($t-1$) bulunabileceği tüm olası saklı durumlar ($S$ kümesindeki her bir $x$ durumu) arasından olasılığı en yüksek olanı seçeceğimizi ifade eder.
-* $V_{t-1, x}$: Bir önceki zaman adımında ($t-1$), $x$ durumunda olmanın hesaplanmış en yüksek olasılığıdır. Kuryenin bir önceki kavşağa ulaşma süresi gibi düşünebilirsiniz.
-* $A_{x, k}$: Sistemin $x$ durumundan $k$ durumuna Geçiş Olasılığı (Transition Probability).
-* $B_{k, o_t}$: Sistem $k$ durumundayken, elimizdeki o anki $o_t$ verisini (örneğin mesajdaki o kelimeyi) Yayım Olasılığı (Emission Probability).
+- Güneşli bir günden sonra yine güneşli olma olasılığı $0.8$, bulutlu olma olasılığı $0.1$, yağmurlu olma olasılığı $0.1$'dir.
+- Bulutlu bir günden sonra güneşli olma olasılığı $0.2$, yine bulutlu olma olasılığı $0.6$, yağmurlu olma olasılığı $0.2$'dir.
+- Yağmurlu bir günden sonra havanın açıp güneşli olma olasılığı $0.1$, bulutlu olma olasılığı $0.2$, yağmurlu kalma olasılığı $0.7$'dir.
 
-Kullandığımız temel matematiksel bağıntı şudur:
-
-$$
-V_{t, k} = \max_{x \in S} (V_{t-1, x} \cdot A_{x, k} \cdot B_{k, o_t})
-$$
-
-Denklemdeki $\max$ fonksiyonu çok kritiktir. Algoritma, bulunduğumuz $k$ durumuna gelebilecek tüm geçmiş $x$ durumlarını tek tek bu çarpımdan geçirir ve sadece olasılığı en yüksek olanı ($max$) seçip $V_{t, k}$ olarak kaydeder. Diğer zayıf ihtimaller o anda çöpe atılır. 
-
-Zaman çizelgesinin en sonuna, yani analiz ettiğimiz verinin son anına ($T$) ulaştığımızda elimizde farklı durumlar için nihai $V_{T}$ değerleri kalır. Bu değerler arasından en büyüğünü seçeriz. Daha sonra, "Ben bu en yüksek olasılıklı sonuca hangi kavşaklardan geçerek ulaştım?" diyerek sistemi geriye doğru takip ederiz. Bu işleme Geriye İz Sürme (Backtracking) adı verilir. 
-
-İşte bu geriye doğru takip işlemi bittiğinde, elimizdeki karmaşık gözlem dizisini üreten en mantıklı, matematiksel olarak kanıtlanmış o saklı durumlar dizisini baştan sona elde etmiş oluruz. Doğal dil işleme algoritmalarından gen dizilimlerinin analizine kadar birçok alanda karşımıza çıkan gürültülü ve belirsiz veriler, bu yöntemle anlamlı yapılara dönüştürülür.
-
-
-## 5. Zaman Serileri ve Markov Varsayımları
-Saklı Markov Modelleri (Hidden Markov Models - HMM) üzerine konuşurken, arka planda işleyen zaman serilerini (time series) ve durum geçişlerini iyi anlamamız gerekir. Bir sistemi incelerken, bu sistemin içinde bulunabileceği bir dizi durumu (state) göz önüne alırız ve bunu $S = \{s_1, s_2, ... s_{|S|}\}$ şeklinde ifade ederiz. İngilizcedeki *state* (durum) kelimesi Latince *status* kökünden gelir ve sistemin o anki pozisyonunu veya halini belirtir. Bu durumları zaman içinde ardışık bir dizi olarak gözlemleyebiliriz. Gözlemlerimizin kümesini $\vec{z} \in S^T$ olarak tanımlıyoruz.
-
-Örneğin, dışarıdaki hava durumunu modelliyor olalım. Havanın alabileceği durumlar kümemiz $S = \{sun, cloud, rain\}$ olsun. Burada toplam durum sayımız |S| = 3'tür. Birkaç günlük bir periyotta havayı gözlemlediğimizi düşünün. Beş günlük ($T=5$) bir gözlem dizimiz şu şekilde olabilir: $\{z_1 = s_{sun}, z_2 = s_{cloud}, z_3 = s_{cloud}, z_4 = s_{rain}, z_5 = s_{cloud}\}$.
-
-Hava örneğimizdeki bu gözlemlenen haller, aslında zaman içinde işleyen rastgele bir sürecin çıktısını temsil eder. Normal şartlar altında, dışarıdan başka hiçbir varsayım eklemediğimizde, $t$ zamanındaki hava durumu ($s_j$), $1$'den $t-1$'e kadar olan tüm geçmiş durumların bir fonksiyonu olabilir. Hatta modellemediğimiz pek çok değişken de bu süreci etkileyebilir. Eğer bugünkü havanın durumunu tahmin etmek için dünyanın varoluşundan bugüne kadarki tüm hava olaylarını hesaba katmak zorunda kalsaydık, hiçbir sistem bu hesabı yapamazdı.
-
-Gençler, zaman serileri hakkında izlenebilir ve hesaplanabilir şekilde akıl yürütmemize izin veren iki temel Markov varsayımı kullanırız.
-
-Birincisi, Sınırlı Görüş Varsayımıdır (Limited Horizon Assumption). Bu kural bize, $t$ zamanında belirli bir durumda olma olasılığımızın sadece $t-1$ zamanındaki duruma bağlı olduğunu söyler. Bu varsayımın altında yatan temel mantık oldukça sadedir: $t$ zamanındaki durum, sistemin gelecek durumunu tahmin etmek için geçmişin yeterli bir özeti ile temsil edilmesidir. Geçmişe dair tüm veri yükünü sırtımızda taşımayız.
-
-Sınırlı görüş varsayımının formülündeki işaretlerin anlamları:
-* $P(X | Y)$: Koşullu olasılık (Conditional Probability) gösterimidir. "Y olayı gerçekleştiği bilindiğinde X olayının gerçekleşme olasılığı" anlamına gelir.
-* $z_t$: Sistemin $t$ (şimdiki) zamanındaki durumudur.
-* $z_{t-1}, z_{t-2}, ..., z_1$: Sistemin geçmişten bugüne kadarki tüm önceki durumlarını ifade eder.
-
-Matematiksel olarak bu kuralı şu şekilde yazarız: 
-
-$$
-P(z_t | z_{t-1}, z_{t-2}, ..., z_1) = P(z_t | z_{t-1})
-$$
-
-İkincisi ise Durağan Süreç Varsayımıdır (The Stationary Process Assumption). Durağan kelimesi, Latince *stationarius* (sabit, değişmez) kökünden gelir. Bu varsayım, bir sonraki duruma geçerken mevcut durumun sağladığı koşullu dağılımın zaman içinde değişmediğini ifade eder. Yani "güneşli bir günden sonra yağmur yağma ihtimali", bugün hesaplasak da on gün sonra hesaplasak da sistemimizde aynı kabul edilir. 
-
-Formüldeki matematiksel terimler:
-* $P(z_t | z_{t-1})$: Herhangi bir $t$ anında, bir önceki ana $t-1$ bağlı olarak hesaplanan durum geçiş olasılığıdır.
-* $P(z_2 | z_1)$: Zamanın başındaki ilk geçişte (1. andan 2. ana geçerken) hesaplanan olasılıktır.
-* $t \in 2...T$: Zaman birimi olan $t$'nin, 2'den başlayıp $T$ (son zaman) anına kadar devam eden kümenin ($\in$ işareti "elemanıdır" demektir) bir parçası olduğunu belirtir.
-
-Bunu formülize edersek: 
-
-$$
-P(z_t | z_{t-1}) = P(z_2 | z_1); \quad t \in 2...T
-$$
-
-## 6. Modelin İnşası ve Geçiş Matrisi
-Sistemi başlatmak için bir ilk durum ve ilk gözlem tanımlamamız gerekir, bunu $z_0 \equiv s_0$ olarak varsayıyoruz. Buradaki $s_0$, $0$ zamanında sistemdeki durumlar üzerindeki başlangıç olasılık dağılımını temsil eder. Bu notasyonel kolaylık, sistemin ilk gerçek durumu olan $z_1$'i $P(z_1 | z_0)$ olarak görme olasılığına ilişkin inancımızı kodlamamızı sağlar. Böylece dizilimi baştan sona $P(z_t|z_{t-1},...,z_1) = P(z_t|z_{t-1},...,z_1, z_0)$ şeklinde ifade edebiliriz.
-
-Şimdi bu olasılıkları sistemli bir şekilde yapılandırmamız gerekiyor. Bunun için Geçiş Matrisi (Transition Matrix) kullanırız ve bunu $A$ ile gösteririz. Boyutları $\mathbb{R}^{(|S|+1) \times (|S|+1)}$ şeklindedir. $+1$ eklememizin sebebi, sisteme dahil ettiğimiz başlangıç durumu olan $s_0$'dır. Matrisin içindeki her bir $A_{ij}$ değeri, sistemin herhangi bir $t$ zamanında $i$ durumundan $j$ durumuna geçiş olasılığıdır.
-
-### Örnek Uygulama: Hava Durumu Modeli
-Güneş, bulut ve yağmur içeren modelimiz için geçiş matrisimizi sayısal değerlerle kuralım.
-
-İlk durumumuz olan $s_0$'dan havanın diğer üç durumuna (güneş, bulut, yağmur) geçiş için eşit (uniform) bir olasılık dağılımı gösterdiğini varsayıyoruz. Bu olasılıklar $0.33$, $0.33$ ve $0.33$ şeklindedir.
-
-Sonrasında sistemin kendi içindeki geçişlerine bakalım:
-* Güneşli ($s_{sun}$) bir günden sonra tekrar güneşli olma olasılığı $0.8$, bulutlu ($s_{cloud}$) olma olasılığı $0.1$, yağmurlu ($s_{rain}$) olma olasılığı ise $0.1$'dir.
-* Bulutlu ($s_{cloud}$) bir günden sonra güneşli olma ihtimali $0.2$, tekrar bulutlu olma ihtimali $0.6$, yağmurlu olma ihtimali ise $0.2$'dir.
-* Yağmurlu ($s_{rain}$) bir günden sonra havanın açıp güneşli olma ihtimali $0.1$, bulutlu olma ihtimali $0.2$ ve yağmurlu kalma ihtimali $0.7$'dir.
-
-Bu geçiş olasılıklarının bir Geçiş Matrisi ($A$) olarak tablo halindeki görünümü şu şekildedir:
-
-| Mevcut Durum \ Sonraki Durum | Güneş ($s_{sun}$) | Bulut ($s_{cloud}$) | Yağmur ($s_{rain}$) |
+| Mevcut durum \ Sonraki durum | Güneş | Bulut | Yağmur |
 | :--- | :---: | :---: | :---: |
-| **Başlangıç ($s_0$)** | 0.33 | 0.33 | 0.33 |
-| **Güneş ($s_{sun}$)** | 0.8 | 0.1 | 0.1 |
-| **Bulut ($s_{cloud}$)** | 0.2 | 0.6 | 0.2 |
-| **Yağmur ($s_{rain}$)** | 0.1 | 0.2 | 0.7 |
-
-Bu sistemi bir diyagram üzerinde inceleyelim:
+| **Güneş** | 0.8 | 0.1 | 0.1 |
+| **Bulut** | 0.2 | 0.6 | 0.2 |
+| **Yağmur** | 0.1 | 0.2 | 0.7 |
 
 ```mermaid
 graph LR
-    S0(("s_0<br>(Başlangıç)"))
-    Sun(("Güneş<br>(s_sun)"))
-    Cloud(("Bulut<br>(s_cloud)"))
-    Rain(("Yağmur<br>(s_rain)"))
-
-    S0 -- "0.33" --> Sun
-    S0 -- "0.33" --> Cloud
-    S0 -- "0.33" --> Rain
+    Sun(("Güneş"))
+    Cloud(("Bulut"))
+    Rain(("Yağmur"))
 
     Sun -- "0.8" --> Sun
     Sun -- "0.1" --> Cloud
@@ -216,10 +81,287 @@ graph LR
     Rain -- "0.2" --> Cloud
     Rain -- "0.7" --> Rain
 
-    style S0 fill:#bdc3c7,stroke:#2c3e50,stroke-width:2px
     style Sun fill:#f1c40f,stroke:#2c3e50,stroke-width:2px
     style Cloud fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
     style Rain fill:#3498db,stroke:#2c3e50,stroke-width:2px
 ```
 
-Oluşturduğumuz matriste ve diyagramda dikkat ederseniz, havanın kendi kendisiyle ilişkili (self-correlated) olduğu sezgisini temsil eden sayılar vardır. Güneşliyse güneşli kalma eğilimindedir, bulutluysa bulutlu kalır. Bu örüntü, birçok Markov modelinde yaygındır ve geçiş matrisinde güçlü bir köşegen (diyagonal) yapı olarak gözlemlenebilir. Olayların birbiri ardına dizilişindeki bu eğilimler, veri analizi süreçlerinin ve algoritma tasarımlarının temel taşıdır.
+Matristeki büyük köşegen değerler, havanın kendi kendisiyle ilişkili (self-correlated) olduğu sezgisini yansıtır: Güneşliyse güneşli, yağmurluysa yağmurlu kalma eğilimindedir. Bu güçlü köşegen yapı birçok Markov modelinde görülür.
+
+Bir durum dizisinin olasılığı, Markov varsayımları sayesinde basit bir çarpıma dönüşür. Örneğin $(\text{güneş}, \text{güneş}, \text{yağmur})$ dizisinin olasılığı:
+
+$$P = \pi_{\text{güneş}} \cdot A_{\text{güneş},\text{güneş}} \cdot A_{\text{güneş},\text{yağmur}} = \tfrac{1}{3} \times 0.8 \times 0.1 \approx 0.0267$$
+
+---
+
+## 3. Saklı Markov Modelinin Parametreleri
+
+Saklı Markov Modelinde durumlar artık doğrudan gözlenmez; her durum, kendisine özgü olasılıklarla bir **gözlem** üretir. Model üç parametreyle tanımlanır ve $\lambda = (A, B, \pi)$ biçiminde gösterilir.
+
+```mermaid
+graph LR
+    H1(("Saklı durum<br>(zaman: t)"))
+    H2(("Saklı durum<br>(zaman: t+1)"))
+    H3(("Saklı durum<br>(zaman: t+2)"))
+
+    O1["Gözlem<br>(zaman: t)"]
+    O2["Gözlem<br>(zaman: t+1)"]
+    O3["Gözlem<br>(zaman: t+2)"]
+
+    H1 -- "Geçiş<br>olasılığı (A)" --> H2
+    H2 -- "Geçiş<br>olasılığı (A)" --> H3
+
+    H1 -- "Yayım<br>olasılığı (B)" --> O1
+    H2 -- "Yayım<br>olasılığı (B)" --> O2
+    H3 -- "Yayım<br>olasılığı (B)" --> O3
+
+    classDef hiddenState fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px;
+    classDef observation fill:#d5dbdb,stroke:#2c3e50,stroke-width:2px;
+
+    class H1,H2,H3 hiddenState;
+    class O1,O2,O3 observation;
+```
+
+**1. $A$ matrisi (geçiş olasılıkları, transition probabilities):** $A_{ij} = P(q_t = s_j \mid q_{t-1} = s_i)$; saklı durumlar arasındaki geçişler. "Bugün yağmurluysa yarın güneşli olma olasılığı nedir?" sorusunun karşılığıdır. (Bu bölümden itibaren saklı durumlar $q_t$, gözlemler $o_t$ ile gösterilmektedir.)
+
+**2. $B$ matrisi (yayım olasılıkları, emission probabilities):** $B_{j}(o) = P(o_t = o \mid q_t = s_j)$; sistem $s_j$ durumundayken $o$ gözlemini üretme olasılığı. *Emission* sözcüğü Latince *emittere* (dışarı salmak, yaymak) kökünden gelir. "Hava yağmurluyken arkadaşımın kitap okuma olasılığı nedir?" sorusu bu matrisin bir elemanıdır.
+
+**3. $\pi$ vektörü (başlangıç olasılıkları, initial probabilities):** $\pi_i = P(q_1 = s_i)$; gözlemlemeye başladığımız ilk andaki saklı durumun dağılımı.
+
+### 3.1 Çözümlü Örnek İçin Model
+
+Bölüm 1'deki arkadaş örneğini sayısallaştıralım. İki saklı durum (Yağmurlu, Güneşli) ve üç olası gözlem (yürüyüş, kitap, temizlik) vardır:
+
+$$\pi = \begin{bmatrix} 0.6 & 0.4 \end{bmatrix} \quad (\text{Yağmurlu, Güneşli})$$
+
+| $A$ (geçiş) | Yağmurlu | Güneşli |
+| :--- | :---: | :---: |
+| **Yağmurlu** | 0.7 | 0.3 |
+| **Güneşli** | 0.4 | 0.6 |
+
+| $B$ (yayım) | yürüyüş | kitap | temizlik |
+| :--- | :---: | :---: | :---: |
+| **Yağmurlu** | 0.1 | 0.4 | 0.5 |
+| **Güneşli** | 0.6 | 0.3 | 0.1 |
+
+Arkadaşımızın üç günlük mesajları sırasıyla şöyle olsun: $O = (\text{yürüyüş}, \text{kitap}, \text{temizlik})$.
+
+---
+
+## 4. HMM ile Çözülen Üç Temel Problem
+
+* **Değerlendirme (evaluation):** Model $\lambda$ ve bir gözlem dizisi $O$ verildiğinde $P(O \mid \lambda)$ nedir? Yani bu model, bu gözlem dizisini hangi olasılıkla üretir? Birden fazla model arasından gözlemleri en iyi açıklayanı seçmek için kullanılır. **İleri algoritmasıyla** (forward algorithm) çözülür (Bölüm 5).
+* **Kod çözme (decoding):** Gözlemleri üreten **en olası saklı durum dizisi** nedir? Bir cümledeki sözcüklerin türlerini sırayla belirlemek (part-of-speech tagging) bu problemin örneğidir. **Viterbi algoritmasıyla** çözülür (Bölüm 6).
+* **Öğrenme (learning):** Elimizde yalnızca gözlemler varken $P(O \mid \lambda)$'yı en büyük yapan $A$, $B$ ve $\pi$ parametreleri nelerdir? **Baum–Welch algoritmasıyla** çözülür (Bölüm 7).
+
+Üç problemin ortak zorluğu şudur: $N$ saklı durum ve $T$ uzunluğunda bir gözlem dizisi için olası durum dizisi sayısı $N^T$'dir. Örneğin 3 durum ve 20 gözlem için $3^{20} \approx 3.5 \times 10^9$ dizi vardır; tüm dizileri tek tek hesaplamak pratik değildir. İleri ve Viterbi algoritmaları **dinamik programlamayla** bu maliyeti $O(N^2 T)$'ye indirir.
+
+---
+
+## 5. Değerlendirme: İleri Algoritması (Forward Algorithm)
+
+### 5.1 Fikir
+
+$P(O \mid \lambda)$, tüm olası durum dizileri üzerinden toplanarak bulunur. İleri algoritması bu toplamı her adımda bir öncekinin üzerine inşa ederek hesaplar. **İleri değişkeni** şöyle tanımlanır:
+
+$$\alpha_t(j) = P(o_1, o_2, \ldots, o_t,\ q_t = s_j \mid \lambda)$$
+
+yani ilk $t$ gözlemin görülmesi **ve** $t$ anında $s_j$ durumunda bulunulması olasılığı.
+
+### 5.2 Adımlar
+
+**Başlatma** ($t = 1$):
+
+$$\alpha_1(j) = \pi_j \, B_j(o_1)$$
+
+**Özyineleme** ($t = 2, \ldots, T$): $s_j$ durumuna önceki her durumdan gelinebilir; bu yolların olasılıkları **toplanır**:
+
+$$\alpha_t(j) = \left[ \sum_{i=1}^{N} \alpha_{t-1}(i)\, A_{ij} \right] B_j(o_t)$$
+
+**Sonlandırma:**
+
+$$P(O \mid \lambda) = \sum_{j=1}^{N} \alpha_T(j)$$
+
+### 5.3 Çözümlü Örnek
+
+$O = (\text{yürüyüş}, \text{kitap}, \text{temizlik})$ için (Y: Yağmurlu, G: Güneşli):
+
+| $t$ | Gözlem | $\alpha_t(\text{Y})$ | $\alpha_t(\text{G})$ |
+| :---: | :--- | :--- | :--- |
+| 1 | yürüyüş | $0.6 \times 0.1 = 0.06$ | $0.4 \times 0.6 = 0.24$ |
+| 2 | kitap | $(0.06 \times 0.7 + 0.24 \times 0.4) \times 0.4 = 0.0552$ | $(0.06 \times 0.3 + 0.24 \times 0.6) \times 0.3 = 0.0486$ |
+| 3 | temizlik | $(0.0552 \times 0.7 + 0.0486 \times 0.4) \times 0.5 = 0.02904$ | $(0.0552 \times 0.3 + 0.0486 \times 0.6) \times 0.1 = 0.004572$ |
+
+$$P(O \mid \lambda) = 0.02904 + 0.004572 = 0.033612$$
+
+Bu model, bu üç günlük mesaj dizisini yaklaşık $0.0336$ olasılıkla üretir. Tek başına bu sayı küçük görünebilir; değeri, aynı gözlemler için başka bir modelin vereceği olasılıkla karşılaştırıldığında anlam kazanır.
+
+---
+
+## 6. Kod Çözme: Viterbi Algoritması ve Dinamik Programlama
+
+### 6.1 Sezgi: En Kısa Yolu Bulan Kurye
+
+Viterbi algoritması (Andrew Viterbi, 1967) **dinamik programlama** (dynamic programming) üzerine kuruludur. Dinamik programlama, büyük bir problemi örtüşen alt problemlere böler, her alt problemi bir kez çözüp sonucunu saklar ve büyük problemin çözümünü bu saklı sonuçlardan kurar. Yöntem, bir problemin en iyi çözümünün alt problemlerin en iyi çözümlerinden oluştuğu (en iyi alt yapı, optimal substructure) durumlarda kullanılabilir. Adı, Richard Bellman'ın 1950'lerde çok aşamalı ve zamana bağlı karar problemleri için kullandığı terimden gelir; buradaki "dinamik" sözcüğü (Yunanca *dynamis*, güç) sürecin aşama aşama ilerlemesini anlatır.
+
+Bu fikri somutlaştırmak için bir kuryeyi düşünelim. Kurye, yan yana dizilmiş mahalleleri sırayla geçerek bir hedefe ulaşacaktır; her mahallede birkaç kavşak vardır ve en kısa süreli rotayı arıyordur. Kurye, rotayı tüm olasılıklarıyla baştan sona düşünmek yerine işi küçük adımlara böler:
+
+1. **Birinci mahalle:** Başlangıç noktasından birinci mahalledeki üç kavşağa (A, B, C) gitme süreleri hesaplanıp not edilir: A'ya 10 dk, B'ye 15 dk, C'ye 12 dk.
+2. **İkinci mahalle:** İkinci mahalledeki "Merkez Kavşağı"na A, B ve C'den gelinebilir. Üç hesap yapılır:
+    * A'ya 10 dk; A'dan Merkez'e 8 dk. Toplam **18 dk**.
+    * B'ye 15 dk; B'den Merkez'e 2 dk. Toplam **17 dk** (en kısa).
+    * C'ye 12 dk; C'den Merkez'e 10 dk. Toplam **22 dk**.
+3. **Eleme:** Merkez Kavşağı'na ulaşmanın en kısa yolu 17 dk ile B üzerinden geçendir. Rota ileride Merkez Kavşağı'ndan geçecekse, B üzerinden gelmek A ya da C üzerinden gelmekten her zaman daha kısadır; bu nedenle A ve C'den gelen yollar Merkez Kavşağı için elenir ve yalnızca "Merkez'e en iyi B'den gelinir, 17 dk" bilgisi saklanır.
+4. **Sonraki mahalleler:** Aynı işlem her mahalledeki her kavşak için yapılır. Hedefe ulaşıldığında saklanan "nereden gelindi" bilgileri geriye doğru izlenerek en iyi rota bulunur.
+
+Viterbi algoritması aynı mantığı olasılıklarla uygular: Sürelerin toplamı yerine olasılıkların **çarpımı**, en küçük yerine **en büyük** değer aranır. (Olasılıkların negatif logaritması alındığında çarpım toplama, en büyük de en küçüğe dönüşür; böylece iki problem birebir aynı biçime gelir.)
+
+### 6.2 Viterbi Değişkeni ve Adımlar
+
+**Viterbi değişkeni** $\delta_t(j)$, ilk $t$ gözlemi üreten ve $t$ anında $s_j$ durumunda biten **en olası** durum dizisinin olasılığıdır:
+
+$$\delta_t(j) = \max_{q_1, \ldots, q_{t-1}} P(q_1, \ldots, q_{t-1},\ q_t = s_j,\ o_1, \ldots, o_t \mid \lambda)$$
+
+$\psi_t(j)$ ise bu en olası dizide $t-1$ anında bulunulan durumu, yani **geri işaretçiyi** (backpointer) saklar.
+
+**Başlatma** ($t = 1$):
+
+$$\delta_1(j) = \pi_j \, B_j(o_1), \qquad \psi_1(j) = 0$$
+
+**Özyineleme** ($t = 2, \ldots, T$):
+
+$$\delta_t(j) = \max_{i} \left[ \delta_{t-1}(i)\, A_{ij} \right] B_j(o_t), \qquad \psi_t(j) = \arg\max_{i} \left[ \delta_{t-1}(i)\, A_{ij} \right]$$
+
+İleri algoritmasından tek fark, önceki durumlar üzerindeki **toplamın** yerini **en büyük değerin** almasıdır. Formüldeki terimler:
+
+* $\delta_{t-1}(i)$: Bir önceki anda $s_i$ durumunda biten en olası dizinin olasılığı (kuryenin önceki kavşağa ulaşma süresine karşılık gelir).
+* $A_{ij}$: $s_i$'den $s_j$'ye geçiş olasılığı (iki kavşak arasındaki yol).
+* $B_j(o_t)$: $s_j$ durumunun $t$ anındaki gözlemi üretme olasılığı.
+
+**Sonlandırma:**
+
+$$P^{*} = \max_{j} \delta_T(j), \qquad q_T^{*} = \arg\max_{j} \delta_T(j)$$
+
+**Geriye iz sürme (backtracking):** $t = T-1, \ldots, 1$ için
+
+$$q_t^{*} = \psi_{t+1}(q_{t+1}^{*})$$
+
+Bu işlem bittiğinde, gözlem dizisini üreten en olası saklı durum dizisi $q_1^{*}, \ldots, q_T^{*}$ elde edilir. Algoritma, model verildiğinde bu dizinin gerçekten en olası dizi olduğunu garanti eder.
+
+### 6.3 Çözümlü Örnek
+
+Aynı model ve $O = (\text{yürüyüş}, \text{kitap}, \text{temizlik})$ için:
+
+| $t$ | Gözlem | $\delta_t(\text{Y})$ | $\psi_t(\text{Y})$ | $\delta_t(\text{G})$ | $\psi_t(\text{G})$ |
+| :---: | :--- | :--- | :---: | :--- | :---: |
+| 1 | yürüyüş | $0.6 \times 0.1 = 0.06$ | — | $0.4 \times 0.6 = 0.24$ | — |
+| 2 | kitap | $\max(0.06 \times 0.7,\ 0.24 \times 0.4) \times 0.4 = 0.096 \times 0.4 = 0.0384$ | G | $\max(0.06 \times 0.3,\ 0.24 \times 0.6) \times 0.3 = 0.144 \times 0.3 = 0.0432$ | G |
+| 3 | temizlik | $\max(0.0384 \times 0.7,\ 0.0432 \times 0.4) \times 0.5 = 0.02688 \times 0.5 = 0.01344$ | Y | $\max(0.0384 \times 0.3,\ 0.0432 \times 0.6) \times 0.1 = 0.02592 \times 0.1 = 0.002592$ | G |
+
+**Sonlandırma:** $\max(0.01344,\ 0.002592) = 0.01344$; son durum **Yağmurlu**.
+
+**Geriye iz sürme:** $\psi_3(\text{Y}) = \text{Y}$, yani 2. gün Yağmurlu; $\psi_2(\text{Y}) = \text{G}$, yani 1. gün Güneşli.
+
+**En olası saklı durum dizisi:** Güneşli → Yağmurlu → Yağmurlu. Bu sonuç Bölüm 1'deki sezgisel çıkarımla örtüşür: Yürüyüşe çıkılan gün güneşli, kitap okunan ve temizlik yapılan günler yağmurludur. Bu dizinin gözlemler verildiğindeki koşullu olasılığı $0.01344 / 0.033612 \approx 0.40$'tır; yani model bu yorumu en olası bulmakla birlikte başka dizilerin de toplamda azımsanmayacak bir olasılığı vardır.
+
+Bu hesabın zaman içindeki akışı genellikle **kafes** (trellis) diyagramıyla gösterilir. Aşağıdaki diyagramda kalın oklar her durum için seçilen en iyi önceki durumu (geri işaretçileri), kesikli oklar elenen geçişleri gösterir; vurgulanan düğüm, geriye iz sürmenin başladığı son durumdur.
+
+```mermaid
+graph LR
+    subgraph t1 ["t=1 (yürüyüş)"]
+        Y1(("Yağmurlu"))
+        G1(("Güneşli"))
+    end
+
+    subgraph t2 ["t=2 (kitap)"]
+        Y2(("Yağmurlu"))
+        G2(("Güneşli"))
+    end
+
+    subgraph t3 ["t=3 (temizlik)"]
+        Y3(("Yağmurlu"))
+        G3(("Güneşli"))
+    end
+
+    Y1 -. "elendi" .-> Y2
+    Y1 -. "elendi" .-> G2
+    G2 -. "elendi" .-> Y3
+    Y2 -. "elendi" .-> G3
+
+    G1 == "en iyi" ==> Y2
+    G1 == "en iyi" ==> G2
+    Y2 == "en iyi" ==> Y3
+    G2 == "en iyi" ==> G3
+
+    style Y3 fill:#f1c40f,stroke:#2c3e50,stroke-width:2px
+    classDef default fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px;
+```
+
+### 6.4 Python ile Doğrulama
+
+```python
+import numpy as np
+
+durumlar   = ['Yağmurlu', 'Güneşli']
+gozlemler  = ['yürüyüş', 'kitap', 'temizlik']
+pi = np.array([0.6, 0.4])
+A  = np.array([[0.7, 0.3],
+               [0.4, 0.6]])
+B  = np.array([[0.1, 0.4, 0.5],
+               [0.6, 0.3, 0.1]])
+O  = [0, 1, 2]                     # yürüyüş, kitap, temizlik
+
+# İleri algoritması
+alpha = pi * B[:, O[0]]
+for o in O[1:]:
+    alpha = (alpha @ A) * B[:, o]
+print("P(O | λ) =", round(alpha.sum(), 6))
+
+# Viterbi algoritması
+delta = pi * B[:, O[0]]
+geri_isaretci = []
+for o in O[1:]:
+    aday = delta[:, None] * A          # aday[i, j] = delta(i) * A(i, j)
+    geri_isaretci.append(aday.argmax(axis=0))
+    delta = aday.max(axis=0) * B[:, o]
+
+yol = [int(delta.argmax())]
+for psi in reversed(geri_isaretci):
+    yol.insert(0, int(psi[yol[0]]))
+print("En olası dizi:", [durumlar[i] for i in yol], "olasılık =", round(delta.max(), 6))
+```
+
+Çıktı:
+
+```text
+P(O | λ) = 0.033612
+En olası dizi: ['Güneşli', 'Yağmurlu', 'Yağmurlu'] olasılık = 0.01344
+```
+
+Uzun gözlem dizilerinde olasılıkların çarpımı çok küçülür ve bilgisayarın kayan noktalı sayı aralığının altına düşebilir (underflow). Uygulamada bu nedenle Viterbi algoritması olasılıkların logaritmalarıyla (çarpımlar yerine toplamlarla), ileri algoritması ise her adımda ölçeklendirilerek çalıştırılır.
+
+---
+
+## 7. Öğrenme: Baum–Welch Algoritması
+
+Model parametreleri bilinmediğinde, yalnızca gözlem dizilerinden kestirilmeleri gerekir. **Baum–Welch algoritması**, beklenti–enbüyütme (expectation–maximization, EM) yönteminin HMM'ye uygulanmış biçimidir. İleri değişkenine ek olarak, $t$ anında $s_i$ durumunda bulunulduğunda kalan gözlemlerin görülme olasılığını veren bir **geri değişkeni** (backward variable) $\beta_t(i)$ kullanır. Her yinelemede:
+
+1. **Beklenti adımı (E):** Mevcut parametrelerle, her anda her durumda bulunma ve her durum çiftinin ardışık görülme olasılıkları $\alpha$ ve $\beta$ yardımıyla hesaplanır.
+2. **Enbüyütme adımı (M):** $\pi$, $A$ ve $B$ bu beklenen sayımlara göre yeniden kestirilir.
+
+Her yinelemede $P(O \mid \lambda)$ azalmaz; algoritma yerel bir en büyük değere yakınsar. Sonuç başlangıç değerlerine bağlı olabileceğinden farklı başlangıçlarla denemek yararlıdır.
+
+---
+
+## 8. Uygulama Alanları
+
+Saklı Markov Modelleri; konuşma tanıma, sözcük türü etiketleme gibi doğal dil işleme görevleri, biyoinformatikte gen ve protein dizilerinin çözümlenmesi, finansal zaman serilerinde piyasa rejimlerinin belirlenmesi ve algılayıcı verilerinden etkinlik tanıma gibi birçok alanda kullanılır. Bu alanların ortak noktası, gürültülü ve belirsiz gözlemlerin arkasında, zaman içinde değişen saklı bir yapının bulunmasıdır.
+
+---
+
+## Kaynaklar
+
+- Rabiner, L. R. (1989). A tutorial on hidden Markov models and selected applications in speech recognition. *Proceedings of the IEEE*, 77(2), 257–286.
+- Ramage, D. (2007). *Hidden Markov Models Fundamentals*. Stanford CS229 ders notu.
+- Jurafsky, D. ve Martin, J. H. *Speech and Language Processing* (3. baskı taslağı), Ek A: Hidden Markov Models.
+- Viterbi, A. J. (1967). Error bounds for convolutional codes and an asymptotically optimum decoding algorithm. *IEEE Transactions on Information Theory*, 13(2), 260–269.

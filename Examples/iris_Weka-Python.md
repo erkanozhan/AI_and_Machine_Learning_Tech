@@ -98,9 +98,9 @@ Karşılaştırma yaparken yalnızca tek bir sayıya takılmayın. İki modelin 
 
 ### Python ile sınıflandırma
 
-Burada önemli bir düzeltme yapıyoruz: `classification_report` çıktısı kendi başına Cohen uyum katsayısını vermez. Bu yüzden kodda bu ölçütü ayrıca hesaplıyoruz. Ayrıca tek bir eğitim-test ayrımına güvenmek yerine, önce eğitim verisi üzerinde çoklu model karşılaştırması yapıyoruz.
+Dikkat edilmesi gereken bir nokta: `classification_report` çıktısı kendi başına Cohen uyum katsayısını vermez. Bu yüzden kodda bu ölçüt ayrıca hesaplanmaktadır. Ayrıca tek bir eğitim-test ayrımına güvenmek yerine, önce eğitim verisi üzerinde çoklu model karşılaştırması yapıyoruz.
 
-Örnek dosya: [iris_classification.py](/e:/Repolar/AI_ML_YL/AI_and_Machine_Learning_Tech/Examples/iris_classification.py)
+Örnek dosya: [iris_classification.py](iris_classification.py)
 
 Gerekli paket:
 
@@ -137,7 +137,7 @@ def build_models() -> dict[str, object]:
     return {
         "Karar Agaci": DecisionTreeClassifier(max_depth=4, random_state=42),
         "Naive Bayes": GaussianNB(),
-        "Destek Vektor Makinasi": make_pipeline(
+        "Destek Vektor Makinesi": make_pipeline(
             StandardScaler(),
             SVC(kernel="rbf", C=1.0, gamma="scale"),
         ),
@@ -242,9 +242,9 @@ Bu kod üç önemli işi düzgün yapar:
 2. Farklı algoritmaları aynı koşullarda karşılaştırır.
 3. Metinde adı geçen ölçütleri gerçekten üretir; özellikle Cohen uyum katsayısını ayrıca hesaplar.
 
-Burada `Destek Vektör Makinasi` için `StandardScaler` kullanmamızın nedeni mesafe ve ölçek duyarlılığıdır. Cetveli santimetre yerine milimetreye çevirdiğinizde bazı algoritmaların davranışı değişebilir. Ağaç tabanlı yöntemler bu değişimden daha az etkilenir; ama destek vektör makineleri ve en yakın komşu türü yöntemler doğrudan etkilenir.
+Burada `Destek Vektor Makinesi` için `StandardScaler` kullanmamızın nedeni mesafe ve ölçek duyarlılığıdır. Cetveli santimetre yerine milimetreye çevirdiğinizde bazı algoritmaların davranışı değişebilir. Ağaç tabanlı yöntemler bu değişimden daha az etkilenir; ama destek vektör makineleri ve en yakın komşu türü yöntemler doğrudan etkilenir.
 
-Bu depoda yapılan doğrulama çalıştırmasında `Destek Vektör Makinasi` en iyi ortalama sonucu verdi. `10` katlı çapraz doğrulamada doğruluk yaklaşık `0.967`, Cohen uyum katsayısı yaklaşık `0.950` çıktı. Ayrı tutulan test kümesinde ise yalnızca bir `versicolor` örneği `virginica` olarak karıştı. Bu sonuç, IRIS veri setinde ayrımın büyük ölçüde güçlü olduğunu; kalan zorluğun ise çoğunlukla bu iki tür arasında toplandığını gösterir.
+Bu depoda yapılan doğrulama çalıştırmasında `Destek Vektor Makinesi` en iyi ortalama sonucu verdi. `10` katlı çapraz doğrulamada doğruluk yaklaşık `0.967`, Cohen uyum katsayısı yaklaşık `0.950` çıktı. Ayrı tutulan test kümesinde ise yalnızca bir `versicolor` örneği `virginica` olarak karıştı. Bu sonuç, IRIS veri setinde ayrımın büyük ölçüde güçlü olduğunu; kalan zorluğun ise çoğunlukla bu iki tür arasında toplandığını gösterir.
 
 ## Kümeleme
 
@@ -288,7 +288,7 @@ Saf denetimsiz inceleme yapmak isterseniz `class` sütununu geçici olarak kald�
 
 ### Python ile kümeleme
 
-Örnek dosya: [iris_clustering.py](/e:/Repolar/AI_ML_YL/AI_and_Machine_Learning_Tech/Examples/iris_clustering.py)
+Örnek dosya: [iris_clustering.py](iris_clustering.py)
 
 Kod:
 
@@ -373,7 +373,7 @@ Bu sıralama, sadece sınavdan alınan toplam nota bakmak yerine hangi konularda
 - Uzaklık temelli algoritmaları ölçekleme yapmadan karşılaştırmak.
 - Kümeleme sonucunu yalnızca gerçek etiketlere bakarak yorumlamak; iç yapı kalitesini görmezden gelmek.
 
-Bu nottaki Python örnekleri özellikle bu beş noktayı düzeltmek için yazıldı.
+Bu nottaki Python örnekleri bu beş hatadan kaçınacak biçimde yazılmıştır.
 
 ## Sonuç
 

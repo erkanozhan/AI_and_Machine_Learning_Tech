@@ -1,449 +1,358 @@
 # Kalman Filtreleri (Kalman Filters)
 
-## 1. Giriş:
-* **Kalman Filtresi (Kalman Filter) Nedir ve Neden Önemlidir?**
-Kalman filtresi, dolaylı ve belirsiz ölçümlerden bir sistemin durumunu tahmin etmek için kullanılan optimal bir tahmin algoritmasıdır (estimation algorithm). Gürültülü ve eksik verilerle başa çıkma yeteneği, onu doğrudan ölçümün imkansız veya güvenilmez olduğu çeşitli alanlarda vazgeçilmez kılar. Kalman filtresinin gücü, bir dinamik sistemin matematiksel bir modelini ve bu sistem üzerindeki ölçümleri kullanarak zaman içindeki davranışına dair bilgi sağlamasında yatar.
+## 1. Giriş
 
-Geleneksel sinyal filtrelerinden farklı olarak, Kalman filtresi sinyali gürültüyü azaltmak veya istenmeyen bileşenleri ortadan kaldırmak için doğrudan değiştirmez. Bunun yerine, bir sistemin zaman içindeki evrimini tanımlayan bir matematiksel modelden yararlanır. Bu model ve sistemden elde edilen ölçümler aracılığıyla, Kalman filtresi geçmişteki davranışları yumuşatabilir, mevcut davranışı tahmin edebilir veya gelecekteki davranışı öngörebilir. Bu çok yönlülük, onu hedef takibi, navigasyon ve kontrol gibi uygulamalarda temel bir bileşen haline getirmiştir.
+### 1.1 Kalman Filtresi Nedir ve Neden Önemlidir?
 
-Kalman filtresinin temelinde, bir sistemin durumuna ilişkin en iyi tahmini sağlamak için gürültülü ve eksik verileri işleme yeteneği yatar. "Optimal" terimi, belirli koşullar altında belirli bir hata metriğini en aza indirdiği anlamına gelir. Özellikle, Kalman filtresi, ortalama karesel hatayı (Minimum Mean Square Error - MMSE) en aza indirerek bir sürecin durumunu tahmin etmek için etkili ve hesaplama açısından verimli (özyinelemeli - recursive) bir yöntem sunar. Bu özyinelemeli doğası, onu gerçek zamanlı uygulamalar için uygun hale getirir, çünkü yalnızca mevcut girdi ölçümlerini ve daha önce hesaplanan durumu ve belirsizliğini kullanır.
+Algılayıcı (sensor) verilerini okumak ve bu veriler üzerinden anlamlı çıkarımlar yapmak mühendisliğin temel meselelerinden biridir. Ancak gerçek dünyada hiçbir algılayıcı kusursuz çalışmaz. Okunan her değere fiziksel çevreden, elektronik bileşenlerden veya veri iletiminden kaynaklanan bir miktar hata karışır; bu hataya **gürültü** (noise) denir. İngilizce *noise* sözcüğü Eski Fransızcadan gelir; kökeninin Latince *nausea* (deniz tutması, rahatsızlık) olduğu düşünülür.
 
-* **Gürültülü Ölçümler ve Belirsiz Sistemler Sorunu.**
-Gerçek dünya ölçümleri genellikle gürültülü ve doğası gereği hatalıdır. Sensörlerin sınırlamaları ve çevresel faktörler ölçüm gürültüsüne (measurement noise) katkıda bulunur. Örneğin, GPS ölçümleri termal gürültü ve atmosferik etkilerden etkilenebilir. Ayrıca, dinamik sistemler, matematiksel modeller tarafından tam olarak yakalanamayan bozulmalara ve belirsizliklere (süreç gürültüsü - process noise) maruz kalır. Hedef hareketi rüzgar ve türbülans gibi dış faktörlerden etkilenebilir.
+**Kalman filtresi** (Kalman filter), dolaylı ve gürültülü ölçümlerden bir sistemin durumunu tahmin etmek için kullanılan özyinelemeli (recursive) bir kestirim algoritmasıdır (estimation algorithm). Adını Macar asıllı Amerikalı mühendis ve matematikçi Rudolf E. Kálmán'dan (1960) alır. Gürültülü ve eksik verilerle başa çıkabilmesi, onu doğrudan ölçümün imkânsız ya da güvenilmez olduğu birçok alanda vazgeçilmez kılar.
 
-Hem ölçümlerdeki hem de sistem modellerindeki bu doğal kusurlar, anlamlı bilgileri çıkarmak için Kalman filtresi gibi bir yöntemi gerekli kılar. İdealize edilmiş modeller nadiren gerçek dünya karmaşıklıklarını mükemmel bir şekilde temsil eder. Dış faktörler ve modellerimizdeki basitleştirmeler, modelin tahmini ile sistemin gerçek davranışı arasında sapmalara yol açar. Bu nedenle, hem ölçüm sürecindeki hem de sistemin kendisindeki belirsizlikleri hesaba katan bir tahmin yaklaşımına ihtiyaç vardır.
+Kalman filtresi, sinyali doğrudan süzerek gürültüyü azaltan geleneksel filtrelerden farklı çalışır. Sistemin zaman içindeki değişimini tanımlayan bir matematiksel modelden yararlanır ve bu modelin öngörüsünü ölçümlerle birleştirir. Böylece mevcut durumu kestirebilir, gelecekteki durumu öngörebilir ve (yumuşatma, smoothing, sürümleriyle) geçmişteki durumları düzeltebilir. Bu çok yönlülük onu hedef takibi, seyrüsefer (navigasyon) ve denetim uygulamalarının temel bileşeni hâline getirmiştir.
 
-* **Temel Fikir: Tahminleri Ölçümlerle Birleştirmek.**
-Kalman filtresi, bir modele dayalı olarak sistemin durumunu tahmin ederek ve ardından bu tahmini, ağırlıklı bir ortalama kullanarak yeni ölçümlerle güncelleyerek çalışır. Ağırlıklar, tahminin ve ölçümün tahmini belirsizliği (kovaryans) tarafından belirlenir; daha kesin değerlere daha fazla "güvenilir". Bu özyinelemeli süreç, yalnızca mevcut girdi ölçümlerini ve daha önce hesaplanan durumu ve belirsizliğini kullanarak gerçek zamanlı tahmine olanak tanır.
+"En iyi" sözcüğü burada belirli bir anlam taşır: Sistem doğrusal, gürültüler ise sıfır ortalamalı Gauss gürültüsü olduğunda Kalman filtresi, kestirim hatasının ortalama karesini en aza indiren (minimum mean square error, MMSE) kestiricidir. Gürültüler Gauss dağılımlı değilse, doğrusal kestiriciler arasında en iyisidir. Özyinelemeli yapısı sayesinde yalnızca son kestirimi ve onun belirsizliğini saklar; tüm ölçüm geçmişini tutmak gerekmez. Bu özellik onu gerçek zamanlı uygulamalara uygun kılar.
 
-Kalman filtresinin temel yeniliği, önceki bilgileri (tahmin) yeni kanıtlarla (ölçüm) güvenilirliklerine göre akıllıca birleştirme yeteneğidir. Bu ağırlıklı ortalama, modelimize ve ölçümlerimize duyduğumuz istatistiksel güvene dayanmaktadır. Özyinelemeli doğası, onu çevrimiçi uygulamalar için uygun hale getirir, çünkü yalnızca önceki duruma ihtiyaç duyar ve tüm ölçüm geçmişini depolamaktan kaçınır.
+### 1.2 Sezgisel Bir Örnek: Tünelde Konum Bulma
 
-## 2. Temel: Durum-Uzay Gösterimi (State-Space Representation)
-* **Sistem Durumunu Tanımlama.**
-Bir sistemin durumu, belirli bir zamanda koşulunu tanımlayan bir parametreler kümesidir. Örnekler arasında bir nesnenin konumu, hızı ve ivmesi bulunur. Durum genellikle bir durum vektörü (state vector) olarak temsil edilir. Durum değişkenlerinin seçimi, sistemi etkili bir şekilde modellemek için çok önemlidir. Bu değişkenler, sistemin problemle ilgili davranışını tanımlamak için yeterli olmalıdır.
+Arabayla uzun bir yolculuğa çıkıldığını ve telefonun GPS'inin (Global Positioning System, küresel konum belirleme sistemi) kullanıldığını düşünelim. GPS uydulardan aldığı sinyallerle konumu gösterir; ancak birkaç metrelik bir hata payı, yani gürültüsü vardır. Araç uzun bir tünele girdiğinde GPS sinyali kesilir, buna rağmen haritadaki araç simgesi ilerlemeye devam eder. Telefon sinyal almadığı hâlde konumu nasıl bilir?
 
-* **Durum Denklemi (State Equation): Sistem Dinamiğini Modelleme.**
-Durum denklemi, sistemin durumunun zaman içinde nasıl geliştiğini açıklar. Formülü anlamak için şu temel terimleri bilmeliyiz:
-* $x(t)$: Sistemin $t$ anındaki durumunu (örneğin nesnenin konumu ve hızı) gösteren vektördür.
-* $\Phi(T)$ (Durum Geçiş Matrisi - State Transition Matrix): Sistemin $t$ anından $t+T$ anına geçerken mevcut durumunun fiziksel olarak nasıl değiştiğini matematiksel olarak ifade eden matristir.
-* $w(t)$: Modele dahil edemediğimiz dış etkenleri veya sistemdeki belirsizlikleri ifade eden "süreç gürültüsü" (process noise) vektörüdür.
-
-Ayrık zamanlı bir sistem için durum denklemi tipik olarak şu şekilde temsil edilir:
-
-$$
-x(t + T) = \Phi(T)x(t) + w(t)
-$$
-
-Durum geçiş matrisi, sistemin deterministik evrimini somutlaştıran doğrusal bir operatördür. Süreç gürültüsü terimi ise modelimizin mükemmel olmadığını ve dış etkilerin olabileceğini kabul eder.
-
-* **Ölçüm Denklemi (Measurement Equation): Durumları Gözlemlere İlişkilendirme.**
-Ölçüm denklemi, ölçümlerin sistemin durumuyla nasıl ilişkili olduğunu açıklar. Formüldeki bileşenler şunlardır:
-* $y(t)$: Sensörlerden elde ettiğimiz $t$ anındaki gözlem/ölçüm vektörüdür.
-* $H$ (Ölçüm Matrisi - Measurement Matrix): Gerçek durumu ($x$) sensörün ölçebileceği formata ($y$) dönüştüren matristir. (Örneğin, hızı ölçemeyip sadece konumu ölçebilen bir sensörün yapısını yansıtır).
-* $v(t)$: Sensörlerin fiziksel yapısından kaynaklanan okuma hatalarını, yani "ölçüm gürültüsünü" temsil eder.
-
-Denklem tipik olarak şu şekilde temsil edilir:
-
-$$
-y(t) = Hx(t) + v(t)
-$$
-
-Ölçüm matrisi, durum vektörünü durum uzayından ölçüm uzayına eşler ve tüm durum değişkenlerini doğrudan ölçmediğimiz gerçeğini hesaba katar. Ölçüm gürültüsü terimi ise sensörlerimizin sınırlamalarını kabul ederek ölçüm sürecindeki yanlışlıkları ve belirsizlikleri hesaba katar.
-
-* **Süreç Gürültüsü ve Ölçüm Gürültüsü: (Belirsizliği Hesaba Katma).**
-Süreç gürültüsü $w(t)$'nin sıfır ortalamalı ve $Q(t)$ kovaryans matrisine (covariance matrix) sahip beyaz Gauss gürültüsü (white Gaussian noise) olduğu varsayılır. Denklemlerde göreceğimiz $E[...]$ ifadesi "Beklenen Değer"i (Expected Value), yani ortalamayı; $^T$ ifadesi ise matrisin "Transpozunu" (satır ve sütunlarının yer değiştirmesini) ifade eder. $Q(t)$ kovaryans matrisi şu şekilde hesaplanır:
-
-$$
-Q(t) = E[w(t)w(t)ᵀ]
-$$
-
-Kovaryans matrisi `Q`, sistemin dinamiğindeki belirsizliği nicelendirir. Köşegen elemanlar, her durum değişkenindeki gürültünün varyansını temsil ederken, köşegen dışı elemanlar aralarındaki kovaryansları temsil eder. Benzer şekilde, ölçüm gürültüsü `v(t)`'nin de sıfır ortalamalı ve sensör hatalarını ifade eden `R(t)` kovaryans matrisine sahip beyaz Gauss gürültüsü olduğu varsayılır:
-
-$$
-R(t) = E[v(t)v(t)ᵀ]
-$$
-
-Kovaryans matrisi `R`, ölçümlerdeki belirsizliği nicelendirir. `w(t)` ve `v(t)`'nin birbirinden bağımsız olduğu varsayılır. Bu varsayım, Kalman filtresinin matematiksel türetilmesini basitleştirir.
-
-## 3. Kalman Filtresi Algoritması:
-* **Başlatma (Initialization): Başlangıç Durumunu ve Kovaryansını Ayarlama.**
-Algoritma, başlangıç durum vektörü tahmini `x̂₀` ve kovaryans matrisi `P₀` ile başlar. Bu başlangıç değerleri, sistemin başlangıç koşulu hakkındaki en iyi tahminimizi ve buna ilişkin belirsizliği temsil eder. Ön bilgiye sahipsek, buraya dahil edebiliriz; aksi takdirde, bir tahmin ve yüksek bir belirsizlikle başlayabiliriz. Bazı uygulamalarda, başlangıç durumu ilk ölçümle başlatılabilir. Bu, başlangıç durumu hakkında ön bilgi olmadığında makul bir yaklaşım olabilir ve belirsizlik `P₀` tipik olarak ilk ölçümdeki beklenen gürültüye göre ayarlanır.
-
-* **Tahmin Adımı (Predict Step): Durumu ve Kovaryansı Zamanda İleriye Yansıtma.**
-Bu adımda kullanılacak temel matematiksel notasyonlar şunlardır:
-* $\hat{x}$ (şapkalı x): İfadenin bir kesinlik değil, "tahmin edilen" (estimated) değer olduğunu gösterir.
-* $k|k-1$ alt indisi: $k-1$ anındaki (geçmiş) bilgilere dayanarak, $k$ anı (gelecek) için yapılan tahmin anlamına gelir.
-* $P$: Sistemin durumuna dair belirsizliğimizi (Kovaryans) temsil eden matristir. $P$ büyüdükçe belirsizlik artar.
-
-    * Tahmini durum tahmini: Bu adım, önceki tahmine dayalı olarak bir sonraki durumu tahmin etmek için sistemin dinamiğini ($\Phi_k$ matrisi ile temsil edilir) kullanır. Modelimizi kullanarak zamanda ileriye doğru bir projeksiyondur.
-
-$$
-x̂_{k|k-1} = \Phi_k x̂_{k-1|k-1}
-$$
-
-    * Tahmini durum kovaryans matrisi: Bu adım, belirsizliği zamanda ileriye doğru yansıtır ve süreç gürültüsü `Q_k`, modelimizin mükemmel olmaması ve dış bozulmaların sistemi etkileyebilmesi gerçeğini yansıtarak bu belirsizliğe katkıda bulunur. Zaman ilerledikçe, yalnızca modele dayalı tahminimize olan güvenimiz, modellenmemiş faktörler nedeniyle azalır.
-
-$$
-P_{k|k-1} = \Phi_k P_{k-1|k-1} \Phi_kᵀ + Q_k
-$$
-
-* **Güncelleme Adımı (Update Step): Tahminleri İyileştirmek İçin Ölçümleri Dahil Etme.**
-Bu adımda sensör verilerini hesaba dahil edeceğiz. Formüllerde karşılaşacağımız yeni terimler şunlardır:
-* $K_k$ (Kalman Kazancı - Kalman Gain): Sensör ölçümüne mi yoksa modelimizin tahminine mi daha çok güveneceğimizi belirleyen ağırlık katsayısı/matrisidir.
-* $z_k$: Sensörden $k$ anında okunan *gerçek ölçüm* değeridir.
-* $k|k$ alt indisi: $k$ anındaki taze ölçümleri kullanarak $k$ anı için yapılan "güncellenmiş, en iyi tahmin" anlamına gelir.
-* $I$ (Birim Matris - Identity Matrix): Matris çarpımlarında etkisiz eleman görevi gören matristir.
-* $^{-1}$ (Ters Matris - Inverse): Matrisin tersini belirtir, bir matrisi bir nevi bölme işlemine sokmak gibi düşünülebilir.
-
-    * Kalman Kazancı: Kalman kazancı, ölçüme mi yoksa tahmine mi ne kadar ağırlık verilmesi gerektiğini belirleyen bir matristir. Tahmini durum kovaryansı `P_{k|k-1}`, ölçüm matrisi `H_k` ve ölçüm gürültüsü kovaryansı `R_k`'ye bağlıdır. `R` küçükse (güvenilir ölçümler), kazanç daha yüksek olur ve ölçüme daha fazla ağırlık verilir. `P_{k|k-1}` küçükse (güvenilir tahmin), kazanç daha düşük olur ve tahmine daha fazla ağırlık verilir.
-
-$$
-K_k = P_{k|k-1} H_kᵀ (H_k P_{k|k-1} H_kᵀ + R_k)⁻¹
-$$
-
-    * Güncellenmiş durum tahmini: Durum tahmini, tahmini duruma, gerçek ölçüm `z_k` ile tahmini duruma dayalı beklenen ölçüm (`H_k x̂_{k|k-1}`) arasındaki farkla orantılı bir düzeltme terimi eklenerek güncellenir. Bu fark, inovasyon (innovation) veya artık (residual) olarak adlandırılır ve ölçümün tahmin tarafından yakalanmayan yeni bilgisini temsil eder.
-
-$$
-x̂_{k|k} = x̂_{k|k-1} + K_k (z_k – H_k x̂_{k|k-1})
-$$
-
-    * Güncellenmiş durum kovaryans matrisi: Ölçüm dahil edildikten sonra durum tahminindeki belirsizlik azalır. Azalma miktarı Kalman kazancına bağlıdır. Daha güvenilir ölçümler (daha küçük R, daha büyük K), belirsizlikte daha büyük bir azalmaya yol açar.
-
-$$
-P_{k|k} = (I – K_k H_k) P_{k|k-1} \quad \text{veya} \quad P_{k|k} = P_{k|k-1} – K_k H_k P_{k|k-1}
-$$
-
-* **Kalman Kazancının Rolü.**
-Kalman kazancı `K`, tahmini durumu ölçümle optimal bir şekilde harmanlar. "Optimal" burada, güncellenmiş durum tahmininin ortalama karesel hatasını en aza indirdiği anlamına gelir. Bu, Kalman filtresi türetilmesinin temel bir teorik sonucudur. Kalman kazancı, a posteriori hata kovaryansını en aza indirmek için özel olarak seçilir. Yüksek bir Kalman kazancı, ölçümlere daha fazla ağırlık verir, bu da tahmini yeni verilere daha duyarlı hale getirir ancak potansiyel olarak daha gürültülü olabilir. Düşük bir Kalman kazancı, tahmini duruma daha fazla ağırlık verir, bu da daha yumuşak bir tahmine ancak sistemdeki değişikliklere daha yavaş tepkiye neden olabilir. Kalman kazancı, süreç gürültüsü kovaryansı `Q` ve ölçüm gürültüsü kovaryansı `R`'nin göreli büyüklüklerine bağlıdır. `Q`'nun `R`'ye oranı, filtrenin yanıt verme ve gürültü reddetme açısından davranışını belirler. Bu, `Q` ve `R`'nin doğru şekilde belirtilmesinin önemini vurgular.
-
-## 4. Sezgisel İçgörüler  ve Matematiksel Temel
-* **Kovaryans Matrisini Bir Belirsizlik Ölçüsü Olarak Anlamak.**
-Kovaryans matrisi `P`, durum tahmininin tahmini doğruluğunu temsil eder. Durum hakkındaki inancımızın ne kadar yaygın olduğunun nicel bir ölçüsünü sağlar. Daha sıkı bir dağılım (daha küçük kovaryans), tahminde daha emin olduğumuz anlamına gelir. Köşegen elemanlar, her durum değişkeninin varyanslarını (her bileşendeki belirsizlik) temsil eder. Köşegen dışı elemanlar, farklı durum değişkenleri arasındaki kovaryansları (farklı bileşenlerdeki belirsizliklerin nasıl ilişkili olduğu) temsil eder. Kovaryans, bir durum değişkenindeki hataların diğerindeki hatalarla ilişkili olup olmadığını gösterir. Örneğin, takipta, konumdaki belirsizlik hızdaki belirsizlikle ilişkili olabilir. Daha büyük bir kovaryans, daha büyük bir belirsizliği gösterir.
-
-* **Kalman Kazancı Tahmin ve Ölçüm Arasındaki Güveni Nasıl Dengeler.**
-Ölçüm gürültüsü kovaryansı `R` küçükse (ölçümler güvenilirse), Kalman kazancı daha büyük olur ve ölçüme daha fazla ağırlık verir. Süreç gürültüsü kovaryansı `Q` küçükse (sistem modeli güvenilirse), Kalman kazancı daha küçük olur ve tahmine daha fazla ağırlık verir. Tersine, `R` büyükse, kazanç küçüktür ve `Q` büyükse, kazanç büyüktür. Kalman kazancı, modelin doğruluğuna göre ölçümlerin algılanan doğruluğuna dayalı olarak yeni ölçümlerin etkisini ayarlayan bir düzenleyici gibi davranır. Filtrenin gürültülü ölçümleri körü körüne takip etmesini veya yanlış bir modele inatla bağlı kalmasını önler.
-
-* **Tahmin ve Güncelleme Sürecini Görselleştirme.**
-Tahmin adımı, mevcut Gauss dağılımını (durum tahminini ve belirsizliğini temsil eder) zamanda ileriye doğru yansıtarak, daha geniş ve daha az kesin bir dağılımla sonuçlanarak görselleştirilebilir. Güncelleme adımı, bu tahmini dağılımın ölçümün Gauss dağılımı ile (belirsizliği ile birlikte) kesişmesini içerir ve iyileştirilmiş durum tahminini temsil eden yeni, daha dar bir dağılımla sonuçlanır. Kalman filtresi esasen bu Gauss dağılımlarını özyinelemeli olarak korur ve günceller. Kalman filtresi, Gauss dağılımları için özyinelemeli bir Bayes tahmincisi olarak anlaşılabilir. Önceki bir inançla (tahmin) başlar ve yeni kanıtlarla (ölçüm) güncelleyerek sonraki bir inanç (güncellenmiş tahmin) elde eder.
-
-## 5. Gerçek Dünya Uygulamaları: Kalman Filtrelerinin Kullanıldığı Yerler
-* **Nesne Takibi: Radardan Bilgisayarlı Görüye.**
-Kalman filtreleri, radar ölçümlerindeki doğal gürültüyü etkili bir şekilde ele alarak yumuşak ve doğru bir takip sağlamak için havaalanları ve çevresindeki uçakları ve nesneleri takip etmek (object tracking) için kullanılır. Bilgisayarlı görü uygulamalarında füzeleri, yüzleri, kafaları ve elleri takip etmek için kullanılır. Kalman filtreleri, engellemeler ve gürültülü algılamalara rağmen video dizilerindeki nesnelerin tutarlı bir şekilde izlenmesine yardımcı olur. Araçlardaki çeşitli sensörlerden gelen verileri daha güvenilir bir durum tahmini sağlamak için birleştirmek üzere XY düzleminde bir aracın konumunu ve hızını tahmin etmek için kullanılır. Kalman filtreleri, görünüşte basit izleme görevleri bile Kalman filtrelerinin sağlamlığından faydalanabilir.
-
-* **Navigasyon Sistemleri: Uçakları, Uzay Araçlarını ve Otonom Araçları Yönlendirme.**
-Kalman filtreleri, Ay'a ve geri giden uzay araçlarının yörüngelerini tahmin etmek için Apollo programında kullanıldı. Bu tarihi uygulama, Kalman filtrelerinin kritik mühendislik görevlerindeki erken başarısını ve gücünü göstermektedir. Denizaltılar, seyir füzeleri ve yeniden kullanılabilir fırlatma araçları için navigasyon sistemlerinin uygulanmasında hayati öneme sahiptir. Kalman filtreleri, talepkar askeri ve havacılık uygulamaları için gerekli doğruluğu ve sağlamlığı sağlar. Otonom araçlarda daha doğru ve sağlam navigasyon için GPS ve atalet ölçüm birimi (IMU) verilerini birleştirmek üzere kullanılır. Sensör füzyonu (sensor fusion), otonom sistemlerin güvenliği ve güvenilirliği için çok önemlidir.
-
-* **Sinyal İşleme: Gürültüyü Giderme ve Gürültülü Sinyallerden Bilgi Çıkarma.**
-Kalman filtreleri, ses sinyallerinin netliğini ve anlaşılırlığını artırmak için gürültüyü azaltarak konuşma sinyallerini iyileştirmek için kullanılır. Ekonomideki zaman serisi verilerini modellemek ve tahmin etmek için ekonometri alanında kullanılır. Bilgisayarlı görüde derinlik ölçümlerini ve özellik takibini stabilize etmek için kullanılır. Kalman filtreleri, gürültülü derinlik sensörlerini veya kararsız özellik dedektörlerini yumuşatabilir. Opsiyon fiyatlaması ve risk yönetimi için piyasa oynaklığının daha güvenilir tahminlerini sağlamak üzere finansal piyasalardaki oynaklığı tahmin etmek için kullanılır. Piyasa verileri doğası gereği gürültülü ve dinamiktir.
-
-* **Diğer Uygulamalar: Finans, Hava Tahmini ve Daha Fazlası.**
-Kalman filtreleri, finansal varlıklar arasındaki değişen ilişkilere uyum sağlayarak, varlıklar arasındaki hedge oranını dinamik olarak tahmin ederek eşleştirilmiş ticarette kullanılır. Beyin, motor sisteminin durumunu nasıl tahmin ettiğine dair gerçekçi bir model sağlayarak merkezi sinir sisteminin hareket kontrolünü modellemek için kullanılır. Hava durumu tahminleri ve ekonomik göstergeler karmaşık ve gürültülüdür ve Kalman filtreleri bu alanlarda sistemleri modellemek için kullanılabilir.
-
-**Tablo 1: Kalman Filtrelerinin Yaygın Uygulamaları**
-
-| Uygulama Alanı       | Özel Örnekler                                                                                               |
-| :-------------------- | :---------------------------------------------------------------------------------------------------------- |
-| Havacılık/Navigasyon  | Apollo programında uzay aracı yörünge tahmini, denizaltılar, seyir füzeleri ve yeniden kullanılabilir fırlatma araçları için navigasyon sistemleri, otonom araçlarda GPS ve IMU veri füzyonu |
-| Robotik/Takip         | Havaalanları çevresinde radar ile uçak ve nesne takibi, bilgisayarlı görüde füze, yüz, kafa ve el takibi, XY düzleminde araç konum ve hız tahmini, video işlemmede aktörler üzerindeki işaretleyici nokta takibi |
-| Sinyal İşleme       | Konuşma sinyallerinde gürültü azaltma, ekonometride zaman serisi veri analizi, bilgisayarlı görüde derinlik ölçümü stabilizasyonu ve özellik takibi, finansal piyasalarda oynaklık tahmini                       |
-| Finans/Ekonomi        | Eşleştirilmiş ticarette hedge oranı dinamik tahmini                                                              |
-| Diğer                 | Merkezi sinir sisteminin hareket kontrolü modellemesi                                                          |
-
-## 6. Genişletilmiş Kalman Filtresi (Extended Kalman Filter - EKF)
-* **Doğrusal Olmayan Sistemlerin Zorluğu.**
-Standart Kalman filtresi, durum geçiş ve ölçüm denklemlerinin durumun doğrusal fonksiyonları olduğu doğrusal sistemler için tasarlanmıştır. Ancak, birçok gerçek dünya sistemi doğrusal olmayan davranış sergiler. Örnekler arasında, dinamiğinde veya ölçümlerinde trigonometrik fonksiyonlar, karekökler veya diğer doğrusal olmayan ilişkiler bulunan sistemler yer alır. Bu, temel Kalman filtresinin geniş bir gerçek dünya problem yelpazesine uygulanabilirliğini önemli ölçüde sınırlar.
-
-* **Doğrusallaştırma (Linearization): Doğrusal Olmayan Fonksiyonları Yaklaştırma.**
-Genişletilmiş Kalman Filtresi (EKF), doğrusal olmayan sistemleri ele almak için Kalman filtresini genişletir. Bunu, doğrusal olmayan durum geçiş (`f`) ve ölçüm (`h`) fonksiyonlarını, özellikle birinci dereceden yaklaşım olan Taylor serisi açılımını (Taylor series expansion) kullanarak mevcut tahminin etrafında doğrusallaştırarak yapar. Bu doğrusallaştırma, doğrusal olmayan fonksiyonların durum ve gürültüye göre Jakobiyen matrislerinin (Jacobian matrices) hesaplanmasını içerir. Durum geçiş fonksiyonunun kısmi türevlerinin matrisi olan durum Jakobiyeni (`F_k`) ve ölçüm fonksiyonunun kısmi türevlerinin matrisi olan ölçüm Jakobiyeni (`H_k`). `F_k`, tahmini durum `x̂_{k-1|k-1}` noktasında `f` fonksiyonunun Jakobiyeni iken, `H_k` tahmini durum `x̂_{k|k-1}` noktasında `h` fonksiyonunun Jakobiyenidir.
-
-**Not:** Jakobiyen Matrisi, matematikte çok değişkenli, vektör değerli bir fonksiyonun kısmi türevlerinin bir matris içinde düzenlenmiş halidir.
-Daha basit bir ifadeyle:
-Bir fonksiyonun türevi, o fonksiyonun girdisindeki küçük bir değişikliğin çıktısında ne kadar değişikliğe neden olduğunu gösterir (eğim gibi düşünebilirsiniz).
-Tek değişkenli fonksiyonlar için bu türev tek bir sayıdır.
-Ancak, girdi olarak birden fazla sayı (bir vektör) alan ve çıktı olarak da birden fazla sayı (başka bir vektör) veren bir fonksiyonunuz varsa, çıktının her bir bileşeninin girdinin her bir bileşenine göre nasıl değiştiğini bilmeniz gerekir.
-İşte Jakobiyen matrisi, bu olası tüm "değişim oranlarını" (kısmi türevleri) düzenli bir şekilde bir araya getiren matristir.
-
-* **EKF Algoritması: Doğrusal Olmayan Modeller İçin Kalman Filtresini Uyarlama.**
-Tahmin adımı, doğrusal olmayan durum geçiş fonksiyonunu doğrudan kullanır:
-
-$$
-x̂_{k|k-1} = f(x̂_{k-1|k-1})
-$$
-
-Tahmini kovaryans, durum Jakobiyeni kullanılarak güncellenir:
-
-$$
-P_{k|k-1} = F_k P_{k-1|k-1} F_kᵀ + Q_k
-$$
-
-Kalman kazancı, ölçüm Jakobiyeni kullanılarak hesaplanır:
-
-$$
-K_k = P_{k|k-1} H_kᵀ (H_k P_{k|k-1} H_kᵀ + R_k)⁻¹
-$$
-
-Güncelleme adımı, inovasyon teriminde doğrusal olmayan ölçüm fonksiyonunu kullanır:
-
-$$
-x̂_{k|k} = x̂_{k|k-1} + K_k (z_k – h(x̂_{k|k-1}))
-$$
-
-Kovaryans, doğrusal Kalman filtresinde olduğu gibi güncellenir:
-
-$$
-P_{k|k} = (I – K_k H_k) P_{k|k-1}
-$$
-
-* **EKF Ne Zaman Kullanılır ve Sınırlamaları Nelerdir.**
-EKF, sistem modeli veya ölçüm modeli doğrusal olmayan ancak türevlenebilir olduğunda kullanılır. Doğrusal olmayan durum tahmini, navigasyon sistemleri ve GPS'de fiili bir standart olmuştur. Sınırlamaları arasında, doğrusal olmayan sistemler için genel olarak optimal bir tahminci olmaması yer alır. Doğrusallaştırma, özellikle yüksek derecede doğrusal olmayan sistemler için veya çalışma noktası doğrusallaştırma noktasından uzak olduğunda, yaklaşım hataları getirebilir. EKF, doğrusallaştırma yanlışsa sapma sorunları yaşayabilir.
-
-## 7. Daha Sağlam Bir Yaklaşım: Unscented Kalman Filter (UKF)
-* **Sigma Noktaları ve Unscented Transformation Kavramı.**
-Unscented Kalman Filter (UKF), doğrusal olmayan durum tahmini için EKF'ye türevsiz bir alternatiftir. UKF, doğrusal olmayan fonksiyonları doğrusallaştırmak yerine, Unscented Transformation (UT) adı verilen deterministik bir örnekleme tekniği kullanır. UT, durumun olasılık dağılımını temsil etmek için sigma noktaları adı verilen dikkatlice seçilmiş minimum bir örnek nokta kümesi seçer. Bu sigma noktaları, durum dağılımının ortalamasını ve kovaryansını yakalar. UKF'nin temelinde, doğrusal olmayan fonksiyonların kendilerini yaklaştırmak yerine bir olasılık dağılımını yaklaştırmanın daha kolay olduğu fikri yatar.
-
-* **UKF Algoritması: Doğrusal Olmayan Tahmin İçin Türevsiz Bir Alternatif.**
-    * Sigma Noktası Üretimi: Mevcut durum tahmini ve kovaryansına dayalı olarak 2n+1 sigma noktası üretin (burada n, durumun boyutudur).
-    * Tahmin: Her sigma noktasını doğrusal olmayan durum geçiş fonksiyonu aracılığıyla yayarak bir dizi dönüştürülmüş sigma noktası elde edin.
-    * Bu dönüştürülmüş sigma noktalarının ağırlıklı ortalamasından tahmini durum ortalamasını ve kovaryansını hesaplayın.
-    * Sigma noktalarını doğrusal olmayan ölçüm fonksiyonu aracılığıyla yayarak dönüştürülmüş ölçüm sigma noktaları elde edin.
-    * Bu dönüştürülmüş ölçüm sigma noktalarının ağırlıklı ortalamasından tahmini ölçüm ortalamasını ve kovaryansını hesaplayın.
-    * Tahmini durum ve tahmini ölçüm arasındaki çapraz kovaryansı hesaplayın.
-    * Güncelleme: Kovaryans ve çapraz kovaryans matrislerini kullanarak Kalman kazancını hesaplayın.
-    * Kalman kazancına ve gerçek ölçüm `z_k` ile tahmini ölçüm arasındaki farka dayalı olarak durum tahminini ve kovaryansını güncelleyin.
-
-* **Yüksek Derecede Doğrusal Olmayan Senaryolarda UKF'nin EKF'ye Göre Avantajları.**
-UKF, yüksek derecede doğrusal olmayan sistemler için genellikle EKF'den daha doğrudur, çünkü birinci dereceden doğrusallaştırmanın getirdiği hatalardan kaçınır. Bazı doğrusal olmayan fonksiyonlar için karmaşık ve hatta imkansız olabilen Jakobiyen matrislerinin hesaplanmasını gerektirmez. UKF, belirli doğrusal olmayan gürültü türlerini EKF'den daha iyi işleyebilir. Unscented Transformation, doğrusal olmayan bir dönüşüm geçirdikten sonra bir rastgele değişkenin istatistiklerini yakalamada genellikle daha doğrudur.
-
-## 8. Filtrenizi Tasarlama: Gürültü Kovaryans Matrislerini Anlama
-* **Süreç Gürültüsü Kovaryansının (Q) Önemi.**
-Süreç gürültüsü kovaryans matrisi `Q`, sistem modelindeki belirsizliği veya sistemin evrimini etkileyen modellenmemiş bozulmaları temsil eder. Kalman filtresinin sistem modelinden gelen tahmine ne kadar güvendiğini belirler. Daha büyük bir `Q`, modelde daha fazla belirsizlik olduğunu gösterir ve filtrenin ölçümlere daha duyarlı olmasına ancak potansiyel olarak daha gürültülü olmasına izin verir. Daha küçük bir `Q`, modele daha fazla güven olduğunu gösterir, bu da daha yumuşak bir tahmine ancak modelden sapmalara daha yavaş tepkiye yol açar. `Q`, bir nesnenin gerçek hareketinin varsayılan hareket modelinden sapabileceği gerçeğini hesaba katar.
-
-* **Ölçüm Gürültüsü Kovaryansının (R) Önemi.**
-Ölçüm gürültüsü kovaryans matrisi `R`, sensörlerden elde edilen ölçümlerdeki belirsizliği veya hataları temsil eder. Kalman filtresinin ölçümlere ne kadar güvendiğini belirler. Daha büyük bir `R`, daha gürültülü ölçümleri gösterir ve filtrenin sistem modeline daha fazla güvenmesine ve ölçümlere daha yavaş tepki vermesine neden olur. Daha küçük bir `R`, daha güvenilir ölçümleri gösterir ve filtrenin ölçümlere daha fazla ağırlık vermesine ve daha duyarlı olmasına neden olur. `R`, ölçümler için kullanılan sensörlerin doğruluğunu ve güvenilirliğini yansıtır.
-
-* **Q ve R İçin Başlangıç Değerleri Nasıl Seçilir.**
-`R` genellikle sensör özelliklerinden veya sistem bilinen bir durumdayken ölçüm verileri toplanarak ve örnek kovaryansı hesaplanarak tahmin edilebilir. `Q`'nun seçilmesi genellikle daha zordur, çünkü sistem dinamiğinin modellenmemiş yönlerini temsil eder. `Q` için başlangıç değerleri, sistemin fiziksel anlayışına ve beklenen bozulmaların büyüklüğüne dayalı olabilir. Farklı durum değişkenlerindeki ve ölçümlerdeki gürültünün bağımsız olduğu varsayılarak, `Q` ve `R` için köşegen matrislerle başlamak yaygındır.
-
-* **Sistem Davranışına ve Sensör Özelliklerine Dayalı Olarak Q ve R'yi Ayarlama Teknikleri.**
-Ayarlama genellikle `Q` ve `R`'yi ayarlama ve filtrenin performansını gözlemleme sürecini içeren yinelemeli bir süreçtir. Filtre çıktısı çok gürültülüyse, `R` çok küçük veya `Q` çok büyük olabilir. Filtre değişikliklere yavaş tepki veriyorsa, `R` çok büyük veya `Q` çok küçük olabilir. Maksimum olabilirlik tahmini (maximum likelihood estimation) gibi teknikler, `Q` ve `R`'yi verilerden tahmin etmek için kullanılabilir. İnovasyon dizisinin (ölçümler ile tahmini ölçümler arasındaki fark) analizi, `Q` ve `R`'nin uygun şekilde ayarlanıp ayarlanmadığına dair içgörüler sağlayabilir. Yüksek manevra kabiliyetine sahip hedefler için daha büyük bir `Q` uygun olabilir.
-
-## 9. Sonuç
-
-**Tablo 2: Kalman Filtresi, EKF ve UKF Karşılaştırması**
-
-| Özellik                       | Doğrusal Kalman Filtresi | Genişletilmiş Kalman Filtresi (EKF) | Unscented Kalman Filter (UKF) |
-| :---------------------------- | :----------------------- | :---------------------------------- | :---------------------------- |
-| Doğrusal Olmayanlığı Ele Alma | Hayır                    | Birinci Dereceden Doğrusallaştırma  | Unscented Transformation      |
-| Doğrusallaştırma Yöntemi      | Yok                      | Jakobiyen Matrisleri                | Sigma Noktaları               |
-| Jakobiyen Gereksinimi         | Yok                      | Gerekli                             | Gerekli Değil                 |
-| Güçlü Doğrusal Olmayanlıkta Doğruluk | Sınırlı          | Genellikle Daha Düşük             | Genellikle Daha Yüksek        |
-| Hesaplama Maliyeti            | Düşük                    | Orta                                | Orta                          |
-
-Sonuç olarak, Kalman filtresi, gürültülü ve belirsiz verilerden dinamik sistemlerin durumunu tahmin etmek için güçlü ve çok yönlü bir araçtır. Temel ilkeleri, doğrusal olmayan sistemleri ele almak için uzantıları ve tasarım hususlarının anlaşılması, çeşitli mühendislik ve bilimsel disiplinlerdeki uygulamaları için hayati öneme sahiptir.
-
-## Örnek
-# Kalman Filtresi: Kuşu En İyi Şekilde Takip Etme
-
-Merhaba çocuklar! Bugün gökyüzünde hızla uçan bir kuşu takip edeceğiz. Bu takip, bir plan yapıp sonra da gördüklerimizi kullanarak planımızı düzeltme oyununa benziyor. Bu oyunda bize yardım edecek süper akıllı bir araç var: **Kalman Filtresi**!
-
-**Kalman Filtresi Nedir? Dedenizin Teleskopu Gibi Düşünün!**
-
-Dedenizin eski bir teleskopu var diyelim. Bazen biraz titrek gösteriyor (yani gördüğünüzde küçük hatalar olabiliyor). Ama dedeniz kuşların nasıl uçtuğunu çok iyi biliyor (yani kuşların hareketine dair harika bir **Planı** var).
-
-Kalman filtresi, hem o biraz titrek teleskopun **gördüğünü** hem de dedenizin kuş hakkındaki **bilgisini (Planını)** alıp birleştirerek, kuşun tam olarak nerede olduğunu en doğru şekilde söyleyen şeydir. İkisini birleştirince hata daha az olur!
-
-**Neden Plan ve Gördüklerimizi Birleştirmeliyiz?**
-
-*   **Planımız Bazen Yanlış Olabilir:** Kuş aniden hızlı uçmayı bırakıp yavaşlayabilir veya yön değiştirebilir. Dedemizin planı tam tutmayabilir.
-*   **Gördüklerimiz Yanlış Olabilir:** Teleskopumuz sallanıyor olabilir, hava çok açık olmayabilir. Gördüğümüz yer kuşun tam yeri olmayabilir.
-
-Kalman filtresi, "Acaba planım mı daha doğru? Yoksa teleskopun gösterdiği mi?" diye düşünür. Hangisi daha güvenilir görünüyorsa, o bilgiye biraz daha çok inanır ve ikisini karıştırıp en iyi tahmini yapar!
-
----
-
-**Oyunumuz: Hızlı Uçan Kuşu Yakalamak!**
-
-Diyelim ki bir kuş tam önünüzden (yani **0 metre** noktasından) havalandı. Ve bu kuşun saniyede **20 metre** hızla (bir metre bir adım gibi düşünün, saniyede 20 adım!) dümdüz uçtuğunu tahmin ediyorsunuz. Bu sizin ilk **Planınız**.
-
-**Hedefimiz:** 5 saniye sonra kuşun nerede olduğunu tahmin etmek!
-
-**Adım 1: Kuşun Durumunu Tanımla (Nerede? Ne Kadar Hızlı?)**
-
-Kuşun o anki durumunu iki sayı ile anlatalım:
-*   **Konumu (p):** Şu an nerede?
-*   **Hızı (v):** Ne kadar hızlı gidiyor?
-
-Bu iki sayıyı bir kutuya koyalım, adı **Durum Kutusu** (`x`) olsun. Zaman geçtikçe bu kutudaki sayılar değişecek!
-
-$$
-x_k = \begin{bmatrix} \text{Konum}_k \\ \text{Hız}_k \end{bmatrix}
-$$
-
-**Adım 2: Planımızı Matematikle Yaz (Kuş Nasıl Hareket Ediyor?)**
-
-Kuşun nasıl hareket ettiğini (planımızı) matematiksel olarak yazabiliriz. Eğer kuş saniyede 20 metre gidiyorsa, 1 saniye sonra (Δt = 1) nerede olur?
-*   Yeni Konum = Eski Konum + Hız * 1 saniye
-*   Yeni Hız = Eski Hız (çünkü planımızda hızın değişmediğini varsaydık)
-
-Bunu Durum Kutusu ile şöyle gösterebiliriz (`k-1` önceki an, `k` şimdiki an):
-
-$$
-x_k = \begin{bmatrix} 1 & 1 \\ 0 & 1 \end{bmatrix} x_{k-1} + w_k
-$$
-
-*   İlk kısımdaki büyük kutu (matris), Planımıza göre hareketini anlatır.
-*   `x_{k-1}`, önceki Durum Kutusu.
-*   `w_k`, küçük bir hata payı. Bu Planımızın bazen tam tutmayabileceğini gösterir (kuş biraz sapabilir). Bu hataya **Süreç Gürültüsü** deriz. Bu gürültünün ne kadar olabileceğini **Q** adında başka bir kutu (matris) anlatır.
-
-**Adım 3: Gördüklerimizi Matematikle Yaz (Teleskop Ne Görüyor?)**
-
-Teleskop sadece kuşun nerede olduğunu söylüyor (konumunu). Bunu da matematiksel olarak yazabiliriz:
-
-$$
-z_k = \begin{bmatrix} 1 & 0 \end{bmatrix} x_k + v_k
-$$
-
-*   `z_k`, teleskopun bize söylediği sayı (gördüğümüz konum).
-*   Büyük kutu (matris), Durum Kutusu'ndan sadece Konum bilgisini aldığımızı söyler. Buna **Ölçüm Matrisi (H)** denir.
-*   `v_k`, teleskopun görme hatası. Buna **Ölçüm Gürültüsü** deriz. Bu gürültünün ne kadar olabileceğini **R** adında tek sayı içeren başka bir kutu (matris) anlatır.
-
-**Başlangıç Noktası (Oyun Başlarken):**
-
-Oyuna başlarken (k=0 anında) tahminlerimizi ve ne kadar az bildiğimizi belirleriz:
-*   İlk En İyi Tahminimiz (`x̂₀`): Kuş 0 metrede ve 20 m/s hızla gidiyor diye tahmin ettik.
-$$
-x̂_0 = \begin{bmatrix} 0 \\ 20 \end{bmatrix}
-$$
-*   İlk Ne Kadar Az Biliyoruz (`P₀`): Başlangıçta konumunu biliyorduk ama hızı hakkında biraz daha az emindik. Bu "ne kadar az biliyoruz"u **Belirsizlik Kutusu (P)** anlatır. Başlangıçta `P₀` şöyle diyelim:
-$$
-P_0 = \begin{bmatrix} \text{Konum Belirsizliği} & \text{Birlikte Belirsizlik} \\ \text{Birlikte Belirsizlik} & \text{Hız Belirsizliği} \end{bmatrix}
-$$
-    (Bu sayıları biz belirleriz, ne kadar az bildiğimize bağlı. Mesela $P_0 = \begin{bmatrix} 1 & 0 \\ 0 & 10 \end{bmatrix}$ gibi.)
-
-**Kalman Filtresinin Oyunu Başlıyor! (Her Saniye Tekrarlanır)**
-
-Her saniye (k = 1, sonra k = 2, sonra k = 3 ... 5'e kadar) şu iki büyük adımı yaparız:
-
-**Büyük Adım 1: Tahmin Et (Geleceği Planla!)**
-
-Önceki saniye için bulduğumuz en iyi tahmini (Durum Kutusu `x̂_{k-1|k-1}`) ve Belirsizlik Kutusu'nu (`P_{k-1|k-1}`) alırız. Planımızı kullanarak kuşun şimdiki saniyede nerede *olması gerektiğini* tahmin ederiz.
-
-*   **Tahmini Durum Kutusu (`x̂_{k|k-1}`):** Önceki en iyi tahminimizi alır, Planımızdaki hareket kuralını uygularız.
-
-$$
-x̂_{k|k-1} = \Phi_k x̂_{k-1|k-1}
-$$
-    (Bu formül bize yeni tahmini konum ve hızı verir, sadece Planımıza bakarak. $\Phi_k$ Planın matematiksel kutusudur.)
-
-*   **Tahmini Belirsizlik Kutusu (`P_{k|k-1}`):** Zaman geçtiği için ve Planımız mükemmel olmadığı için tahminimize olan güvenimiz biraz azalır. Bu, Belirsizlik Kutusu'nun biraz büyümesi demektir.
-
-$$
-P_{k|k-1} = \Phi_k P_{k-1|k-1} \Phi_kᵀ + Q_k
-$$
-    (Bu formül bize yeni tahmini belirsizliğimizi verir, Planımızdaki hata payı olan $Q_k$ kutusunu da ekleyerek.)
-
-**Büyük Adım 2: Düzelt (Gördüklerini Kullan ve Tahminini İyileştir!)**
-
-Şimdi teleskopumuza bakarız ve kuşun nerede olduğunu **gerçekten** görürüz (`z_k`). Tahminimizi bu yeni bilgiyle düzeltiriz.
-
-*   **Kalman'ın Karıştırma Oranı (`K_k`):** Plan Tahminimiz ile Gördüğümüz arasındaki farkı ne kadar ciddiye alacağımıza karar veririz. Buna **Kalman Kazancı** denir. Bu, Plan Tahminimizin Belirsizliği (`P_{k|k-1}`) ve Gördüğümüzün Hatası (`R_k`) arasındaki dengeye bağlıdır.
-
-$$
-K_k = P_{k|k-1} H_kᵀ (H_k P_{k|k-1} H_kᵀ + R_k)⁻¹
-$$
-    (Bu formül, Plan Tahminimize mi yoksa Gördüğümüze mi daha çok güvenmemiz gerektiğini söyleyen bir sayı kutusu verir. $H_k$ Ölçüm Matrisidir, $R_k$ Gördüğümüzdeki hata payı kutusudur.)
-
-*   **En İyi Durum Kutusu (`x̂_{k|k}`):** Plan Tahminimizi alırız ve Gördüğümüz ile Plan Tahminimiz arasındaki farkı (buna "yenilik" denir) Karıştırma Oranı kadar ekleyerek düzeltiriz.
-
-$$
-x̂_{k|k} = x̂_{k|k-1} + K_k (z_k – H_k x̂_{k|k-1})
-$$
-    (Bu formül, hem Planımızı hem de Gördüğümüzü karıştırarak o saniye için kuşun nerede olduğuna dair en iyi tahmini verir.)
-
-*   **En İyi Belirsizlik Kutusu (`P_{k|k}`):** Yeni bir bilgi (Gördüğümüz) kullandığımız için, kuşun nerede olduğunu artık daha iyi biliyoruz. Bu, Belirsizlik Kutusu'nun küçülmesi demektir.
-
-$$
-P_{k|k} = (I – K_k H_k) P_{k|k-1}
-$$
-    ($I$ sihirli bir "hiçbir şeyi değiştirmeyen" matristir. Bu formül, Gördüğümüzü kullandıktan sonra kalan belirsizliğimizi verir.)
-
-**5 Saniye Sonra Ne Olur?**
-
-Bu tahmin ve düzeltme adımlarını 5 kez tekrarlarız (her saniye bir kez). Her adımda, bir önceki adımın **En İyi Durum Kutusu** ve **En İyi Belirsizlik Kutusu** bir sonraki adımın başlangıcı olur.
-
-5. saniye sonunda, Kalman filtresinin en son bulduğu **En İyi Durum Kutusu** (`x̂_{5|5}`) bizim 5 saniye sonra kuşun nerede olduğuna dair en güvenilir tahminimize sahip olacaktır. Bu tahmin, sadece kuşun nasıl hareket ettiğine dair Planımızı değil, aynı zamanda 5 saniye boyunca teleskopla yapılan tüm gürültülü Gözlemleri de akıllıca birleştirerek bulunmuştur.
-
-Kalman filtresi sayesinde, teleskopumuz biraz titrek olsa bile, kuşun yerini harika bir şekilde tahmin edebiliriz!
-
-### NOTLAR:
-Sensör verilerini okumak ve bu veriler üzerinden anlamlı çıkarımlar yapmak mühendisliğin temel meselelerinden biridir. Ancak gerçek dünyada hiçbir sensör kusursuz çalışmaz. Okuduğumuz her değere fiziksel çevreden, elektronik bileşenlerden veya veri iletiminden kaynaklanan bir miktar hata karışır. Biz bu hataya "gürültü" (noise) diyoruz.
-
-Gürültü kelimesinin İngilizcesi olan *noise*, köken olarak Latince *nausea* (deniz tutması, rahatsızlık) kelimesine dayanır. Tıpkı deniz tutmasının insanın dengesini ve yönelimini bozması gibi, sensör gürültüsü de sistemimizin gerçeği algılama dengesini bozar. Doğal dil işleme (Natural Language Processing - NLP) modellerinde dolandırıcı SMS'leri ayıklarken metnin içine gizlenmiş anlamsız karakterleri ve yazım hatalarını nasıl aşılması gereken bir "gürültü" olarak ele alıyorsak, fiziksel sensörlerden gelen voltaj dalgalanmalarını da benzer bir yaklaşımla filtrelememiz gerekir.
-
-İşte Kalman Filtresi (Kalman Filter), bu gürültülü ölçümlerin içinden en doğru gerçeği çekip çıkarmamızı sağlayan matematiksel bir algoritmadır. Adını Macar asıllı Amerikalı matematikçi Rudolf E. Kálmán'dan alır.
-
-### Temel Mantık: Tahmin ve Güncelleme
-
-Süreci zihninizde somutlaştırmak için arabayla uzun bir yola çıktığınızı ve cep telefonunuzun GPS'ini (Global Positioning System - Küresel Konumlama Sistemi) kullandığınızı düşünün.
-
-GPS uydulardan aldığı sinyallerle konumunuzu haritada gösterir. Ancak GPS'in 5-10 metrelik bir hata payı, yani gürültüsü vardır. Aracınızla uzun ve karanlık bir tünele girdiğinizi varsayın. Tünele girdiğiniz an GPS sinyali kesilir. Buna rağmen haritadaki araç simgesi ilerlemeye devam eder. Peki telefon sinyal almadığı halde nerede olduğunuzu nasıl bilir?
-
-Telefon, tünele girmeden önceki son hızınızı ve yönünüzü biliyordur. Bu bilgileri kullanarak tünel içindeki konumunuzu **Tahmin (Predict)** eder. Ancak zaman geçtikçe bu tahminin hata payı artar; tünel içinde yavaşlamış veya şerit değiştirmiş olabilirsiniz. Tünelden çıktığınız anda GPS sinyali tekrar gelir. Yeni bir **Ölçüm (Measurement)** alınır. Sistem, yaptığı tahmini bu yeni ölçümle karşılaştırarak gerçek konumunuzu **Günceller (Update)**.
+Telefon, tünele girmeden önceki son hızı ve yönü bilmektedir. Bu bilgilerle tünel içindeki konumu **tahmin eder** (predict). Ancak zaman geçtikçe bu tahminin belirsizliği artar; araç tünelde yavaşlamış ya da şerit değiştirmiş olabilir. Tünelden çıkıldığında GPS sinyali geri gelir ve yeni bir **ölçüm** (measurement) alınır. Sistem tahminini bu ölçümle karşılaştırarak konumu **günceller** (update). Hangi bilgiye ne kadar güvenileceğini, ikisinin belirsizlikleri belirler.
 
 Kalman filtresi tam olarak bu iki adımlı döngüyle çalışır:
 
 ```mermaid
 graph LR
     Predict["Tahmin (Predict)<br>Fiziksel modele dayanarak<br>bir sonraki durumu hesapla"]
-    Update["Güncelleme (Update)<br>Sensörden gelen ölçüm ile<br>tahmini düzelt"]
-    
-    Predict -- "Öngörü<br>(Belirsizlik artar)" --> Update
-    Update -- "Düzeltilmiş Durum<br>(Belirsizlik azalır)" --> Predict
-    
+    Update["Güncelleme (Update)<br>Algılayıcıdan gelen ölçümle<br>tahmini düzelt"]
+
+    Predict -- "Öngörü<br>(belirsizlik artar)" --> Update
+    Update -- "Düzeltilmiş durum<br>(belirsizlik azalır)" --> Predict
+
     classDef default fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px;
 ```
 
-Mekansal-zamansal (Spatio-Temporal) verilerle çalışırken, örneğin sismik hareketlerin zaman içindeki yayılımını veya hareketli bir hedefin rotasını izlerken, sistemin durumunu sürekli takip etmeliyiz. Sistem durumuna İngilizcede *State* denir. Latince *status* (durma, pozisyon, vaziyet) kökünden gelir. Sistemin o anki hızını, konumunu ve ivmesini bu durum değişkenleri ile ifade ederiz.
+### 1.3 Gürültülü Ölçümler ve Belirsiz Sistemler
 
-### Matematiksel Gösterim ve Matrisler
+Gerçek dünya ölçümleri gürültülüdür. Algılayıcıların sınırlamaları ve çevresel etkenler **ölçüm gürültüsüne** (measurement noise) yol açar; örneğin GPS ölçümleri atmosferik etkilerden ve sinyal yansımalarından etkilenir. Ayrıca sistemlerin kendisi de matematiksel modellerin tam olarak yakalayamadığı bozucu etkilere maruz kalır; bir hava aracının hareketini rüzgâr ve türbülans etkiler. Modelin hesaba katamadığı bu etkilere **süreç gürültüsü** (process noise) denir.
 
-Gençler, işin içine kod ve hesaplama girdiğinde bu döngüyü matrislerle ve olasılık dağılımlarıyla ifade etmemiz gerekir. Bir nesnenin durumunu asla %100 kesinlikle bilemeyiz, elimizde her zaman bir belirsizlik vardır. Bu belirsizliği Kovaryans (Covariance) matrisi ile tanımlarız. Kovaryans, değişkenlerin birlikte ne kadar değiştiklerini gösterir.
+Hem ölçümlerdeki hem de modeldeki bu kusurlar, iki bilgi kaynağının belirsizliklerini birlikte hesaba katan bir kestirim yöntemini gerekli kılar. Kalman filtresinin temel fikri, modele dayalı **önsel bilgiyi** (tahmin) yeni **kanıtla** (ölçüm), güvenilirliklerine göre ağırlıklandırarak birleştirmektir.
 
-Durum vektörümüzü $x$, belirsizliğimizi (kovaryans matrisini) ise $P$ olarak tanımlayalım. Sistem zaman adımlarıyla (k, k+1, k+2...) ilerler.
+---
 
-**1. Tahmin (Predict) Adımı Denklemeleri:**
+## 2. Temel: Durum Uzayı Gösterimi (State-Space Representation)
 
-Bu aşamada geçmişteki bilgimizi kullanarak bir adım sonrasını öngörüyoruz.
+### 2.1 Sistemin Durumu
 
-$$x_{k} = A x_{k-1} + B u_{k-1}$$
-$$P_{k} = A P_{k-1} A^T + Q$$
+Bir sistemin **durumu** (state), belirli bir andaki koşulunu tanımlayan değişkenler kümesidir; örneğin bir nesnenin konumu, hızı ve ivmesi. *State* sözcüğü Latince *status* (duruş, vaziyet) kökünden gelir. Durum genellikle bir **durum vektörü** (state vector) $x_k$ ile gösterilir; $k$ ayrık zaman adımıdır. Durum değişkenleri, sistemin problemle ilgili davranışını tanımlamaya yetecek biçimde seçilmelidir.
 
-* **A (State Transition Matrix - Durum Geçiş Matrisi):** Önceki durumun yeni duruma nasıl evrileceğini tanımlar (örneğin hızın konuma etkisi).
-* **B (Control Input Matrix - Kontrol Giriş Matrisi):** Dışarıdan sisteme verilen komutların (örneğin frene basmak) durumu nasıl etkilediğini gösterir ($u$ kontrol vektörüdür).
-* **Q (Process Noise Covariance - Süreç Gürültüsü Kovaryansı):** Matematiksel modelimizin kusurlarından kaynaklanan belirsizliktir.
+### 2.2 Durum Denklemi: Sistem Dinamiğinin Modellenmesi
 
-Fark ettiyseniz tahmin adımında sensörden hiç veri almadık, sadece sistemin kendi dinamiğini işlettik.
+Durum denklemi, sistemin durumunun bir adımdan sonrakine nasıl değiştiğini tanımlar:
 
-**2. Güncelleme (Update) Adımı Denklemeleri:**
+$$x_k = F_k\, x_{k-1} + B_k\, u_k + w_k$$
 
-Şimdi sensörden okuduğumuz taze veriyi ($z_k$) denkleme dahil etme zamanı. Ancak ölçüme ne kadar güveneceğiz? Tahminimize mi daha çok güvenmeliyiz, yoksa sensöre mi? İşte bu dengeyi **Kalman Kazancı (Kalman Gain)**, yani $K$ belirler.
+- $x_k$: $k$ anındaki durum vektörü.
+- $F_k$ (durum geçiş matrisi, state transition matrix): Önceki durumun, dış etki olmadan yeni duruma nasıl dönüştüğünü tanımlar. Bazı kaynaklarda $\Phi$ ya da $A$ ile gösterilir.
+- $u_k$ ve $B_k$ (denetim girdisi ve denetim girdi matrisi, control input matrix): Sisteme dışarıdan verilen komutların (örneğin gaza ya da frene basma) durumu nasıl etkilediğini tanımlar. Denetim girdisi yoksa bu terim düşer.
+- $w_k$ (süreç gürültüsü): Modelin hesaba katamadığı etkiler.
 
-Önce Kalman Kazancını hesaplarız:
-$$K = P_{k} H^T (H P_{k} H^T + R)^{-1}$$
+### 2.3 Ölçüm Denklemi: Durumların Gözlemlerle İlişkilendirilmesi
 
-* **H (Measurement Matrix - Ölçüm Matrisi):** Durum vektörümüzü sensör formatına dönüştürür.
-* **R (Measurement Noise Covariance - Ölçüm Gürültüsü Kovaryansı):** Sensörümüzün teknik hata payıdır (örneğin sıcaklık sensörünün $\pm 0.5^\circ$C hata vermesi).
+$$z_k = H_k\, x_k + v_k$$
 
-Ardından yeni ölçümü kullanarak durum vektörümüzü güncelleriz:
-$$x_{k} = x_{k} + K (z_{k} - H x_{k})$$
+- $z_k$: $k$ anında algılayıcılardan elde edilen ölçüm vektörü.
+- $H_k$ (ölçüm matrisi, measurement matrix): Durumu, algılayıcının ölçebildiği büyüklüklere dönüştürür. Örneğin yalnızca konumu ölçebilen, hızı ölçemeyen bir algılayıcının yapısını yansıtır.
+- $v_k$ (ölçüm gürültüsü): Algılayıcının okuma hataları.
 
-Bu denklemdeki $(z_{k} - H x_{k})$ kısmı çok kritiktir; buna *Yenilik (Innovation)* denir. Beklediğimiz ölçüm ile gerçekte sensörden okunan değer arasındaki farktır. Kalman kazancı ($K$) büyükse ölçüme güveniriz, küçükse kendi modelimizin tahminine güveniriz.
+### 2.4 Süreç ve Ölçüm Gürültüsü
 
-Son olarak, bu yeni bilgi ışığında sistemin belirsizliğini (kovaryansını) daraltır, yani güncelleriz:
-$$P_{k} = (I - K H) P_{k}$$
+Süreç gürültüsü $w_k$'nin sıfır ortalamalı ve $Q_k$ kovaryans matrisine sahip beyaz Gauss gürültüsü (white Gaussian noise) olduğu varsayılır:
 
-Buradaki $I$ Birim Matristir (Identity Matrix). Yeni ölçüm sayesinde sistem hakkındaki bilgimiz arttığı için belirsizlik matrisimiz ($P$) küçülür.
+$$Q_k = E[w_k w_k^{T}]$$
 
-Algoritma çalıştığı sürece bu döngü sonsuza kadar tekrar eder. Tahmin et, ölçüm al, hatayı hesapla, kendini düzelt. 
+Burada $E[\cdot]$ beklenen değeri (ortalamayı), $^{T}$ ise matrisin devriğini (transpose, satır ve sütunlarının yer değiştirmesi) gösterir. $Q$ sistem dinamiğindeki belirsizliği nicelendirir: Köşegen elemanlar her durum değişkenindeki gürültünün varyansını, köşegen dışı elemanlar ise değişkenler arasındaki kovaryansı gösterir.
 
-Teori ve formüller bu şekilde çalışıyor. Bu algoritmaların pratikte nasıl işlediğini görmek için basit bir Python kodu üzerinden 1 boyutlu (örneğin sadece düz bir hatta ilerleyen araç) bir Kalman Filtresi simülasyonu yazmamı ister misiniz?
+Benzer biçimde ölçüm gürültüsü $v_k$'nin de sıfır ortalamalı ve $R_k$ kovaryanslı beyaz Gauss gürültüsü olduğu varsayılır:
+
+$$R_k = E[v_k v_k^{T}]$$
+
+$R$ ölçümlerdeki belirsizliği nicelendirir. $w_k$ ile $v_k$'nin birbirinden ve başlangıç durumundan bağımsız olduğu varsayılır; bu varsayım filtrenin türetilmesini basitleştirir.
+
+---
+
+## 3. Kalman Filtresi Algoritması
+
+### 3.1 Gösterim
+
+- $\hat{x}$ (şapkalı $x$): Gerçek durumun kendisi değil, **kestirimi** (estimate).
+- $\hat{x}_{k|k-1}$: $k-1$ anına kadarki ölçümlerle $k$ anı için yapılan kestirim (**önsel**, a priori; ölçüm henüz kullanılmamış).
+- $\hat{x}_{k|k}$: $k$ anındaki ölçüm de kullanılarak yapılan kestirim (**sonsal**, a posteriori).
+- $P$: Kestirim hatasının kovaryans matrisi; kestirime ne kadar güvenilebileceğini gösterir. $P$ büyüdükçe belirsizlik artar.
+
+### 3.2 Başlatma (Initialization)
+
+Algoritma, başlangıç durumu kestirimi $\hat{x}_{0|0}$ ve kovaryansı $P_{0|0}$ ile başlar. Bu değerler başlangıç koşulu hakkındaki en iyi bilgiyi ve buna ilişkin belirsizliği temsil eder. Ön bilgi yoksa makul bir tahmin ve büyük bir başlangıç belirsizliği kullanılır; bazı uygulamalarda başlangıç durumu ilk ölçümle başlatılır ve $P_{0|0}$ ilk ölçümün gürültüsüne göre ayarlanır.
+
+### 3.3 Tahmin Adımı (Predict)
+
+Model kullanılarak durum ve belirsizlik zamanda bir adım ileriye taşınır:
+
+$$\hat{x}_{k|k-1} = F_k\, \hat{x}_{k-1|k-1} + B_k\, u_k$$
+
+$$P_{k|k-1} = F_k\, P_{k-1|k-1}\, F_k^{T} + Q_k$$
+
+İkinci denklemdeki $Q_k$ terimi, modelin kusursuz olmadığını ve dış etkilerin sistemi bozabileceğini yansıtır: Ölçüm alınmadan geçen her adımda belirsizlik artar. Bu adımda algılayıcıdan hiç veri kullanılmaz; yalnızca sistemin kendi dinamiği işletilir.
+
+### 3.4 Güncelleme Adımı (Update)
+
+Yeni ölçüm $z_k$ hesaba katılır.
+
+**Yenilik (innovation, artık):** Ölçüm ile tahmine göre beklenen ölçüm arasındaki fark ve bu farkın kovaryansı:
+
+$$y_k = z_k - H_k\, \hat{x}_{k|k-1}, \qquad S_k = H_k\, P_{k|k-1}\, H_k^{T} + R_k$$
+
+**Kalman kazancı (Kalman gain):** Ölçüme mi yoksa tahmine mi ne kadar güvenileceğini belirleyen ağırlık matrisidir:
+
+$$K_k = P_{k|k-1}\, H_k^{T}\, S_k^{-1}$$
+
+Burada $^{-1}$ matrisin tersini gösterir; skaler durumda bölmeye karşılık gelir.
+
+**Durum ve kovaryansın güncellenmesi:**
+
+$$\hat{x}_{k|k} = \hat{x}_{k|k-1} + K_k\, y_k$$
+
+$$P_{k|k} = (I - K_k H_k)\, P_{k|k-1}$$
+
+$I$ birim matristir (identity matrix). Ölçüm kullanıldıktan sonra belirsizlik azalır; azalmanın miktarı Kalman kazancına bağlıdır.
+
+### 3.5 Kalman Kazancının Sezgisi: Tek Boyutlu Durum
+
+Durum tek bir sayı ve $H = 1$ olduğunda kazanç şu basit biçimi alır:
+
+$$K = \frac{P_{k|k-1}}{P_{k|k-1} + R}, \qquad \hat{x}_{k|k} = (1-K)\,\hat{x}_{k|k-1} + K\, z_k$$
+
+Güncellenmiş kestirim, tahmin ile ölçümün **ağırlıklı ortalamasıdır**. Ölçüm gürültüsü küçükse ($R \to 0$) $K \to 1$ olur ve filtre ölçüme güvenir. Tahminin belirsizliği küçükse ($P_{k|k-1} \to 0$) $K \to 0$ olur ve filtre tahmine güvenir. Süreç gürültüsü $Q$ büyüdükçe $P_{k|k-1}$ büyüdüğü için kazanç da büyür.
+
+"En iyi" kazanç, güncellenmiş kestirimin hata kovaryansını (sonsal kovaryans) en aza indirecek biçimde seçilir; yukarıdaki formül bu eniyileme probleminin çözümüdür. Yüksek kazanç filtreyi yeni ölçümlere duyarlı ama gürültülü yapar; düşük kazanç daha yumuşak ama değişikliklere geç tepki veren bir kestirim üretir. $Q$ ile $R$'nin göreli büyüklüğü bu dengeyi belirler; bu nedenle iki matrisin doğru seçilmesi önemlidir (Bölüm 8).
+
+### 3.6 Olasılıksal Yorum
+
+Tahmin adımı, durumun Gauss dağılımını zamanda ileriye taşır; dağılım genişler (belirsizlik artar). Güncelleme adımı, bu dağılımı ölçümün Gauss dağılımıyla birleştirir ve daha dar bir dağılım elde edilir. Kalman filtresi, bu nedenle Gauss dağılımları için özyinelemeli bir **Bayes kestiricisi** olarak da yorumlanabilir: Önsel bir inançla (tahmin) başlar, yeni kanıtla (ölçüm) güncelleyerek sonsal bir inanç elde eder.
+
+---
+
+## 4. Çözümlü Örnek: Uçan Bir Kuşun Takibi
+
+Bir kuşun düz bir hat boyunca uçtuğunu ve bir teleskopla saniyede bir kez konumunun ölçüldüğünü varsayalım. Teleskobun ölçümleri titreşim nedeniyle gürültülüdür; kuşun hızı ise sabit kabul edilse de rüzgâr nedeniyle biraz değişebilir.
+
+### 4.1 Modelin Kurulması
+
+**Durum vektörü:** konum ve hız.
+
+$$x_k = \begin{bmatrix} \text{konum}_k \\ \text{hız}_k \end{bmatrix}$$
+
+**Durum denklemi** ($\Delta t = 1$ s, sabit hız modeli; denetim girdisi yoktur):
+
+$$x_k = \underbrace{\begin{bmatrix} 1 & 1 \\ 0 & 1 \end{bmatrix}}_{F} x_{k-1} + w_k$$
+
+Yeni konum, eski konum ile hızın toplamıdır; hız ise değişmeden kalır. Süreç gürültüsü kovaryansı $Q = \begin{bmatrix} 0.1 & 0 \\ 0 & 1 \end{bmatrix}$ olarak seçilmiştir; hızın her saniyede yaklaşık $\pm 1$ m/s değişebileceğini kabul eder.
+
+**Ölçüm denklemi:** Teleskop yalnızca konumu ölçer; standart sapması 5 m olan bir hata yapar:
+
+$$z_k = \underbrace{\begin{bmatrix} 1 & 0 \end{bmatrix}}_{H} x_k + v_k, \qquad R = 5^2 = 25$$
+
+**Başlangıç:** Kuşun 0 m'den 20 m/s hızla havalandığı tahmin edilmektedir. Konum iyi biliniyor, hız daha belirsizdir:
+
+$$\hat{x}_{0|0} = \begin{bmatrix} 0 \\ 20 \end{bmatrix}, \qquad P_{0|0} = \begin{bmatrix} 1 & 0 \\ 0 & 10 \end{bmatrix}$$
+
+**Ölçümler** (m): $z_1, \dots, z_5 = 24,\ 41,\ 69,\ 86,\ 112$. (Örnek için seçilen bu değerler, gerçekte 22 m/s hızla uçan bir kuşun konumlarına birkaç metrelik hata eklenerek elde edilmiştir: 22, 44, 66, 88, 110.)
+
+### 4.2 Birinci Adımın Elle Hesaplanması
+
+**Tahmin:**
+
+$$\hat{x}_{1|0} = F\,\hat{x}_{0|0} = \begin{bmatrix} 0 + 20 \\ 20 \end{bmatrix} = \begin{bmatrix} 20 \\ 20 \end{bmatrix}$$
+
+$$P_{1|0} = F P_{0|0} F^{T} + Q = \begin{bmatrix} 11 & 10 \\ 10 & 10 \end{bmatrix} + \begin{bmatrix} 0.1 & 0 \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} 11.1 & 10 \\ 10 & 11 \end{bmatrix}$$
+
+Konum belirsizliği 1'den 11.1'e çıkmıştır: Hızdaki belirsizlik, bir saniye sonra konuma yansır. Köşegen dışı elemanlar (10) da artık sıfır değildir; konum hatası ile hız hatası ilişkili hâle gelmiştir.
+
+**Yenilik ve kazanç:**
+
+$$y_1 = z_1 - H\hat{x}_{1|0} = 24 - 20 = 4, \qquad S_1 = 11.1 + 25 = 36.1$$
+
+$$K_1 = \frac{1}{36.1} \begin{bmatrix} 11.1 \\ 10 \end{bmatrix} = \begin{bmatrix} 0.307 \\ 0.277 \end{bmatrix}$$
+
+**Güncelleme:**
+
+$$\hat{x}_{1|1} = \begin{bmatrix} 20 \\ 20 \end{bmatrix} + 4 \begin{bmatrix} 0.307 \\ 0.277 \end{bmatrix} = \begin{bmatrix} 21.23 \\ 21.11 \end{bmatrix}, \qquad P_{1|1} = \begin{bmatrix} 7.69 & 6.93 \\ 6.93 & 8.23 \end{bmatrix}$$
+
+Dikkat çekici sonuç şudur: Teleskop hızı hiç ölçmediği hâlde hız kestirimi 20'den 21.11 m/s'ye güncellenmiştir. Bunu sağlayan, $P_{1|0}$'daki köşegen dışı terimdir: Kuşun beklenenden 4 m ileride görülmesi, hızının da beklenenden yüksek olabileceğini gösterir. Konum belirsizliği 11.1'den 7.69'a, hız belirsizliği 11'den 8.23'e düşmüştür.
+
+### 4.3 Beş Adımın Hesaplanması
+
+```python
+import numpy as np
+
+F = np.array([[1.0, 1.0],
+              [0.0, 1.0]])          # durum geçiş matrisi (Δt = 1 s)
+H = np.array([[1.0, 0.0]])          # yalnızca konum ölçülür
+Q = np.array([[0.1, 0.0],
+              [0.0, 1.0]])          # süreç gürültüsü kovaryansı
+R = np.array([[25.0]])              # ölçüm gürültüsü varyansı (σ = 5 m)
+
+x = np.array([0.0, 20.0])           # başlangıç: konum 0 m, hız 20 m/s
+P = np.array([[1.0, 0.0],
+              [0.0, 10.0]])
+
+z_olcum = [24.0, 41.0, 69.0, 86.0, 112.0]
+
+for k, z in enumerate(z_olcum, start=1):
+    # Tahmin adımı
+    x_pred = F @ x
+    P_pred = F @ P @ F.T + Q
+    # Güncelleme adımı
+    S = H @ P_pred @ H.T + R              # yenilik kovaryansı
+    K = P_pred @ H.T @ np.linalg.inv(S)   # Kalman kazancı
+    y = z - (H @ x_pred)[0]               # yenilik
+    x = x_pred + (K * y).ravel()
+    P = (np.eye(2) - K @ H) @ P_pred
+    print(f"k={k}: z={z:5.1f}  tahmin={x_pred[0]:6.2f}  K=({K[0,0]:.3f}, {K[1,0]:.3f})  "
+          f"konum={x[0]:6.2f}  hız={x[1]:5.2f}  P_konum={P[0,0]:5.2f}  P_hız={P[1,1]:4.2f}")
+```
+
+Çıktı (Python 3.12, NumPy):
+
+| $k$ | $z_k$ | Tahmin edilen konum | $K$ (konum) | $K$ (hız) | Kestirilen konum | Kestirilen hız | $P$ (konum) | $P$ (hız) |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| 1 | 24 | 20.00 | 0.307 | 0.277 | 21.23 | 21.11 | 7.69 | 8.23 |
+| 2 | 41 | 42.34 | 0.544 | 0.276 | 41.61 | 20.74 | 13.61 | 5.04 |
+| 3 | 69 | 62.35 | 0.566 | 0.208 | 66.11 | 22.12 | 14.14 | 3.56 |
+| 4 | 86 | 88.23 | 0.530 | 0.165 | 87.05 | 21.75 | 13.25 | 3.12 |
+| 5 | 112 | 108.80 | 0.497 | 0.146 | 110.39 | 22.22 | 12.42 | 3.07 |
+
+**Yorum.** Beşinci saniyenin sonunda filtre kuşu 110.39 m'de ve 22.22 m/s hızla uçuyor olarak kestirmektedir; gerçek değerler 110 m ve 22 m/s'dir. Teleskobun ölçümleri 5 m'ye varan hatalar içerdiği ve başlangıçtaki hız tahmini (20 m/s) yanlış olduğu hâlde filtre birkaç adımda gerçek hıza yaklaşmıştır. Hız belirsizliği 10'dan 3.07'ye düşmüş ve dengelenmiştir; hız kazancı ise 0.277'den 0.146'ya inmiştir: Filtre hızı öğrendikçe tek tek ölçümlere daha az tepki verir. Konum belirsizliği ise yaklaşık 12–14 düzeyinde dengelenir; bu değer, ölçüm gürültüsünün (25) altındadır, yani kestirim tek başına ölçümden daha güvenilirdir.
+
+---
+
+## 5. Gerçek Dünya Uygulamaları
+
+**Nesne takibi.** Radar ölçümlerindeki gürültüyü ele alarak hava trafiğindeki uçakların izlenmesinde kullanılır. Bilgisayarlı görüde video karelerindeki nesnelerin (yüzler, eller, araçlar) kısa süreli örtülmelere ve gürültülü algılamalara rağmen tutarlı biçimde izlenmesine yardımcı olur.
+
+**Seyrüsefer sistemleri.** Apollo programında uzay araçlarının Ay'a gidiş ve dönüş yörüngelerinin kestiriminde kullanılmıştır; bu, filtrenin kritik mühendislik görevlerindeki ilk büyük başarılarındandır. Denizaltıların, uçakların ve yeniden kullanılabilir fırlatma araçlarının seyrüsefer sistemlerinde yer alır. Otonom araçlarda GPS ile ataletsel ölçüm biriminin (inertial measurement unit, IMU) verilerini birleştirmek (sensor fusion, algılayıcı birleştirme) için kullanılır.
+
+**Sinyal işleme.** Konuşma sinyallerinde gürültü azaltma, derinlik algılayıcılarının ve öznitelik izleyicilerinin kararlı hâle getirilmesi gibi işlerde kullanılır.
+
+**Ekonomi ve finans.** Ekonometride gözlenemeyen değişkenleri içeren zaman serisi modellerinin kestiriminde, finansta piyasa oynaklığının ve iki varlık arasındaki değişen bağlantının (örneğin eşleştirilmiş alım satımda korunma oranı, hedge ratio) izlenmesinde kullanılır.
+
+**Diğer.** Hava tahmininde veri özümseme (data assimilation) yöntemlerinin temelini oluşturur. Sinirbilimde merkezî sinir sisteminin hareket denetimini modellemek için de kullanılmıştır.
+
+**Tablo 1: Kalman filtrelerinin yaygın uygulamaları**
+
+| Uygulama alanı | Örnekler |
+| :--- | :--- |
+| Havacılık / seyrüsefer | Apollo yörünge kestirimi; denizaltı ve uçak seyrüseferi; otonom araçlarda GPS–IMU birleştirmesi |
+| Robotik / takip | Radarla uçak takibi; videoda yüz, el ve araç takibi; düzlemde konum ve hız kestirimi |
+| Sinyal işleme | Konuşmada gürültü azaltma; derinlik ölçümlerinin kararlı hâle getirilmesi |
+| Ekonomi / finans | Zaman serisi modelleri; oynaklık kestirimi; dinamik korunma oranı |
+| Diğer | Hava tahmininde veri özümseme; hareket denetiminin modellenmesi |
+
+---
+
+## 6. Genişletilmiş Kalman Filtresi (Extended Kalman Filter, EKF)
+
+### 6.1 Doğrusal Olmayan Sistemlerin Zorluğu
+
+Standart Kalman filtresi, durum geçişinin ve ölçümün durumun doğrusal fonksiyonları olduğu sistemler için tasarlanmıştır. Oysa birçok gerçek sistem doğrusal değildir; dinamiğinde ya da ölçümünde trigonometrik fonksiyonlar, karekökler ve benzeri ilişkiler bulunur. Örneğin bir radar, hedefin uzaklığını ve açısını ölçer; bunlar kartezyen konumun doğrusal olmayan fonksiyonlarıdır.
+
+### 6.2 Doğrusallaştırma (Linearization)
+
+Doğrusal olmayan sistem şöyle yazılır:
+
+$$x_k = f(x_{k-1}, u_k) + w_k, \qquad z_k = h(x_k) + v_k$$
+
+EKF, $f$ ve $h$ fonksiyonlarını mevcut kestirimin çevresinde birinci dereceden Taylor açılımıyla doğrusallaştırır. Bunun için **Jacobi matrisleri** (Jacobian matrices) hesaplanır:
+
+$$F_k = \left.\frac{\partial f}{\partial x}\right|_{\hat{x}_{k-1|k-1}}, \qquad H_k = \left.\frac{\partial h}{\partial x}\right|_{\hat{x}_{k|k-1}}$$
+
+**Not.** Jacobi matrisi, vektör değerli ve çok değişkenli bir fonksiyonun kısmi türevlerinin bir matriste düzenlenmiş hâlidir. Tek değişkenli bir fonksiyonun türevi, girdideki küçük bir değişikliğin çıktıyı ne kadar değiştirdiğini gösteren tek bir sayıdır (eğim). Girdisi ve çıktısı birer vektör olan bir fonksiyonda ise çıktının her bileşeninin girdinin her bileşenine göre değişim oranı gerekir; Jacobi matrisi bu kısmi türevlerin tümünü bir araya getirir.
+
+### 6.3 EKF Algoritması
+
+**Tahmin:** Doğrusal olmayan fonksiyon durum için doğrudan, Jacobi matrisi kovaryans için kullanılır:
+
+$$\hat{x}_{k|k-1} = f(\hat{x}_{k-1|k-1}, u_k), \qquad P_{k|k-1} = F_k P_{k-1|k-1} F_k^{T} + Q_k$$
+
+**Güncelleme:** Yenilikte doğrusal olmayan ölçüm fonksiyonu, kazançta ölçüm Jacobi matrisi kullanılır:
+
+$$y_k = z_k - h(\hat{x}_{k|k-1}), \qquad S_k = H_k P_{k|k-1} H_k^{T} + R_k, \qquad K_k = P_{k|k-1} H_k^{T} S_k^{-1}$$
+
+$$\hat{x}_{k|k} = \hat{x}_{k|k-1} + K_k y_k, \qquad P_{k|k} = (I - K_k H_k) P_{k|k-1}$$
+
+### 6.4 EKF Ne Zaman Kullanılır ve Sınırlamaları Nelerdir?
+
+EKF, sistem ya da ölçüm modeli doğrusal olmayan ancak türevlenebilir olduğunda kullanılır ve uzun yıllar boyunca seyrüsefer sistemlerinde ve GPS alıcılarında fiilî standart olmuştur. Sınırlamaları şunlardır: Doğrusal olmayan sistemler için genel olarak en iyi kestirici değildir; doğrusallaştırma, özellikle güçlü doğrusal olmayanlık varsa ya da kestirim gerçek durumdan uzaksa önemli hatalar doğurabilir ve filtre ıraksayabilir (diverge). Ayrıca Jacobi matrislerinin türetilmesi zahmetli olabilir.
+
+---
+
+## 7. Daha Sağlam Bir Yaklaşım: Unscented Kalman Filtresi (UKF)
+
+### 7.1 Sigma Noktaları ve Unscented Dönüşüm
+
+Unscented Kalman filtresi (UKF; Julier ve Uhlmann), EKF'ye türev gerektirmeyen bir alternatiftir. UKF, doğrusal olmayan fonksiyonları doğrusallaştırmak yerine **unscented dönüşüm** (unscented transformation, UT) adı verilen belirlenimci (deterministic) bir örnekleme tekniği kullanır. UT, durumun ortalamasını ve kovaryansını tam olarak temsil eden, özenle seçilmiş az sayıda örnek noktadan, yani **sigma noktalarından** yararlanır. Temel fikir şudur: Doğrusal olmayan bir fonksiyonun kendisine yaklaşmak yerine, o fonksiyondan geçen olasılık dağılımına yaklaşmak daha kolaydır.
+
+### 7.2 UKF Algoritması
+
+1. **Sigma noktalarının üretilmesi:** Mevcut kestirim ve kovaryanstan $2n+1$ sigma noktası üretilir ($n$ durumun boyutudur).
+2. **Tahmin:** Her sigma noktası doğrusal olmayan durum geçiş fonksiyonundan geçirilir; dönüştürülmüş noktaların ağırlıklı ortalaması ve kovaryansı, önsel kestirimi ve $P_{k|k-1}$'i verir.
+3. **Ölçüm tahmini:** Sigma noktaları ölçüm fonksiyonundan geçirilir; tahmin edilen ölçümün ortalaması, kovaryansı ve durum ile ölçüm arasındaki çapraz kovaryans hesaplanır.
+4. **Güncelleme:** Bu kovaryanslardan Kalman kazancı hesaplanır; kestirim ve kovaryans, ölçüm ile tahmin edilen ölçüm arasındaki farka göre güncellenir.
+
+### 7.3 Güçlü Doğrusal Olmayanlıkta UKF'nin Üstünlükleri
+
+UKF, birinci dereceden doğrusallaştırmanın getirdiği hatalardan kaçındığı için güçlü doğrusal olmayanlık içeren sistemlerde genellikle EKF'den daha doğrudur. Jacobi matrisi gerektirmez; bu, türevi elde edilmesi zor ya da imkânsız fonksiyonlarda önemli bir kolaylıktır. Hesaplama maliyeti EKF ile aynı mertebededir, ancak her adımda $2n+1$ noktanın fonksiyonlardan geçirilmesi gerektiğinden pratikte genellikle biraz daha yüksektir.
+
+---
+
+## 8. Filtre Tasarımı: Gürültü Kovaryans Matrislerinin Seçimi
+
+### 8.1 Süreç Gürültüsü Kovaryansı ($Q$)
+
+$Q$, sistem modelindeki belirsizliği ya da modellenmemiş bozucu etkileri temsil eder ve filtrenin modele ne kadar güveneceğini belirler. Büyük bir $Q$, modele daha az güvenildiğini gösterir; filtre ölçümlere daha duyarlı, ancak daha gürültülü olur. Küçük bir $Q$, daha yumuşak bir kestirim üretir, ancak modelden sapmalara (örneğin aniden yön değiştiren bir hedefe) geç tepki verir.
+
+### 8.2 Ölçüm Gürültüsü Kovaryansı ($R$)
+
+$R$, algılayıcı ölçümlerindeki belirsizliği temsil eder ve filtrenin ölçümlere ne kadar güveneceğini belirler. Büyük bir $R$, gürültülü ölçümleri gösterir; filtre modele daha çok güvenir ve ölçümlere daha yavaş tepki verir. Küçük bir $R$, güvenilir ölçümleri gösterir; filtre ölçümlere daha fazla ağırlık verir.
+
+### 8.3 Başlangıç Değerlerinin Seçimi
+
+$R$ çoğu zaman algılayıcının teknik özelliklerinden ya da sistem bilinen bir durumdayken toplanan ölçümlerin örnek kovaryansından kestirilebilir. $Q$'nun seçimi daha zordur; çünkü modelin yakalayamadığı etkileri temsil eder. Başlangıç değerleri sistemin fiziksel anlayışına ve beklenen bozucu etkilerin büyüklüğüne dayandırılabilir. Gürültülerin değişkenler arasında bağımsız olduğu varsayılarak köşegen matrislerle başlamak yaygındır.
+
+### 8.4 Ayarlama (Tuning)
+
+Ayarlama, $Q$ ve $R$'yi değiştirip filtrenin davranışını gözlemlemeye dayanan yinelemeli bir süreçtir. Kestirim çok gürültülüyse $R$ çok küçük ya da $Q$ çok büyük seçilmiş olabilir; kestirim değişikliklere geç tepki veriyorsa $R$ çok büyük ya da $Q$ çok küçük olabilir. Yenilik dizisinin ($y_k$) incelenmesi iyi bir tanı aracıdır: İyi ayarlanmış bir filtrede yenilikler sıfır ortalamalı ve birbirinden bağımsız olmalı, büyüklükleri de $S_k$ ile tutarlı olmalıdır. En çok olabilirlik kestirimi (maximum likelihood estimation) gibi yöntemlerle $Q$ ve $R$ veriden de kestirilebilir. Manevra kabiliyeti yüksek hedefler için daha büyük bir $Q$ uygundur.
+
+---
+
+## 9. Sonuç
+
+**Tablo 2: Doğrusal Kalman filtresi, EKF ve UKF karşılaştırması**
+
+| Özellik | Doğrusal Kalman filtresi | Genişletilmiş Kalman filtresi (EKF) | Unscented Kalman filtresi (UKF) |
+| :--- | :--- | :--- | :--- |
+| Doğrusal olmayanlığın ele alınması | Yok | Birinci dereceden doğrusallaştırma | Unscented dönüşüm |
+| Yaklaşım aracı | — | Jacobi matrisleri | Sigma noktaları |
+| Türev gereksinimi | Yok | Var | Yok |
+| Güçlü doğrusal olmayanlıkta doğruluk | Uygulanamaz | Genellikle daha düşük | Genellikle daha yüksek |
+| Hesaplama maliyeti | Düşük | Orta | Orta (EKF'den genellikle biraz yüksek) |
+
+Kalman filtresi, gürültülü ve belirsiz verilerden dinamik sistemlerin durumunu kestirmek için güçlü ve çok yönlü bir araçtır. Temel ilkelerinin, doğrusal olmayan sistemler için geliştirilen uzantılarının ve tasarım kararlarının anlaşılması, mühendislik ve bilimin birçok alanındaki uygulamaları için büyük önem taşır.
+
+---
+
+## Kaynaklar
+
+- Kalman, R. E. (1960). A new approach to linear filtering and prediction problems. *Journal of Basic Engineering*, 82(1), 35–45.
+- Welch, G. ve Bishop, G. (2006). *An Introduction to the Kalman Filter*. UNC-Chapel Hill, TR 95-041.
+- Julier, S. J. ve Uhlmann, J. K. (2004). Unscented filtering and nonlinear estimation. *Proceedings of the IEEE*, 92(3), 401–422.
+- Simon, D. (2006). *Optimal State Estimation: Kalman, H∞, and Nonlinear Approaches*. Wiley.
