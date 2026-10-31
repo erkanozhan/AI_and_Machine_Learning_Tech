@@ -56,6 +56,12 @@ $$x_k = F_k\, x_{k-1} + B_k\, u_k + w_k$$
 - $u_k$ ve $B_k$ (denetim girdisi ve denetim girdi matrisi, control input matrix): Sisteme dışarıdan verilen komutların (örneğin gaza ya da frene basma) durumu nasıl etkilediğini tanımlar. Denetim girdisi yoksa bu terim düşer.
 - $w_k$ (süreç gürültüsü): Modelin hesaba katamadığı etkiler.
 
+```math
+\underbrace{x_k}_{\substack{\text{yeni}\\\text{durum}}} = \overbrace{F_k\, x_{k-1}}^{\substack{\text{önceki durumun}\\\text{dinamikle dönüşümü}}} + \underbrace{B_k\, u_k}_{\substack{\text{denetim girdisinin}\\\text{etkisi}}} + \overbrace{w_k}^{\substack{\text{süreç}\\\text{gürültüsü}}}
+```
+
+**Ne anlatıyor?** Sistemin yeni durumu üç katkının toplamıdır: önceki durumun sistem dinamiğine göre dönüşmesi, dışarıdan verilen komutların etkisi ve modelin açıklayamadığı rastgele etkiler. Böylece durum denklemi, bilinen fiziksel ilişkiler ile bilinmeyen bozucuları tek bir bağıntıda birleştirir.
+
 ### 2.3 Ölçüm Denklemi: Durumların Gözlemlerle İlişkilendirilmesi
 
 $$z_k = H_k\, x_k + v_k$$
@@ -63,6 +69,12 @@ $$z_k = H_k\, x_k + v_k$$
 - $z_k$: $k$ anında algılayıcılardan elde edilen ölçüm vektörü.
 - $H_k$ (ölçüm matrisi, measurement matrix): Durumu, algılayıcının ölçebildiği büyüklüklere dönüştürür. Örneğin yalnızca konumu ölçebilen, hızı ölçemeyen bir algılayıcının yapısını yansıtır.
 - $v_k$ (ölçüm gürültüsü): Algılayıcının okuma hataları.
+
+```math
+\underbrace{z_k}_{\text{ölçüm}} = \overbrace{H_k\, x_k}^{\substack{\text{durumdan beklenen}\\\text{ölçüm}}} + \underbrace{v_k}_{\substack{\text{ölçüm}\\\text{gürültüsü}}}
+```
+
+**Ne anlatıyor?** Algılayıcının okuduğu değer, gerçek durumun ölçülebilen kısmına okuma hatasının eklenmesiyle oluşur. $H_k$ matrisi, durum vektöründen algılayıcının görebildiği bileşenleri seçer ya da onları algılayıcının birimine dönüştürür.
 
 ### 2.4 Süreç ve Ölçüm Gürültüsü
 
@@ -72,9 +84,21 @@ $$Q_k = E[w_k w_k^{T}]$$
 
 Burada $E[\cdot]$ beklenen değeri (ortalamayı), $^{T}$ ise matrisin devriğini (transpose, satır ve sütunlarının yer değiştirmesi) gösterir. $Q$ sistem dinamiğindeki belirsizliği nicelendirir: Köşegen elemanlar her durum değişkenindeki gürültünün varyansını, köşegen dışı elemanlar ise değişkenler arasındaki kovaryansı gösterir.
 
+```math
+\underbrace{Q_k}_{\substack{\text{süreç gürültüsü}\\\text{kovaryansı}}} = \overbrace{E}^{\substack{\text{beklenen}\\\text{değer}}}\big[\underbrace{w_k\, w_k^{T}}_{\substack{\text{gürültünün kendisiyle}\\\text{dış çarpımı}}}\big]
+```
+
+**Ne anlatıyor?** Sıfır ortalamalı süreç gürültüsünün kendisiyle dış çarpımının beklenen değeri, gürültünün her bileşendeki varyansını ve bileşenler arasındaki kovaryansı tek bir matriste toplar. $Q_k$ büyüdükçe modelin bir adımlık öngörüsüne daha az güvenilir.
+
 Benzer biçimde ölçüm gürültüsü $v_k$'nin de sıfır ortalamalı ve $R_k$ kovaryanslı beyaz Gauss gürültüsü olduğu varsayılır:
 
 $$R_k = E[v_k v_k^{T}]$$
+
+```math
+\underbrace{R_k}_{\substack{\text{ölçüm gürültüsü}\\\text{kovaryansı}}} = \overbrace{E}^{\substack{\text{beklenen}\\\text{değer}}}\big[\underbrace{v_k\, v_k^{T}}_{\substack{\text{ölçüm hatasının}\\\text{kendisiyle dış çarpımı}}}\big]
+```
+
+**Ne anlatıyor?** $Q_k$ ile aynı yapıdaki bu matris, her ölçüm bileşenindeki hata varyansını ve bileşenlerin hataları arasındaki kovaryansı verir; algılayıcının ne kadar gürültülü olduğunu sayısal olarak tanımlar.
 
 $R$ ölçümlerdeki belirsizliği nicelendirir. $w_k$ ile $v_k$'nin birbirinden ve başlangıç durumundan bağımsız olduğu varsayılır; bu varsayım filtrenin türetilmesini basitleştirir.
 
@@ -99,7 +123,19 @@ Model kullanılarak durum ve belirsizlik zamanda bir adım ileriye taşınır:
 
 $$\hat{x}_{k|k-1} = F_k\, \hat{x}_{k-1|k-1} + B_k\, u_k$$
 
+```math
+\underbrace{\hat{x}_{k|k-1}}_{\substack{\text{önsel kestirim}\\\text{(tahmin)}}} = \overbrace{F_k\, \hat{x}_{k-1|k-1}}^{\substack{\text{önceki sonsal kestirimin}\\\text{bir adım ileri taşınması}}} + \underbrace{B_k\, u_k}_{\substack{\text{denetim girdisinin}\\\text{etkisi}}}
+```
+
+**Ne anlatıyor?** Bir önceki adımın en iyi kestirimi, durum denklemi gürültü terimi olmadan işletilerek bir sonraki an için öngörülür. Gürültünün ortalaması sıfır kabul edildiğinden $w_k$ bu öngörüde yer almaz.
+
 $$P_{k|k-1} = F_k\, P_{k-1|k-1}\, F_k^{T} + Q_k$$
+
+```math
+\underbrace{P_{k|k-1}}_{\substack{\text{önsel}\\\text{belirsizlik}}} = \overbrace{F_k\, P_{k-1|k-1}\, F_k^{T}}^{\substack{\text{önceki belirsizliğin}\\\text{dinamikle taşınması}}} + \underbrace{Q_k}_{\substack{\text{eklenen süreç}\\\text{belirsizliği}}}
+```
+
+**Ne anlatıyor?** Önceki kestirimin hata kovaryansı sistem dinamiğinden geçirilerek yeni ana aktarılır ve üzerine modelin kusurlarından kaynaklanan belirsizlik eklenir. Bir kovaryans matrisi bir doğrusal dönüşümden geçirilirken dönüşüm matrisiyle iki yandan çarpılır; $F_k P F_k^{T}$ biçimi buradan gelir.
 
 İkinci denklemdeki $Q_k$ terimi, modelin kusursuz olmadığını ve dış etkilerin sistemi bozabileceğini yansıtır: Ölçüm alınmadan geçen her adımda belirsizlik artar. Bu adımda algılayıcıdan hiç veri kullanılmaz; yalnızca sistemin kendi dinamiği işletilir.
 
@@ -111,25 +147,55 @@ Yeni ölçüm $z_k$ hesaba katılır.
 
 $$y_k = z_k - H_k\, \hat{x}_{k|k-1}, \qquad S_k = H_k\, P_{k|k-1}\, H_k^{T} + R_k$$
 
+```math
+\underbrace{y_k}_{\text{yenilik}} = \overbrace{z_k}^{\substack{\text{gerçek}\\\text{ölçüm}}} - \overbrace{H_k\, \hat{x}_{k|k-1}}^{\substack{\text{beklenen}\\\text{ölçüm}}}, \qquad \underbrace{S_k}_{\substack{\text{yeniliğin}\\\text{kovaryansı}}} = \overbrace{H_k\, P_{k|k-1}\, H_k^{T}}^{\substack{\text{tahmin belirsizliğinin}\\\text{ölçüm uzayındaki karşılığı}}} + \underbrace{R_k}_{\substack{\text{ölçüm}\\\text{belirsizliği}}}
+```
+
+**Ne anlatıyor?** Yenilik, algılayıcının gördüğü değer ile tahmine göre görülmesi beklenen değer arasındaki farktır ve ölçümün getirdiği yeni bilgiyi taşır. Bu farkın beklenen büyüklüğü iki kaynaktan gelir: tahmindeki belirsizlik ve ölçümdeki gürültü.
+
 **Kalman kazancı (Kalman gain):** Ölçüme mi yoksa tahmine mi ne kadar güvenileceğini belirleyen ağırlık matrisidir:
 
 $$K_k = P_{k|k-1}\, H_k^{T}\, S_k^{-1}$$
 
 Burada $^{-1}$ matrisin tersini gösterir; skaler durumda bölmeye karşılık gelir.
 
+```math
+\underbrace{K_k}_{\substack{\text{Kalman}\\\text{kazancı}}} = \overbrace{P_{k|k-1}\, H_k^{T}}^{\substack{\text{tahminin}\\\text{belirsizliği}}}\; \underbrace{S_k^{-1}}_{\substack{\text{toplam belirsizliğe}\\\text{bölme}}}
+```
+
+**Ne anlatıyor?** Kazanç, tahminin belirsizliğinin yeniliğin toplam belirsizliğine oranıdır. Tahmin ölçüme göre ne kadar belirsizse kazanç o kadar büyük olur ve kestirim ölçüme doğru o kadar çekilir.
+
 **Durum ve kovaryansın güncellenmesi:**
 
 $$\hat{x}_{k|k} = \hat{x}_{k|k-1} + K_k\, y_k$$
 
+```math
+\underbrace{\hat{x}_{k|k}}_{\substack{\text{sonsal}\\\text{kestirim}}} = \overbrace{\hat{x}_{k|k-1}}^{\substack{\text{önsel}\\\text{kestirim}}} + \underbrace{K_k}_{\text{kazanç}}\, \overbrace{y_k}^{\text{yenilik}}
+```
+
+**Ne anlatıyor?** Güncellenmiş kestirim, tahmine yeniliğin kazançla ağırlıklandırılmış bir kısmı eklenerek elde edilir. Ölçüm tahminle örtüşüyorsa yenilik sıfıra yakındır ve tahmin pek değişmez.
+
 $$P_{k|k} = (I - K_k H_k)\, P_{k|k-1}$$
 
 $I$ birim matristir (identity matrix). Ölçüm kullanıldıktan sonra belirsizlik azalır; azalmanın miktarı Kalman kazancına bağlıdır.
+
+```math
+\underbrace{P_{k|k}}_{\substack{\text{sonsal}\\\text{belirsizlik}}} = \overbrace{(I - K_k H_k)}^{\substack{\text{ölçümle sağlanan}\\\text{küçültme}}}\, \underbrace{P_{k|k-1}}_{\substack{\text{önsel}\\\text{belirsizlik}}}
+```
+
+**Ne anlatıyor?** Ölçüm kullanıldıktan sonra kalan belirsizlik, önsel belirsizlikten kazançla orantılı bir kısmın çıkarılmasıyla bulunur. Kazanç sıfırsa belirsizlik değişmez; kazanç büyüdükçe belirsizlik daha çok azalır.
 
 ### 3.5 Kalman Kazancının Sezgisi: Tek Boyutlu Durum
 
 Durum tek bir sayı ve $H = 1$ olduğunda kazanç şu basit biçimi alır:
 
 $$K = \frac{P_{k|k-1}}{P_{k|k-1} + R}, \qquad \hat{x}_{k|k} = (1-K)\,\hat{x}_{k|k-1} + K\, z_k$$
+
+```math
+\underbrace{K}_{\text{kazanç}} = \frac{\overbrace{P_{k|k-1}}^{\substack{\text{tahminin}\\\text{varyansı}}}}{\underbrace{P_{k|k-1} + R}_{\substack{\text{toplam}\\\text{varyans}}}}, \qquad \hat{x}_{k|k} = \underbrace{(1-K)\,\hat{x}_{k|k-1}}_{\substack{\text{tahminin}\\\text{ağırlıklı payı}}} + \overbrace{K\, z_k}^{\substack{\text{ölçümün}\\\text{ağırlıklı payı}}}
+```
+
+**Ne anlatıyor?** Tek boyutta kazanç, tahminin varyansının tahmin ve ölçüm varyanslarının toplamına oranıdır; bu nedenle 0 ile 1 arasında kalır. Yeni kestirimde tahmin ve ölçümün ağırlıklarının toplamı 1 olduğundan sonuç her zaman ikisinin arasında yer alır.
 
 Güncellenmiş kestirim, tahmin ile ölçümün **ağırlıklı ortalamasıdır**. Ölçüm gürültüsü küçükse ($R \to 0$) $K \to 1$ olur ve filtre ölçüme güvenir. Tahminin belirsizliği küçükse ($P_{k|k-1} \to 0$) $K \to 0$ olur ve filtre tahmine güvenir. Süreç gürültüsü $Q$ büyüdükçe $P_{k|k-1}$ büyüdüğü için kazanç da büyür.
 
@@ -271,9 +337,21 @@ Doğrusal olmayan sistem şöyle yazılır:
 
 $$x_k = f(x_{k-1}, u_k) + w_k, \qquad z_k = h(x_k) + v_k$$
 
+```math
+\underbrace{x_k}_{\substack{\text{yeni}\\\text{durum}}} = \overbrace{f(x_{k-1}, u_k)}^{\substack{\text{doğrusal olmayan}\\\text{durum geçişi}}} + \underbrace{w_k}_{\substack{\text{süreç}\\\text{gürültüsü}}}, \qquad \underbrace{z_k}_{\text{ölçüm}} = \overbrace{h(x_k)}^{\substack{\text{doğrusal olmayan}\\\text{ölçüm fonksiyonu}}} + \underbrace{v_k}_{\substack{\text{ölçüm}\\\text{gürültüsü}}}
+```
+
+**Ne anlatıyor?** Doğrusal modeldeki $F_k x_{k-1}$ ve $H_k x_k$ çarpımlarının yerini genel $f$ ve $h$ fonksiyonları alır; gürültüler yine toplamsal kabul edilir. Örneğin radarın ölçtüğü uzaklık ve açı, konumdan böyle doğrusal olmayan bir $h$ fonksiyonuyla elde edilir.
+
 EKF, $f$ ve $h$ fonksiyonlarını mevcut kestirimin çevresinde birinci dereceden Taylor açılımıyla doğrusallaştırır. Bunun için **Jacobi matrisleri** (Jacobian matrices) hesaplanır:
 
 $$F_k = \left.\frac{\partial f}{\partial x}\right|_{\hat{x}_{k-1|k-1}}, \qquad H_k = \left.\frac{\partial h}{\partial x}\right|_{\hat{x}_{k|k-1}}$$
+
+```math
+\underbrace{F_k}_{\substack{\text{durum geçişinin}\\\text{Jacobi matrisi}}} = \overbrace{\left.\frac{\partial f}{\partial x}\right|_{\hat{x}_{k-1|k-1}}}^{\substack{\text{f'nin türevi, sonsal}\\\text{kestirimde hesaplanır}}}, \qquad \underbrace{H_k}_{\substack{\text{ölçümün}\\\text{Jacobi matrisi}}} = \overbrace{\left.\frac{\partial h}{\partial x}\right|_{\hat{x}_{k|k-1}}}^{\substack{\text{h'nin türevi, önsel}\\\text{kestirimde hesaplanır}}}
+```
+
+**Ne anlatıyor?** Doğrusal olmayan $f$ ve $h$ fonksiyonlarının eğimleri, o an en iyi bilinen kestirim noktasında hesaplanarak her adımda geçerli birer doğrusal yaklaşım elde edilir. Bu matrisler, standart Kalman filtresindeki $F_k$ ve $H_k$'nin yerini alır.
 
 **Not.** Jacobi matrisi, vektör değerli ve çok değişkenli bir fonksiyonun kısmi türevlerinin bir matriste düzenlenmiş hâlidir. Tek değişkenli bir fonksiyonun türevi, girdideki küçük bir değişikliğin çıktıyı ne kadar değiştirdiğini gösteren tek bir sayıdır (eğim). Girdisi ve çıktısı birer vektör olan bir fonksiyonda ise çıktının her bileşeninin girdinin her bileşenine göre değişim oranı gerekir; Jacobi matrisi bu kısmi türevlerin tümünü bir araya getirir.
 
@@ -283,9 +361,21 @@ $$F_k = \left.\frac{\partial f}{\partial x}\right|_{\hat{x}_{k-1|k-1}}, \qquad H
 
 $$\hat{x}_{k|k-1} = f(\hat{x}_{k-1|k-1}, u_k), \qquad P_{k|k-1} = F_k P_{k-1|k-1} F_k^{T} + Q_k$$
 
+```math
+\underbrace{\hat{x}_{k|k-1}}_{\substack{\text{önsel}\\\text{kestirim}}} = \overbrace{f(\hat{x}_{k-1|k-1}, u_k)}^{\substack{\text{doğrusal olmayan}\\\text{model doğrudan}}}, \qquad \underbrace{P_{k|k-1}}_{\substack{\text{önsel}\\\text{belirsizlik}}} = \overbrace{F_k P_{k-1|k-1} F_k^{T}}^{\substack{\text{Jacobi matrisiyle}\\\text{taşınan belirsizlik}}} + \underbrace{Q_k}_{\substack{\text{süreç}\\\text{belirsizliği}}}
+```
+
+**Ne anlatıyor?** Kestirimin kendisi doğrusal olmayan modelden doğrudan geçirilir; kovaryans ise doğrusal olmayan bir dönüşümle kapalı biçimde taşınamadığından doğrusallaştırılmış $F_k$ matrisiyle aktarılır. Belirsizlik hesabındaki bu yaklaşıklık, EKF hatalarının temel kaynağıdır.
+
 **Güncelleme:** Yenilikte doğrusal olmayan ölçüm fonksiyonu, kazançta ölçüm Jacobi matrisi kullanılır:
 
 $$y_k = z_k - h(\hat{x}_{k|k-1}), \qquad S_k = H_k P_{k|k-1} H_k^{T} + R_k, \qquad K_k = P_{k|k-1} H_k^{T} S_k^{-1}$$
+
+```math
+\underbrace{y_k}_{\text{yenilik}} = z_k - \overbrace{h(\hat{x}_{k|k-1})}^{\substack{\text{doğrusal olmayan}\\\text{beklenen ölçüm}}}, \qquad S_k = \underbrace{H_k P_{k|k-1} H_k^{T}}_{\substack{\text{Jacobi matrisiyle}\\\text{dönüştürülen belirsizlik}}} + R_k, \qquad \underbrace{K_k}_{\text{kazanç}} = P_{k|k-1} \overbrace{H_k^{T}}^{\substack{\text{ölçüm}\\\text{Jacobi matrisi}}} S_k^{-1}
+```
+
+**Ne anlatıyor?** Beklenen ölçüm gerçek $h$ fonksiyonuyla hesaplanırken yeniliğin kovaryansı ve kazanç, doğrusallaştırılmış $H_k$ matrisiyle bulunur. Standart filtreden farkı, $H_k$'nin her adımda önsel kestirim noktasında yeniden hesaplanmasıdır.
 
 $$\hat{x}_{k|k} = \hat{x}_{k|k-1} + K_k y_k, \qquad P_{k|k} = (I - K_k H_k) P_{k|k-1}$$
 

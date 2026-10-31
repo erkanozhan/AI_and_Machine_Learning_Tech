@@ -22,13 +22,25 @@ Geçmiş kesin, gelecek ise belirsiz olduğundan her karar aslında belirsiz gel
 
 Beklenen fayda teorisinin kökleri 1738 yılına uzanır. Daniel Bernoulli bu tarihte **St. Petersburg paradoksunu** (St. Petersburg paradox) ele almış ve karar vericilerin yalnızca parasal değeri değil, sonuçların kendilerine sağladığı faydayı dikkate aldığını ileri sürmüştür.
 
-Paradoks şöyledir: Bir oyunda yazı gelene kadar madeni para atılır; yazı $n$'inci atışta gelirse oyuncu $2^n$ lira kazanır. Kazancın beklenen değeri
+Paradoks şöyledir: Bir oyunda yazı gelene kadar madeni para atılır; yazı $n$'inci atışta gelirse oyuncu $2^n$ lira kazanır. Kazancın beklenen değeri sonsuzdur:
 
 $$E[X] = \sum_{n=1}^{\infty} \frac{1}{2^n} \cdot 2^n = 1 + 1 + 1 + \cdots = \infty$$
 
-olduğu hâlde, insanlar bu oyuna katılmak için birkaç liradan fazlasını ödemek istemez. Bernoulli, paranın faydasının azalan oranda arttığını (ek bir liranın zengine yoksula olduğundan daha az yarar sağladığını) öne sürerek logaritmik bir fayda fonksiyonu önerdi. $U(x) = \ln x$ ile oyunun beklenen faydası sonludur:
+```math
+\underbrace{E[X]}_{\substack{\text{kazancın}\\\text{beklenen değeri}}} = \sum_{n=1}^{\infty} \overbrace{\frac{1}{2^n}}^{\substack{\text{yazının ilk kez}\\\text{n. atışta gelmesi}}} \cdot \underbrace{2^n}_{\substack{\text{bu durumda}\\\text{kazanılan tutar}}} = \overbrace{1 + 1 + 1 + \cdots}^{\substack{\text{her terimin}\\\text{katkısı aynı}}} = \infty
+```
+
+**Ne anlatıyor?** Her olası sonucun olasılığı kazançla çarpılıp toplanır. Olasılık her adımda yarıya inerken kazanç iki katına çıktığından her terim aynı katkıyı yapar ve toplam sınırsız büyür.
+
+Buna karşın insanlar bu oyuna katılmak için birkaç liradan fazlasını ödemek istemez. Bernoulli, paranın faydasının azalan oranda arttığını (ek bir liranın zengine yoksula olduğundan daha az yarar sağladığını) öne sürerek logaritmik bir fayda fonksiyonu önerdi. $U(x) = \ln x$ ile oyunun beklenen faydası sonludur:
 
 $$E[U(X)] = \sum_{n=1}^{\infty} \frac{1}{2^n} \ln(2^n) = \ln 2 \sum_{n=1}^{\infty} \frac{n}{2^n} = 2 \ln 2 \approx 1.386$$
+
+```math
+\underbrace{E[U(X)]}_{\substack{\text{beklenen}\\\text{fayda}}} = \sum_{n=1}^{\infty} \overbrace{\frac{1}{2^n}}^{\text{olasılık}} \underbrace{\ln(2^n)}_{\substack{\text{kazancın}\\\text{faydası}}} = \ln 2 \underbrace{\sum_{n=1}^{\infty} \frac{n}{2^n}}_{\substack{\text{sonlu bir değere}\\\text{yakınsayan seri}}} = 2 \ln 2 \approx 1.386
+```
+
+**Ne anlatıyor?** Kazancın kendisi yerine logaritmik faydası olasılıklarla ağırlıklandırıldığında terimler giderek küçülür ve toplam sonlu bir değere yakınsar. Büyük kazançların faydası tutarlarıyla orantılı artmadığından, olasılığı çok küçük dev ödüller beklenen faydayı sınırsız büyütemez.
 
 Bu beklenen faydaya karşılık gelen kesin tutar $e^{2 \ln 2} = 4$ liradır; oyun bu karar verici için 4 lira değerindedir.
 
@@ -73,9 +85,21 @@ $$EU(A) = \sum_{i} P(O_i \mid A)\, U(O_i)$$
 - $P(O_i \mid A)$: $A$ eylemi seçildiğinde $O_i$ sonucunun gerçekleşme olasılığı (koşullu olasılık).
 - $U(O_i)$: $O_i$ sonucunun karar vericiye sağladığı fayda.
 
+```math
+\underbrace{EU(A)}_{\substack{A \text{ eyleminin}\\\text{beklenen faydası}}} = \overbrace{\sum_{i}}^{\substack{\text{tüm olası}\\\text{sonuçlar}}} \underbrace{P(O_i \mid A)}_{\substack{A \text{ seçilince } O_i\\\text{gerçekleşme olasılığı}}}\, \overbrace{U(O_i)}^{\substack{O_i \text{ sonucunun}\\\text{faydası}}}
+```
+
+**Ne anlatıyor?** Bir eylemin değeri, yol açabileceği her sonucun faydasının o sonucun gerçekleşme olasılığıyla ağırlıklandırılmış toplamıdır. Böylece olasılığı yüksek ama faydası düşük sonuçlar ile olasılığı düşük ama faydası yüksek sonuçlar aynı ölçek üzerinde bir araya getirilir.
+
 Sonuç, eylem ile karar vericinin denetimi dışındaki **dünyanın durumu** tarafından birlikte belirleniyorsa (Bölüm 6), aynı tanım durumlar üzerinden yazılabilir. $s$ olası bir durum, $o(A, s)$ ise $A$ eylemi $s$ durumunda seçildiğinde ortaya çıkan sonuç olmak üzere:
 
 $$EU(A) = \sum_{s} P(s)\, U\big(o(A, s)\big)$$
+
+```math
+\underbrace{EU(A)}_{\substack{\text{beklenen}\\\text{fayda}}} = \overbrace{\sum_{s}}^{\substack{\text{dünyanın tüm}\\\text{olası durumları}}} \underbrace{P(s)}_{\substack{\text{durumun}\\\text{olasılığı}}}\, \overbrace{U\big(\underbrace{o(A, s)}_{\substack{A \text{ eylemi } s \text{ durumunda}\\\text{seçilince oluşan sonuç}}}\big)}^{\substack{\text{bu sonucun}\\\text{faydası}}}
+```
+
+**Ne anlatıyor?** Olasılıklar bu kez eylemden bağımsız olan dünya durumlarına atanır; her durumda eylemin doğurduğu sonucun faydası, o durumun olasılığıyla ağırlıklandırılıp toplanır. Eylemin durumların olasılığını değiştirmediği problemlerde, örneğin şemsiye örneğinde, bu biçim daha kullanışlıdır.
 
 ### 5.2 Karar Kuralı
 
@@ -84,6 +108,12 @@ En yüksek beklenen faydayı sağlayan eylem seçilir:
 $$A^{*} = \operatorname*{argmax}_{A} EU(A)$$
 
 $\operatorname{argmax}_A$, ardından gelen ifadeyi (burada $EU(A)$) en büyük yapan eylemi döndürür: "beklenen faydası en yüksek olan eylemi bul." Birden fazla eylem aynı en yüksek değeri veriyorsa bunlardan herhangi biri seçilebilir.
+
+```math
+\underbrace{A^{*}}_{\substack{\text{seçilecek}\\\text{eylem}}} = \overbrace{\operatorname*{argmax}_{A}}^{\substack{\text{değeri en büyük yapan}\\\text{eylemi döndür}}} \underbrace{EU(A)}_{\substack{\text{eylemin beklenen}\\\text{faydası}}}
+```
+
+**Ne anlatıyor?** Her eylemin beklenen faydası hesaplanır ve bu değerlerden en büyüğünü veren eylem seçilir. Kuralın çıktısı en büyük faydanın sayısal değeri değil, o değeri sağlayan eylemin kendisidir.
 
 ### 5.3 Aksiyomlar
 

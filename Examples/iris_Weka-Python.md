@@ -64,6 +64,12 @@ $$
 
 Burada $p_o$ gözlenen uyumu, $p_e$ ise tesadüfî beklenen uyumu gösterir.
 
+```math
+\underbrace{\kappa}_{\substack{\text{Cohen uyum}\\\text{katsayısı}}} = \frac{\overbrace{p_o - p_e}^{\substack{\text{şansın ötesindeki}\\\text{gözlenen uyum}}}}{\underbrace{1 - p_e}_{\substack{\text{şansın ötesinde ulaşılabilecek}\\\text{en büyük uyum}}}}
+```
+
+**Ne anlatıyor?** Gözlenen uyumdan şans eseri beklenen uyum çıkarılır ve sonuç, şansın ötesinde ulaşılabilecek en büyük uyuma bölünür. Böylece katsayı, modelin tesadüfün sağlayacağından ne kadar fazla uyum yakaladığını oran olarak verir.
+
 ### Weka ile sınıflandırma
 
 Weka, görsel arayüzü sayesinde ilk temas için çok uygundur. Özellikle küçük veri setlerinde, adımların görünür olması öğrencinin kafasında süreci oturtur.
@@ -265,6 +271,12 @@ Burada:
 - $\lVert x_i - \mu_k \rVert^2$, örneğin merkezden uzaklığının karesini gösterir.
 
 Yani algoritma, her kümeyi kendi merkezine olabildiğince yakın örneklerle kurmaya çalışır.
+
+```math
+\underbrace{J}_{\substack{\text{toplam küme içi}\\\text{kare uzaklık}}} = \overbrace{\sum_{k=1}^{K}}^{\substack{\text{tüm}\\\text{kümeler}}} \underbrace{\sum_{x_i \in C_k}}_{\substack{C_k \text{ kümesindeki}\\\text{tüm örnekler}}} \overbrace{\lVert x_i - \mu_k \rVert^2}^{\substack{\text{örneğin merkezden}\\\text{uzaklığının karesi}}}
+```
+
+**Ne anlatıyor?** Her örneğin kendi küme merkezine olan uzaklığının karesi alınır ve tüm kümeler üzerinden toplanır. K-Means örnekleri kümelere atayıp merkezleri güncelleyerek bu toplamı küçültür; toplam ne kadar küçükse kümeler o kadar sıkıdır.
 
 ### Weka ile kümeleme
 

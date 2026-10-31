@@ -171,15 +171,33 @@ $$G(D) = 1 - \sum_{k=1}^{K} p_k^2$$
 
 Burada $p_k$, $D$ düğümündeki $k$ sınıfının oranıdır. Düğümdeki tüm örnekler aynı sınıftaysa $G = 0$ olur. En büyük değer, sınıfların eşit dağıldığı durumda $1 - 1/K$'dir; iki sınıfta $0.5$, dört sınıfta $0.75$. Entropi tabanlı ölçüt kullanıldığında safsızlıktaki azalmaya **bilgi kazancı** (information gain) denir.
 
+```math
+\underbrace{G(D)}_{\substack{D \text{ düğümünün}\\\text{Gini safsızlığı}}} = 1 - \overbrace{\sum_{k=1}^{K}}^{\substack{\text{tüm}\\\text{sınıflar}}} \underbrace{p_k^2}_{\substack{k \text{ sınıfının}\\\text{oranının karesi}}}
+```
+
+**Ne anlatıyor?** Düğümden yerine koyarak rastgele iki örnek seçildiğinde ikisinin aynı sınıftan olma olasılığı, sınıf oranlarının karelerinin toplamıdır; Gini safsızlığı bunun tümleyeni, yani iki örneğin farklı sınıflardan çıkma olasılığıdır. Düğüm ne kadar karışıksa bu olasılık o kadar büyür.
+
 **Regresyonda** (bu nottaki ev fiyatı problemi) safsızlık, düğümdeki hedef değerlerin varyansı, yani ortalama kare hatadır (mean squared error, MSE):
 
 $$\text{MSE}(D) = \frac{1}{|D|} \sum_{i \in D} \left(y_i - \bar{y}_D\right)^2$$
+
+```math
+\underbrace{\text{MSE}(D)}_{\substack{D \text{ düğümünün}\\\text{safsızlığı}}} = \overbrace{\frac{1}{|D|} \sum_{i \in D}}^{\substack{\text{düğümdeki örnekler}\\\text{üzerinden ortalama}}} \big(\underbrace{y_i - \bar{y}_D}_{\substack{\text{hedef değerin düğüm}\\\text{ortalamasından sapması}}}\big)^2
+```
+
+**Ne anlatıyor?** Düğüm, hedef değerlerin ortalamasını tahmin olarak verir; MSE bu tahminin her örnekteki hatasının karesinin ortalamasıdır. Düğümdeki değerler birbirine ne kadar yakınsa safsızlık o kadar küçüktür.
 
 Hangi ölçüt kullanılırsa kullanılsın, $j$ özelliğiyle yapılan bir bölünmenin sağladığı safsızlık azalması şöyledir:
 
 $$\Delta I(D, j) = I(D) - \frac{|D_L|}{|D|} \cdot I(D_L) - \frac{|D_R|}{|D|} \cdot I(D_R)$$
 
 Burada $I$ safsızlık ölçütü (Gini ya da MSE), $D_L$ ve $D_R$ bölünme sonucunda oluşan sol ve sağ alt kümelerdir.
+
+```math
+\underbrace{\Delta I(D, j)}_{\substack{j \text{ ile bölünmenin}\\\text{safsızlık azalması}}} = \overbrace{I(D)}^{\substack{\text{bölünme öncesi}\\\text{safsızlık}}} - \underbrace{\frac{|D_L|}{|D|} \cdot I(D_L)}_{\substack{\text{sol dalın ağırlıklı}\\\text{safsızlığı}}} - \overbrace{\frac{|D_R|}{|D|} \cdot I(D_R)}^{\substack{\text{sağ dalın ağırlıklı}\\\text{safsızlığı}}}
+```
+
+**Ne anlatıyor?** Bölünmeden önceki safsızlıktan, iki alt kümenin örnek sayılarıyla orantılı olarak ağırlıklandırılmış safsızlıkları çıkarılır. Fark ne kadar büyükse $j$ özelliğiyle yapılan bölünme grupları o kadar türdeş hâle getirmiştir.
 
 ### 2.2 Rastgele Ormanda Özellik Önemi
 
@@ -190,6 +208,12 @@ Bir özelliğin ormandaki önem puanı, o özelliğin kullanıldığı tüm dü�
 $$\text{FI}(j) = \frac{1}{B} \sum_{b=1}^{B} \sum_{\substack{t \in T_b \\ \text{split}(t)=j}} \frac{n_t}{N} \cdot \Delta I_t$$
 
 Burada $B$ ağaç sayısı, $T_b$ $b$'inci ağacın düğümleri, $n_t$ $t$ düğümüne düşen örnek sayısı ve $N$ toplam örnek sayısıdır. Bu yönteme **MDI** (Mean Decrease in Impurity, ortalama safsızlık azalması) denir. scikit-learn her ağacın puanlarını toplamı 1 olacak biçimde normalleştirir; bu nedenle puanlar 0 ile 1 arasındadır ve toplamları 1'dir.
+
+```math
+\underbrace{\text{FI}(j)}_{\substack{j \text{ özelliğinin}\\\text{önem puanı}}} = \overbrace{\frac{1}{B} \sum_{b=1}^{B}}^{\substack{\text{ağaçlar üzerinden}\\\text{ortalama}}} \underbrace{\sum_{\substack{t \in T_b \\ \text{split}(t)=j}}}_{\substack{j \text{ ile bölünen}\\\text{tüm düğümler}}} \overbrace{\frac{n_t}{N}}^{\substack{\text{düğüme düşen}\\\text{örnek oranı}}} \cdot \underbrace{\Delta I_t}_{\substack{\text{düğümdeki}\\\text{safsızlık azalması}}}
+```
+
+**Ne anlatıyor?** Bir özelliğin her ağaçta kullanıldığı düğümlerdeki safsızlık azalmaları, o düğümlere düşen örnek oranıyla ağırlıklandırılarak toplanır ve ağaçlar üzerinden ortalaması alınır. Çok sayıda örneği etkileyen ve safsızlığı belirgin biçimde azaltan bölünmelerde kullanılan özellik yüksek puan alır.
 
 ### 2.3 Kod Örneği: Özellik Önemi
 
@@ -292,6 +316,12 @@ Burada:
 - $v(S \cup \{i\}) - v(S)$: $i$ özelliğinin $S$'ye eklenmesiyle tahminde oluşan değişim (marjinal katkı).
 - $\frac{|S|!\,(|F|-|S|-1)!}{|F|!}$: özelliklerin tüm olası sıralamaları içinde, $i$'den önce tam olarak $S$'deki özelliklerin geldiği sıralamaların oranı.
 
+```math
+\underbrace{\phi_i}_{\substack{i \text{ özelliğinin}\\\text{Shapley değeri}}} = \overbrace{\sum_{S \subseteq F \setminus \{i\}}}^{\substack{i \text{'yi içermeyen}\\\text{tüm alt kümeler}}} \underbrace{\frac{|S|!\,(|F|-|S|-1)!}{|F|!}}_{\substack{\text{sıralamalar}\\\text{içindeki ağırlık}}} \overbrace{\left[ v(S \cup \{i\}) - v(S) \right]}^{\substack{i \text{ eklenince tahmindeki}\\\text{değişim (marjinal katkı)}}}
+```
+
+**Ne anlatıyor?** $i$ özelliğinin, kendisini içermeyen her alt kümeye eklendiğinde tahmine getirdiği ek katkı hesaplanır; bu katkılar, ilgili alt kümenin rastgele sıralamalarda tam olarak $i$'den önce gelme oranıyla ağırlıklandırılarak toplanır. Sonuç, özelliğin olası tüm takımlar içindeki ortalama katkısıdır.
+
 Formül şu yorumla da okunabilir: Özellikler rastgele bir sırayla tek tek "masaya" gelsin; $i$ özelliği geldiğinde tahmini ne kadar değiştiriyorsa bu değişimin tüm sıralamalar üzerinden ortalaması $\phi_i$'dir.
 
 ### 3.3 Elle Hesaplanan Küçük Bir Örnek
@@ -318,6 +348,12 @@ Burada:
 - $\phi_0$: temel değer, $E[f(X)]$; modelin eğitim verisi üzerindeki ortalama tahmini.
 - $\phi_i$: $i$'inci özelliğin bu örneğe katkısı (pozitif ya da negatif olabilir).
 - $M$: özellik sayısı.
+
+```math
+\underbrace{f(x)}_{\substack{\text{modelin bu örnek}\\\text{için tahmini}}} = \overbrace{\phi_0}^{\substack{\text{temel değer}\\\text{(ortalama tahmin)}}} + \underbrace{\sum_{i=1}^{M} \phi_i}_{\substack{\text{özellik katkılarının}\\\text{toplamı}}}
+```
+
+**Ne anlatıyor?** Bir örneğin tahmini, modelin ortalama tahmininden başlanıp her özelliğin pozitif ya da negatif katkısı eklenerek eksiksiz biçimde yeniden kurulur. Böylece tahminin ortalamadan neden saptığı, özellik katkılarına ayrıştırılmış olur.
 
 Bu özellik yerel doğruluk (local accuracy) olarak da adlandırılır; diğer açıklama yöntemlerinin çoğu bu güvenceyi vermez.
 
@@ -455,6 +491,12 @@ Yakınlık ağırlıkları üstel bir çekirdekle (exponential kernel) hesaplan�
 $$\pi_x(z) = \exp\!\left(-\frac{d(x, z)^2}{\sigma^2}\right)$$
 
 $d(x,z)$ sorgu noktası ile pertürbe edilmiş örnek arasındaki uzaklık (Öklid ya da kosinüs), $\sigma$ ise çekirdeğin bant genişliğidir. Uzak örneklerin ağırlığı üstel olarak küçülür ve yerel modele neredeyse hiç katkı vermez.
+
+```math
+\underbrace{\pi_x(z)}_{\substack{z \text{ örneğinin}\\\text{yakınlık ağırlığı}}} = \exp\!\left(-\frac{\overbrace{d(x, z)^2}^{\substack{\text{sorgu noktasına}\\\text{uzaklığın karesi}}}}{\underbrace{\sigma^2}_{\substack{\text{bant genişliğinin}\\\text{karesi}}}}\right)
+```
+
+**Ne anlatıyor?** Pertürbe edilmiş bir örnek sorgu noktasına ne kadar yakınsa ağırlığı en büyük değerine o kadar yakın olur; uzaklık arttıkça ağırlık üstel olarak sıfıra iner. Bant genişliği $\sigma$, ağırlığın hangi uzaklıktan sonra belirgin biçimde azalacağını, yani yerel sayılan bölgenin genişliğini belirler.
 
 ### 4.4 Kod Örneği: LIME
 

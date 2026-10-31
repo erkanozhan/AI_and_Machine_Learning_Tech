@@ -32,11 +32,23 @@ $$P(z_t \mid z_{t-1}, z_{t-2}, \ldots, z_1) = P(z_t \mid z_{t-1})$$
 
 Burada $P(X \mid Y)$, "$Y$ bilindiğinde $X$'in olasılığı" anlamına gelen **koşullu olasılıktır** (conditional probability). Varsayımın arkasındaki düşünce şudur: Şimdiki durum, geleceği kestirmek için geçmişin yeterli bir özetidir.
 
+```math
+\overbrace{P(z_t \mid z_{t-1}, z_{t-2}, \ldots, z_1)}^{\substack{\text{tüm geçmiş bilindiğinde}\\\text{t anındaki durumun olasılığı}}} = \underbrace{P(z_t \mid z_{t-1})}_{\substack{\text{yalnızca bir önceki durum}\\\text{bilindiğinde aynı olasılık}}}
+```
+
+**Ne anlatıyor?** Bir önceki durum bilindiğinde daha eski durumlar, sıradaki durum hakkında ek bilgi taşımaz. Bu varsayım sayesinde koşullu olasılıkta tüm geçmiş yerine yalnızca son durumun tutulması yeterli olur.
+
 ### 2.3 Durağanlık Varsayımı (Stationary Process Assumption)
 
 Bir durumdan diğerine geçiş olasılıkları zamanla değişmez:
 
 $$P(z_t \mid z_{t-1}) = P(z_2 \mid z_1), \qquad t \in \{2, \ldots, T\}$$
+
+```math
+\underbrace{P(z_t \mid z_{t-1})}_{\substack{\text{herhangi bir adımdaki}\\\text{geçiş olasılığı}}} = \overbrace{P(z_2 \mid z_1)}^{\substack{\text{ilk geçişin}\\\text{olasılığı}}}, \qquad \underbrace{t \in \{2, \ldots, T\}}_{\substack{\text{dizideki}\\\text{tüm adımlar}}}
+```
+
+**Ne anlatıyor?** Geçiş olasılıkları dizinin hangi adımında bakılırsa bakılsın aynıdır; bu nedenle tek bir geçiş matrisi tüm zaman adımları için kullanılabilir.
 
 *Stationary* sözcüğü Latince *stationarius* (yerinde duran, sabit) kökünden gelir. "Güneşli bir günden sonra yağmur yağma olasılığı" bugün de on gün sonra da aynı kabul edilir.
 
@@ -168,19 +180,43 @@ $$\alpha_t(j) = P(o_1, o_2, \ldots, o_t,\ q_t = s_j \mid \lambda)$$
 
 yani ilk $t$ gözlemin görülmesi **ve** $t$ anında $s_j$ durumunda bulunulması olasılığı.
 
+```math
+\underbrace{\alpha_t(j)}_{\substack{\text{ileri}\\\text{değişkeni}}} = P(\overbrace{o_1, o_2, \ldots, o_t}^{\text{ilk t gözlem}},\ \underbrace{q_t = s_j}_{\substack{t \text{ anında}\\ s_j \text{ durumunda olmak}}} \mid \overbrace{\lambda}^{\text{model}})
+```
+
+**Ne anlatıyor?** İleri değişkeni, gözlem dizisinin ilk $t$ öğesinin görülmesi ile sistemin $t$ anında $s_j$ durumunda bulunmasının birlikte gerçekleşme olasılığıdır. Bu değişken, o ana kadarki tüm olası durum yollarını tek bir sayıda özetler.
+
 ### 5.2 Adımlar
 
 **Başlatma** ($t = 1$):
 
 $$\alpha_1(j) = \pi_j \, B_j(o_1)$$
 
+```math
+\underbrace{\alpha_1(j)}_{\substack{\text{ilk andaki}\\\text{ileri değişkeni}}} = \overbrace{\pi_j}^{\substack{s_j \text{ ile}\\\text{başlama olasılığı}}} \, \underbrace{B_j(o_1)}_{\substack{s_j \text{ durumunun ilk}\\\text{gözlemi üretme olasılığı}}}
+```
+
+**Ne anlatıyor?** İlk anda $s_j$ durumunda bulunup ilk gözlemi görmenin olasılığı, o durumla başlama olasılığı ile o durumun ilk gözlemi üretme olasılığının çarpımıdır.
+
 **Özyineleme** ($t = 2, \ldots, T$): $s_j$ durumuna önceki her durumdan gelinebilir; bu yolların olasılıkları **toplanır**:
 
 $$\alpha_t(j) = \left[ \sum_{i=1}^{N} \alpha_{t-1}(i)\, A_{ij} \right] B_j(o_t)$$
 
+```math
+\underbrace{\alpha_t(j)}_{\substack{t \text{ anındaki}\\\text{ileri değişkeni}}} = \left[ \underbrace{\sum_{i=1}^{N}}_{\substack{\text{önceki tüm}\\\text{durumlar}}} \overbrace{\alpha_{t-1}(i)}^{\substack{\text{önceki adımda}\\ s_i \text{ ile biten yollar}}}\, \overbrace{A_{ij}}^{\substack{s_i \text{'den } s_j \text{'ye}\\\text{geçiş}}} \right] \underbrace{B_j(o_t)}_{\substack{s_j \text{ durumunun}\\ o_t \text{'yi üretmesi}}}
+```
+
+**Ne anlatıyor?** $s_j$ durumuna önceki adımdaki her durumdan gelinebileceği için bu yolların olasılıkları geçiş olasılıklarıyla çarpılıp toplanır; sonuç, $s_j$ durumunun yeni gözlemi üretme olasılığıyla çarpılır. Böylece her adımda yalnızca bir önceki adımın $N$ değeri kullanılır ve yollar tek tek sayılmaz.
+
 **Sonlandırma:**
 
 $$P(O \mid \lambda) = \sum_{j=1}^{N} \alpha_T(j)$$
+
+```math
+\underbrace{P(O \mid \lambda)}_{\substack{\text{modelin gözlem dizisini}\\\text{üretme olasılığı}}} = \overbrace{\sum_{j=1}^{N}}^{\substack{\text{tüm son}\\\text{durumlar}}} \underbrace{\alpha_T(j)}_{\substack{\text{tüm gözlemler görülüp}\\ s_j \text{ ile bitme olasılığı}}}
+```
+
+**Ne anlatıyor?** Gözlem dizisi herhangi bir durumda sona erebileceğinden son adımdaki ileri değişkenlerin toplamı, dizinin model tarafından üretilme olasılığını verir.
 
 ### 5.3 Çözümlü Örnek
 
@@ -224,9 +260,21 @@ $$\delta_t(j) = \max_{q_1, \ldots, q_{t-1}} P(q_1, \ldots, q_{t-1},\ q_t = s_j,\
 
 $\psi_t(j)$ ise bu en olası dizide $t-1$ anında bulunulan durumu, yani **geri işaretçiyi** (backpointer) saklar.
 
+```math
+\underbrace{\delta_t(j)}_{\substack{\text{Viterbi}\\\text{değişkeni}}} = \overbrace{\max_{q_1, \ldots, q_{t-1}}}^{\substack{\text{önceki durumların}\\\text{en iyi seçimi}}} P(\underbrace{q_1, \ldots, q_{t-1}}_{\substack{\text{önceki}\\\text{durumlar}}},\ \overbrace{q_t = s_j}^{\substack{s_j \text{ ile}\\\text{bitmek}}},\ \underbrace{o_1, \ldots, o_t}_{\substack{\text{ilk t}\\\text{gözlem}}} \mid \lambda)
+```
+
+**Ne anlatıyor?** İleri değişkeninden farklı olarak $s_j$'de biten yolların olasılıkları toplanmaz; bunlar arasından en olası tek yolun olasılığı alınır. Böylece $\delta_t(j)$, $t$ anına kadar $s_j$'de biten en iyi durum dizisinin ne kadar olası olduğunu gösterir.
+
 **Başlatma** ($t = 1$):
 
 $$\delta_1(j) = \pi_j \, B_j(o_1), \qquad \psi_1(j) = 0$$
+
+```math
+\underbrace{\delta_1(j)}_{\substack{\text{ilk andaki}\\\text{Viterbi değişkeni}}} = \overbrace{\pi_j}^{\substack{s_j \text{ ile}\\\text{başlama}}} \, \underbrace{B_j(o_1)}_{\substack{\text{ilk gözlemi}\\\text{üretme}}}, \qquad \overbrace{\psi_1(j) = 0}^{\substack{\text{önceki durum}\\\text{yok}}}
+```
+
+**Ne anlatıyor?** İlk anda her durum için tek bir yol bulunduğundan Viterbi değişkeni ileri değişkeniyle aynıdır. Öncesinde bir durum bulunmadığından geri işaretçiye yalnızca bir başlangıç değeri atanır.
 
 **Özyineleme** ($t = 2, \ldots, T$):
 
@@ -238,13 +286,31 @@ $$\delta_t(j) = \max_{i} \left[ \delta_{t-1}(i)\, A_{ij} \right] B_j(o_t), \qqua
 * $A_{ij}$: $s_i$'den $s_j$'ye geçiş olasılığı (iki kavşak arasındaki yol).
 * $B_j(o_t)$: $s_j$ durumunun $t$ anındaki gözlemi üretme olasılığı.
 
+```math
+\underbrace{\delta_t(j)}_{\substack{\text{en iyi yolun}\\\text{olasılığı}}} = \overbrace{\max_{i}}^{\substack{\text{en iyi önceki}\\\text{durumu seç}}} \left[ \underbrace{\delta_{t-1}(i)\, A_{ij}}_{\substack{s_i \text{ üzerinden}\\ s_j \text{'ye gelen yol}}} \right] \overbrace{B_j(o_t)}^{\substack{\text{gözlemi}\\\text{üretme}}}, \qquad \underbrace{\psi_t(j)}_{\substack{\text{geri}\\\text{işaretçi}}} = \overbrace{\arg\max_{i}}^{\substack{\text{en iyi önceki}\\\text{durumun kendisi}}} \left[ \delta_{t-1}(i)\, A_{ij} \right]
+```
+
+**Ne anlatıyor?** $s_j$ durumuna gelen yollar arasından olasılığı en büyük olan seçilir ve yeni gözlemin olasılığıyla çarpılır; bu yolun hangi önceki durumdan geldiği de geri işaretçide saklanır. En büyük değer ile o değeri veren durum, köşeli parantez içindeki aynı ifadeden elde edilir.
+
 **Sonlandırma:**
 
 $$P^{*} = \max_{j} \delta_T(j), \qquad q_T^{*} = \arg\max_{j} \delta_T(j)$$
 
+```math
+\underbrace{P^{*}}_{\substack{\text{en olası dizinin}\\\text{olasılığı}}} = \overbrace{\max_{j}}^{\substack{\text{tüm son}\\\text{durumlar arasında}}} \delta_T(j), \qquad \underbrace{q_T^{*}}_{\substack{\text{en olası}\\\text{son durum}}} = \overbrace{\arg\max_{j}}^{\substack{\text{en büyük değeri}\\\text{veren durum}}} \delta_T(j)
+```
+
+**Ne anlatıyor?** Son adımdaki en büyük Viterbi değişkeni, en olası tam durum dizisinin olasılığını verir; bu değerin ait olduğu durum ise dizinin son durumudur.
+
 **Geriye iz sürme (backtracking):** $t = T-1, \ldots, 1$ için
 
 $$q_t^{*} = \psi_{t+1}(q_{t+1}^{*})$$
+
+```math
+\underbrace{q_t^{*}}_{\substack{t \text{ anındaki}\\\text{en olası durum}}} = \overbrace{\psi_{t+1}}^{\substack{\text{sonraki adımın}\\\text{geri işaretçisi}}}(\underbrace{q_{t+1}^{*}}_{\substack{\text{sonraki adımın}\\\text{en olası durumu}}})
+```
+
+**Ne anlatıyor?** En olası dizi sondan başa doğru kurulur: Bir sonraki adımda seçilmiş durumun geri işaretçisi, o duruma hangi durumdan gelindiğini gösterir.
 
 Bu işlem bittiğinde, gözlem dizisini üreten en olası saklı durum dizisi $q_1^{*}, \ldots, q_T^{*}$ elde edilir. Algoritma, model verildiğinde bu dizinin gerçekten en olası dizi olduğunu garanti eder.
 
