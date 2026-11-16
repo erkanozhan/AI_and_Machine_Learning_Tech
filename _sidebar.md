@@ -1,0 +1,6 @@
+- [Giriş ve Okuma Sırası](/README.md)
+- [Fayda Teorisi ve Beklenen Fayda](/Expected_Utility.md)
+- [Saklı Markov Modelleri (HMM)](/Hidden_Markov_Models.md)
+- [Kalman Filtreleri](/Kalman_Filters.md)
+- [Yorumlanabilirlik: Özellik Önemi, SHAP, LIME ve Kategorik Kodlama](/Feature_Importance_SHAP_OneHotEncoding.md)
+- [IRIS ile Sınıflandırma ve Kümeleme: Weka ve Python](/Examples/iris_Weka-Python.md)

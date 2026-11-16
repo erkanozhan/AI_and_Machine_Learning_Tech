@@ -2,6 +2,9 @@
 
 Bu depo, lisansüstü **Yapay Zekâ ve Makine Öğrenmesi Teknolojileri** dersinin notlarını ve örnek uygulamalarını içerir.
 
+- **Web sürümü:** [erkanozhan.github.io/AI_and_Machine_Learning_Tech](https://erkanozhan.github.io/AI_and_Machine_Learning_Tech/). Aynı notlar; not listesi, tüm notlarda arama, formüller ve diyagramlarla birlikte.
+- **PDF / yazdırma:** [Notların tamamı tek sayfada](https://erkanozhan.github.io/AI_and_Machine_Learning_Tech/yazdir.html) açılıp Ctrl+P ile "PDF olarak kaydet" seçilebilir. Aynı PDF `python araclar/pdf_olustur.py` komutuyla da üretilir (Chrome veya Edge gerekir).
+
 **Ön koşul.** Makine öğrenmesine ilişkin lisans düzeyinde bir temeliniz yoksa önce lisans dersinin deposundaki tüm ders notlarını okumanız önerilir: [Makine Öğrenmesine Giriş (lisans)](https://github.com/erkanozhan/machinelearning).
 
 ## Önerilen Okuma Sırası
@@ -23,6 +26,10 @@ Examples/                IRIS örnekleri (Weka adımları ve Python betikleri)
   iris_clustering.py       Kümeleme: k-ortalamalar, silüet skoru, düzeltilmiş Rand indeksi
 images/                  Şekiller (SVG)
 requirements.txt         Python paketleri
+index.html, _sidebar.md, docsify-ayar.js, docsify-stil.css
+                         Web sürümü: docsify sayfası, not listesi, ayarlar ve stiller
+yazdir.html              Notların tamamını tek sayfada gösteren yazdırma sayfası
+araclar/pdf_olustur.py   PDF üreten betik
 ```
 
 ## Kurulum

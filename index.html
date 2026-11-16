@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Yapay Zekâ ve Makine Öğrenmesi Teknolojileri Ders Notları</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <link rel="stylesheet" href="docsify-stil.css">
+</head>
+<body>
+  <div id="app">Yükleniyor...</div>
+
+  <!-- Ortak ayarlar: kenar çubuğu, arama, uyarı kutuları, ```math ve ```mermaid blokları -->
+  <script src="docsify-ayar.js"></script>
+
+  <!-- Docsify -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+
+  <!-- KaTeX - Formüller için -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-katex@1.4.4/dist/docsify-katex.js"></script>
+  <!-- Not düzenleme eklentisi formül eklentisinden önce çalışsın (kod dosyası bağlantıları, görsel yolları) -->
+  <script>window.$docsify.plugins.unshift(window.NOT_ARACLARI.eklenti);</script>
+
+  <!-- Mermaid - Diyagramlar için -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      deterministicIds: true,   // aynı sayfadaki diyagramların kimlikleri çakışmasın
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { useMaxWidth: true, htmlLabels: true }
+    });
+  </script>
+
+  <!-- Kod renklendirme -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+
+  <!-- Arama (tüm bölümlerde) -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+
+  <!-- Kod kopyalama düğmesi -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@2"></script>
+</body>
+</html>
